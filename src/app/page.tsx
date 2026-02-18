@@ -46,9 +46,16 @@ function LiveDemo() {
     { name: 'data-sync', status: 'paused' as const, actions: 1203, cost: 0, lastActive: '2h ago' },
   ]);
   const [budget, setBudget] = useState({ used: 67, limit: 100, label: 'billing-agent · daily spend' });
-  const [alert, setAlert] = useState<{ show: boolean; message: string; severity: string }>({ show: false, message: '', severity: '' });
+  const [alert, setAlert] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
   const [tab, setTab] = useState<'feed' | 'agents' | 'budgets'>('feed');
+  const [autoCycle, setAutoCycle] = useState(true);
+  const [progress, setProgress] = useState(0);
   const idRef = useRef(0);
+  const cycleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const TABS: ('feed' | 'agents' | 'budgets')[] = ['feed', 'agents', 'budgets'];
+  const TAB_DURATION = 4000;
 
   const DEMO_ACTIONS = [
     { agent: 'support-bot', service: 'slack', action: 'send_message', cost: 0, durationRange: [80, 200] },
@@ -62,38 +69,51 @@ function LiveDemo() {
 
   const SERVICE_COLORS: Record<string, string> = {
     slack: 'text-violet-400', gmail: 'text-rose-400', stripe: 'text-sky-400',
-    github: 'text-white/60', notion: 'text-white/60', openai: 'text-emerald-400',
-    anthropic: 'text-blue-400', twilio: 'text-rose-400', sendgrid: 'text-cyan-400',
+    github: 'text-white/60', openai: 'text-emerald-400', twilio: 'text-rose-400',
   };
 
+  // Auto-cycle tabs
+  useEffect(() => {
+    if (!autoCycle) return;
+    setProgress(0);
+    const startTime = Date.now();
+    progressTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      setProgress(Math.min((elapsed / TAB_DURATION) * 100, 100));
+    }, 50);
+    cycleTimerRef.current = setInterval(() => {
+      setTab(prev => TABS[(TABS.indexOf(prev) + 1) % TABS.length]);
+      setProgress(0);
+    }, TAB_DURATION);
+    return () => {
+      if (cycleTimerRef.current) clearInterval(cycleTimerRef.current);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoCycle, tab]);
+
+  // Action generator
   useEffect(() => {
     const addAction = () => {
       const template = DEMO_ACTIONS[Math.floor(Math.random() * DEMO_ACTIONS.length)];
-      if (template.agent === 'data-sync' && agents.find(a => a.name === 'data-sync')?.status === 'paused') {
-        return; // paused agents don't fire
-      }
       const duration = Math.floor(Math.random() * (template.durationRange[1] - template.durationRange[0]) + template.durationRange[0]);
       const isError = Math.random() < 0.05;
       const isBlocked = !isError && Math.random() < 0.03;
-      const status = isError ? 'error' : isBlocked ? 'blocked' : 'success';
       setActions(prev => [{
         id: idRef.current++, agent: template.agent, service: template.service,
-        action: template.action, status, cost: template.cost, duration,
+        action: template.action, status: isError ? 'error' : isBlocked ? 'blocked' : 'success',
+        cost: template.cost, duration,
         time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }),
       }, ...prev].slice(0, 6));
-
-      // Update agent stats
       setAgents(prev => prev.map(a => a.name === template.agent ? {
         ...a, actions: a.actions + 1, cost: a.cost + template.cost, lastActive: 'just now'
       } : a));
-
-      // Increment budget
       if (template.agent === 'billing-agent' && template.cost > 0) {
         setBudget(prev => {
           const newUsed = Math.min(prev.used + template.cost / 100, prev.limit);
           if (newUsed > 85 && prev.used <= 85) {
-            setAlert({ show: true, message: 'billing-agent approaching daily budget (85%)', severity: 'warning' });
-            setTimeout(() => setAlert({ show: false, message: '', severity: '' }), 4000);
+            setAlert({ show: true, message: 'billing-agent approaching daily budget (85%)' });
+            setTimeout(() => setAlert({ show: false, message: '' }), 4000);
           }
           return { ...prev, used: newUsed };
         });
@@ -105,10 +125,15 @@ function LiveDemo() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleTabClick = (t: 'feed' | 'agents' | 'budgets') => {
+    setAutoCycle(false);
+    setTab(t);
+  };
+
   const toggleAgent = (name: string) => {
+    setAutoCycle(false);
     setAgents(prev => prev.map(a => a.name === name ? {
       ...a, status: a.status === 'active' ? 'paused' : 'active',
-      lastActive: a.status === 'active' ? 'just now' : a.lastActive,
     } : a));
   };
 
@@ -126,11 +151,19 @@ function LiveDemo() {
 
         {/* Tab bar */}
         <div className="flex items-center gap-0 px-5 border-b border-white/[0.06]">
-          {(['feed', 'agents', 'budgets'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)}
+          {TABS.map(t => (
+            <button key={t} onClick={() => handleTabClick(t)}
               className={`px-4 py-3 text-[11px] font-medium tracking-wide uppercase transition-all relative ${tab === t ? 'text-white/70' : 'text-white/20 hover:text-white/40'}`}>
               {t === 'feed' ? 'Live Feed' : t === 'agents' ? 'Agents' : 'Budgets'}
-              {tab === t && <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full" />}
+              {tab === t && (
+                <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full overflow-hidden bg-white/[0.06]">
+                  {autoCycle ? (
+                    <div className="h-full bg-blue-500 rounded-full transition-none" style={{ width: `${progress}%` }} />
+                  ) : (
+                    <div className="h-full bg-blue-500 rounded-full w-full" />
+                  )}
+                </div>
+              )}
             </button>
           ))}
           <div className="flex-1" />

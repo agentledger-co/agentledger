@@ -139,7 +139,7 @@ const FEATURES = [
   { icon: '\ud83d\udcb0', title: 'Cost Tracking & Budgets', desc: 'Know what your agents spend. Set daily/weekly/monthly budgets per agent with automatic enforcement.' },
   { icon: '\ud83d\udea8', title: 'Anomaly Detection', desc: 'Automatic alerts when agents spike in activity, hit new services, or approach budget limits.' },
   { icon: '\u23f9\ufe0f', title: 'Kill Switches', desc: 'Pause or permanently kill any agent instantly from the dashboard or API.' },
-  { icon: '\ud83d\udd0c', title: '2-Line Integration', desc: 'Wrap any async function with ledger.track(). Works with LangChain, CrewAI, OpenAI, Anthropic, or plain code.' },
+  { icon: '\ud83d\udd0c', title: '2-Line Integration', desc: 'Wrap any async function with ledger.track(). Works with LangChain, OpenAI, MCP Servers, Express, or plain code.' },
   { icon: '\ud83d\udee1\ufe0f', title: 'Fail-Open by Default', desc: 'If AgentLedger is down, your agents keep running. Never blocks production unless configured.' },
 ];
 
@@ -235,7 +235,7 @@ export default function LandingPage() {
       {/* Social Proof */}
       <section className="border-y border-white/[0.04] px-6 py-5">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[12px] text-white/15 tracking-wider">Works with LangChain {'\u00b7'} CrewAI {'\u00b7'} OpenAI Agents {'\u00b7'} Anthropic Claude {'\u00b7'} AutoGPT {'\u00b7'} MCP Servers {'\u00b7'} Any agent framework</p>
+          <p className="text-[12px] text-white/15 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Any agent framework</p>
         </div>
       </section>
 
@@ -336,12 +336,12 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Basic alerts', 'Community support'], cta: 'Get Started', hl: false },
-              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: true },
+              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Basic alerts', 'Community support'], cta: 'Get Started', hl: true },
+              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: false },
               { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'SSO (coming soon)', 'Webhooks & API', 'Email support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
               <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]'}`}>
-                {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Popular</div>}
+                {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Available Now</div>}
                 <h3 className="font-semibold text-[17px] mb-1">{plan.name}</h3>
                 <div className="flex items-baseline gap-1 mb-7">
                   <span className="text-[36px] font-bold tracking-tight">{plan.price}</span>

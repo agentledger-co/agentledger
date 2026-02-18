@@ -392,7 +392,6 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
             <a href="https://github.com/miken1988/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">GitHub</a>
-            <a href="https://x.com/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">X / Twitter</a>
             <Link href="/docs" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Docs</Link>
             <Link href="/changelog" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Changelog</Link>
             <Link href="/terms" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Terms</Link>

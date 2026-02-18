@@ -17,14 +17,14 @@ describe('API Business Logic', () => {
       const { key, hash, prefix } = generateApiKey();
 
       // Key format
-      expect(key).toMatch(/^al_[A-Za-z0-9]{40}$/);
+      expect(key).toMatch(/^al_[A-Za-z0-9_-]{40}$/);
 
       // Hash matches
       expect(hashApiKey(key)).toBe(hash);
 
       // Prefix is first 10 chars
       expect(prefix).toBe(key.slice(0, 10));
-      expect(prefix).toMatch(/^al_[A-Za-z0-9]{7}$/);
+      expect(prefix).toMatch(/^al_[A-Za-z0-9_-]{7}$/);
     });
 
     it('key lookup by hash is unambiguous', () => {

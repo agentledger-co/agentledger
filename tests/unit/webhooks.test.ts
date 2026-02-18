@@ -25,7 +25,7 @@ describe('Webhooks', () => {
       for (let i = 0; i < 50; i++) {
         const secret = generateWebhookSecret();
         const randomPart = secret.slice(6); // Remove 'whsec_'
-        expect(randomPart).toMatch(/^[A-Za-z0-9]+$/);
+        expect(randomPart).toMatch(/^[A-Za-z0-9_-]+$/);
       }
     });
   });

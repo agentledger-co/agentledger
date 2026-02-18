@@ -1,6 +1,6 @@
 import { createServiceClient } from './supabase';
 import { NextRequest } from 'next/server';
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 
 export interface AuthContext {
   orgId: string;
@@ -46,11 +46,7 @@ export function hashApiKey(key: string): string {
 }
 
 export function generateApiKey(): { key: string; hash: string; prefix: string } {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let random = '';
-  for (let i = 0; i < 40; i++) {
-    random += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  const random = randomBytes(30).toString('base64url'); // 40 chars, cryptographically secure
   const key = `al_${random}`;
   return {
     key,

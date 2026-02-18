@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizeString } from '@/lib/validate';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { agent, service, action } = body;
+  const agent = sanitizeString(body.agent);
 
   if (!agent) {
     return NextResponse.json({ error: 'Missing required field: agent' }, { status: 400 });

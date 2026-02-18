@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizeString, sanitizePositiveInt } from '@/lib/validate';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 
@@ -39,7 +40,10 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { agent_name, period, max_actions, max_cost_cents } = body;
+  const agent_name = sanitizeString(body.agent_name);
+  const period = sanitizeString(body.period);
+  const max_actions = body.max_actions ? sanitizePositiveInt(body.max_actions) : null;
+  const max_cost_cents = body.max_cost_cents ? sanitizePositiveInt(body.max_cost_cents) : null;
 
   if (!agent_name || !period) {
     return NextResponse.json({ error: 'Missing required fields: agent_name, period' }, { status: 400 });

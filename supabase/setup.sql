@@ -187,6 +187,20 @@ ALTER TABLE webhook_deliveries ENABLE ROW LEVEL SECURITY;
 
 -- Note: All API access uses the service_role key which bypasses RLS.
 -- Application code filters by org_id to enforce data isolation.
+-- These RLS policies are a defense-in-depth layer — if the anon key
+-- is accidentally used, data is still protected.
+
+-- Allow service role full access (API routes use this)
+-- Block anon key from all tables (defense in depth)
+CREATE POLICY "Service role only" ON organizations FOR ALL USING (false);
+CREATE POLICY "Service role only" ON org_members FOR ALL USING (false);
+CREATE POLICY "Service role only" ON api_keys FOR ALL USING (false);
+CREATE POLICY "Service role only" ON agents FOR ALL USING (false);
+CREATE POLICY "Service role only" ON action_logs FOR ALL USING (false);
+CREATE POLICY "Service role only" ON budgets FOR ALL USING (false);
+CREATE POLICY "Service role only" ON anomaly_alerts FOR ALL USING (false);
+CREATE POLICY "Service role only" ON webhooks FOR ALL USING (false);
+CREATE POLICY "Service role only" ON webhook_deliveries FOR ALL USING (false);
 
 -- ============================================================
 -- BUDGET RESET FUNCTION (for cron jobs)

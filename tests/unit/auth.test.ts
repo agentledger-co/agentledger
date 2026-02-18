@@ -42,7 +42,7 @@ describe('Auth Library', () => {
       for (let i = 0; i < 50; i++) {
         const { key } = generateApiKey();
         const randomPart = key.slice(3); // Remove 'al_'
-        expect(randomPart).toMatch(/^[A-Za-z0-9]+$/);
+        expect(randomPart).toMatch(/^[A-Za-z0-9_-]+$/);
       }
     });
   });

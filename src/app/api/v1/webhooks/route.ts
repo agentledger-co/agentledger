@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizeString } from '@/lib/validate';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { generateWebhookSecret } from '@/lib/webhooks';
@@ -32,7 +33,9 @@ export async function POST(req: NextRequest) {
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json();
-  const { url, events, description } = body;
+  const url = sanitizeString(body.url, 2000);
+  const description = sanitizeString(body.description, 500);
+  const events = body.events;
 
   if (!url) return NextResponse.json({ error: 'URL is required' }, { status: 400 });
 

@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { fireWebhooks } from '@/lib/webhooks';
 import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
 import { reportError } from '@/lib/errors';
+import { sanitizeString, sanitizeMetadata, sanitizePositiveInt, validateStatus } from '@/lib/validate';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -38,7 +39,13 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { agent, service, action, status = 'success', cost_cents = 0, duration_ms = 0, metadata = {} } = body;
+  const agent = sanitizeString(body.agent);
+  const service = sanitizeString(body.service);
+  const action = sanitizeString(body.action);
+  const status = validateStatus(body.status);
+  const cost_cents = sanitizePositiveInt(body.cost_cents);
+  const duration_ms = sanitizePositiveInt(body.duration_ms);
+  const metadata = sanitizeMetadata(body.metadata);
 
   if (!agent || !service || !action) {
     return NextResponse.json({ error: 'Missing required fields: agent, service, action' }, { status: 400 });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { generateApiKey } from '@/lib/auth';
+import { sanitizeString } from '@/lib/validate';
 import { reportError } from '@/lib/errors';
 
 // Simple in-memory rate limiter for setup endpoint
@@ -29,7 +30,8 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { name, userId } = body;
+  const { userId } = body;
+  const name = sanitizeString(body.name);
 
   if (!name) {
     return NextResponse.json({ error: 'Organization name required' }, { status: 400 });

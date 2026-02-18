@@ -1,5 +1,5 @@
 import { createServiceClient } from './supabase';
-import { createHmac } from 'crypto';
+import { createHmac, randomBytes } from 'crypto';
 
 export type WebhookEvent =
   | 'action.logged'
@@ -127,10 +127,5 @@ async function deliverWebhook(
  * Generate a webhook signing secret.
  */
 export function generateWebhookSecret(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let secret = 'whsec_';
-  for (let i = 0; i < 32; i++) {
-    secret += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return secret;
+  return `whsec_${randomBytes(24).toString('base64url')}`;
 }

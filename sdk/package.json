@@ -1,6 +1,6 @@
 {
   "name": "agentledger",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Track, monitor, and control AI agent actions. The missing observability layer for AI agents. Zero dependencies.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

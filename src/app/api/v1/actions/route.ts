@@ -3,6 +3,7 @@ import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { fireWebhooks } from '@/lib/webhooks';
 import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
+import { reportError } from '@/lib/errors';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch actions' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch actions', detail: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ actions: actions || [], total: count || 0 });
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (agentErr || !newAgent) {
-      return NextResponse.json({ error: 'Failed to create agent' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create agent', detail: (agentErr || new Error('unknown')).message }, { status: 500 });
     }
     agentId = newAgent.id;
   } else {
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (logErr) {
-    return NextResponse.json({ error: 'Failed to log action' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to log action', detail: logErr.message }, { status: 500 });
   }
 
   // Update budget counters

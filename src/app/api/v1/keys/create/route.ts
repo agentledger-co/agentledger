@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     .select('id, key_prefix, name, description, created_at')
     .single();
 
-  if (error) return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to create API key', detail: error.message }, { status: 500 });
 
   // Return the full key only on creation
   return NextResponse.json({ ...data, key });

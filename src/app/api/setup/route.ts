@@ -1,8 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { generateApiKey } from '@/lib/auth';
+import { reportError } from '@/lib/errors';
+
+// Simple in-memory rate limiter for setup endpoint
+const setupRateLimit = new Map<string, { count: number; windowStart: number }>();
+
+function checkSetupRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 60 * 60 * 1000; // 1 hour
+  const maxRequests = 5; // max 5 orgs per hour per IP
+
+  const entry = setupRateLimit.get(ip);
+  if (!entry || now - entry.windowStart > windowMs) {
+    setupRateLimit.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
 
 export async function POST(req: NextRequest) {
+  // Rate limit by IP
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  if (!checkSetupRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many organizations created. Try again later.' }, { status: 429 });
+  }
+
   const body = await req.json();
   const { name, userId } = body;
 
@@ -45,7 +70,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (orgError) {
-    return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create organization', detail: orgError.message }, { status: 500 });
   }
 
   // Link user to org if userId provided
@@ -70,7 +95,7 @@ export async function POST(req: NextRequest) {
     });
 
   if (keyError) {
-    return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create API key', detail: keyError.message }, { status: 500 });
   }
 
   return NextResponse.json({ orgId: org.id, apiKey: key });

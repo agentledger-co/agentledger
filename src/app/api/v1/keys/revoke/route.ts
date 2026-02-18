@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     .eq('org_id', auth.orgId)
     .is('revoked_at', null);
 
-  if (error) return NextResponse.json({ error: 'Failed to revoke key' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to revoke key', detail: error.message }, { status: 500 });
 
   return NextResponse.json({ revoked: true });
 }

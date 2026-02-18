@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     .eq('name', name);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to kill agent' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to kill agent', detail: error.message }, { status: 500 });
   }
 
   // Log an anomaly alert

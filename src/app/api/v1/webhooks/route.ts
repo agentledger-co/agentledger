@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     .eq('org_id', auth.orgId)
     .order('created_at', { ascending: false });
 
-  if (error) return NextResponse.json({ error: 'Failed to fetch webhooks' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to fetch webhooks', detail: error.message }, { status: 500 });
 
   return NextResponse.json({ webhooks: webhooks || [] });
 }
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     .select('id, url, events, active, description, created_at')
     .single();
 
-  if (error) return NextResponse.json({ error: 'Failed to create webhook' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to create webhook', detail: error.message }, { status: 500 });
 
   // Return the secret only on creation
   return NextResponse.json({ ...webhook, secret });
@@ -84,7 +84,7 @@ export async function DELETE(req: NextRequest) {
     .eq('id', id)
     .eq('org_id', auth.orgId);
 
-  if (error) return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to delete webhook', detail: error.message }, { status: 500 });
 
   return NextResponse.json({ deleted: true });
 }
@@ -114,7 +114,7 @@ export async function PATCH(req: NextRequest) {
     .eq('id', id)
     .eq('org_id', auth.orgId);
 
-  if (error) return NextResponse.json({ error: 'Failed to update webhook' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to update webhook', detail: error.message }, { status: 500 });
 
   return NextResponse.json({ updated: true });
 }

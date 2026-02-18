@@ -18,12 +18,14 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch budgets' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch budgets', detail: error.message }, { status: 500 });
   }
 
   const enriched = (budgets || []).map((b: Record<string, unknown>) => ({
     ...b,
     agent_name: (b.agents as Record<string, unknown>)?.name || 'unknown',
+    pct_actions: b.max_actions ? ((b.current_actions as number) / (b.max_actions as number)) * 100 : null,
+    pct_cost: b.max_cost_cents ? ((b.current_cost_cents as number) / (b.max_cost_cents as number)) * 100 : null,
   }));
 
   return NextResponse.json({ budgets: enriched });
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to create budget' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create budget', detail: error.message }, { status: 500 });
   }
 
   return NextResponse.json(budget);
@@ -104,7 +106,7 @@ export async function DELETE(req: NextRequest) {
     .eq('org_id', auth.orgId);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to delete budget' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete budget', detail: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ message: 'Budget deleted' });
@@ -138,7 +140,7 @@ export async function PATCH(req: NextRequest) {
     .eq('org_id', auth.orgId);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to reset budget' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to reset budget', detail: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ message: 'Budget reset' });

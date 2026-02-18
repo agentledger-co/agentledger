@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
+import { reportError } from '@/lib/errors';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -73,19 +74,29 @@ export async function GET(req: NextRequest) {
   const blockedCount = (todayLogs || []).filter((l: any) => l.status === 'blocked').length;
 
   // Enrich agents with aggregated totals
-  const enrichedAgents = (agents || []).map((agent: any) => {
-    const agentActions = (weekLogs || []).filter((l: any) => l.agent_name === agent.name);
-    const totalCost = agentActions.reduce((s: number, l: any) => s + (l.estimated_cost_cents || 0), 0);
+  // Note: total_actions comes from agent's full history, not just 7 days
+  const enrichedAgents = await Promise.all((agents || []).map(async (agent: any) => {
+    // All-time count for this agent
+    const { count: allTimeCount } = await safe(
+      supabase.from('action_logs').select('*', { count: 'exact', head: true })
+        .eq('org_id', auth.orgId).eq('agent_name', agent.name),
+      { count: 0 }
+    );
+    // All-time cost for this agent
+    const { data: allCostData } = await safe(
+      supabase.from('action_logs').select('estimated_cost_cents')
+        .eq('org_id', auth.orgId).eq('agent_name', agent.name),
+      { data: [] }
+    );
+    const totalCost = (allCostData || []).reduce((s: number, l: any) => s + (l.estimated_cost_cents || 0), 0);
     
     return {
       ...agent,
-      total_actions: agentActions.length,
+      total_actions: allTimeCount || 0,
       total_cost_cents: totalCost,
-      last_active_at: agentActions.length > 0 
-        ? agentActions[agentActions.length - 1].created_at 
-        : (agent.updated_at || agent.created_at),
+      last_active_at: agent.last_active_at || agent.updated_at || agent.created_at,
     };
-  });
+  }));
 
   return NextResponse.json({
     totalActions: totalActions || 0,

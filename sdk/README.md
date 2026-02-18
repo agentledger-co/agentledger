@@ -1,8 +1,9 @@
-# AgentLedger
+# agentledger
 
-**See everything your AI agents do.** Track actions, monitor costs, and kill agents when things go wrong.
+The missing observability layer for AI agents. Track every action, set budgets, get alerts, and kill misbehaving agents — with one line of code.
 
-Your agents send emails, create tickets, charge credit cards, and call APIs. AgentLedger logs every action, tracks every cost, and lets you kill agents instantly when things go sideways.
+[![npm](https://img.shields.io/npm/v/agentledger)](https://www.npmjs.com/package/agentledger)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Install
 
@@ -10,17 +11,17 @@ Your agents send emails, create tickets, charge credit cards, and call APIs. Age
 npm install agentledger
 ```
 
-## Quick Start
+## Quick Start (60 seconds)
 
 ```typescript
-import { AgentLedger } from 'agentledger';
+import AgentLedger from 'agentledger';
 
 const ledger = new AgentLedger({
-  apiKey: process.env.AGENTLEDGER_KEY, // Get this from agentledger.co
+  apiKey: process.env.AGENTLEDGER_KEY!, // Get from agentledger.co
 });
 
-// Wrap any async function — it's logged, timed, and budget-checked
-const result = await ledger.track({
+// Wrap any async action — it gets logged, timed, and budget-checked automatically
+const { result } = await ledger.track({
   agent: 'support-bot',
   service: 'slack',
   action: 'send_message',
@@ -29,16 +30,16 @@ const result = await ledger.track({
 });
 ```
 
-Open your dashboard at [agentledger.co](https://agentledger.co) and watch your agents in real-time.
+That's it. Open [agentledger.co/dashboard](https://agentledger.co/dashboard) and watch your agent in real-time.
 
-## Features
+## What You Get
 
-- **Zero dependencies** — just this package, nothing else
-- **Fail-open by default** — if AgentLedger is down, your agents keep running
-- **Pre-flight checks** — block actions before they happen if agent is over budget
-- **Kill switches** — pause or kill any agent instantly
-- **Cost tracking** — know exactly what each agent costs
-- **5ms overhead** — async logging, doesn't slow your agents down
+- **Live dashboard** — see every action, cost, and error in real-time
+- **Budget controls** — set hourly/daily/weekly/monthly spend limits per agent
+- **Kill switch** — pause or kill any agent instantly from the dashboard or SDK
+- **Alerts** — get notified when agents exceed budgets or behave unexpectedly
+- **Webhooks** — HTTP callbacks for action.logged, budget.exceeded, agent.killed, etc.
+- **Pre-flight checks** — ask "is this agent allowed to act?" before expensive operations
 
 ## API
 
@@ -48,37 +49,39 @@ Open your dashboard at [agentledger.co](https://agentledger.co) and watch your a
 const ledger = new AgentLedger({
   apiKey: 'al_...',           // Required. Get from agentledger.co
   baseUrl: 'https://...',     // Optional. Default: https://agentledger.co
-  failOpen: true,             // Optional. If true, agents run even if AgentLedger is unreachable
+  failOpen: true,             // Optional. If true (default), actions proceed when AgentLedger is unreachable
   timeout: 5000,              // Optional. API timeout in ms
-  onError: (err) => {},       // Optional. Called on communication errors
+  onError: (err) => {},       // Optional. Error callback
 });
 ```
 
-### `ledger.track(options, fn)`
+### `ledger.track(options, fn)` — Track an action
 
-Wrap an async function. Runs a pre-flight budget check, executes the function, logs the result.
-
-```typescript
-const { result, allowed, durationMs } = await ledger.track({
-  agent: 'my-bot',
-  service: 'stripe',
-  action: 'charge',
-  costCents: 50,
-  metadata: { customerId: '123' },
-}, async () => {
-  return await stripe.charges.create({ amount: 5000 });
-});
-```
-
-### `ledger.check(options)`
-
-Pre-flight check without executing. Use before expensive operations.
+Wraps an async function with logging, timing, and budget checks.
 
 ```typescript
-const { allowed, blockReason } = await ledger.check({
+const { result, allowed, durationMs, actionId } = await ledger.track({
   agent: 'my-bot',
   service: 'openai',
   action: 'completion',
+  costCents: 5,                // Optional estimated cost
+  metadata: { model: 'gpt-4' }, // Optional metadata
+}, async () => {
+  return await openai.chat.completions.create({ ... });
+});
+```
+
+Throws if the agent is paused/killed or budget is exceeded.
+
+### `ledger.check(options)` — Pre-flight check
+
+Check if an action is allowed without executing it.
+
+```typescript
+const { allowed, blockReason, remainingBudget } = await ledger.check({
+  agent: 'my-bot',
+  service: 'stripe',
+  action: 'charge',
 });
 
 if (!allowed) {
@@ -86,28 +89,27 @@ if (!allowed) {
 }
 ```
 
-### `ledger.log(options)`
+### `ledger.log(options)` — Manual logging
 
-Manual logging without wrapping a function.
+Log an action without wrapping a function.
 
 ```typescript
 await ledger.log({
   agent: 'my-bot',
-  service: 'sendgrid',
-  action: 'send_email',
+  service: 'email',
+  action: 'send',
+  status: 'success',
+  durationMs: 230,
   costCents: 1,
-  durationMs: 340,
 });
 ```
 
-### `ledger.pauseAgent(name)` / `resumeAgent(name)` / `killAgent(name)`
-
-Control agents programmatically.
+### Agent Controls
 
 ```typescript
-await ledger.pauseAgent('runaway-bot');  // All future actions blocked
-await ledger.resumeAgent('runaway-bot'); // Back in action
-await ledger.killAgent('runaway-bot');   // Permanently stopped
+await ledger.pauseAgent('my-bot');   // Pause — blocks all future actions
+await ledger.resumeAgent('my-bot');  // Resume a paused agent
+await ledger.killAgent('my-bot');    // Kill — permanently blocks (can be resumed from dashboard)
 ```
 
 ## Framework Integrations
@@ -115,61 +117,62 @@ await ledger.killAgent('runaway-bot');   // Permanently stopped
 ### LangChain
 
 ```typescript
-import { AgentLedger } from 'agentledger';
-import { AgentLedgerCallbackHandler } from 'agentledger/integrations/langchain';
+import { AgentLedgerCallback } from 'agentledger/integrations/langchain';
 
-const handler = new AgentLedgerCallbackHandler(ledger, {
-  agent: 'research-bot',
-  serviceMap: { 'tavily_search': { service: 'tavily', action: 'search' } },
+const callback = new AgentLedgerCallback({
+  apiKey: process.env.AGENTLEDGER_KEY!,
+  agent: 'langchain-bot',
 });
 
-const agent = createReactAgent({ llm, tools, callbacks: [handler] });
+const chain = new LLMChain({ llm, prompt, callbacks: [callback] });
 ```
 
 ### OpenAI
 
 ```typescript
-import { createToolExecutor } from 'agentledger/integrations/openai';
+import { wrapOpenAI } from 'agentledger/integrations/openai';
 
-const execute = createToolExecutor(ledger, 'my-agent', tools, serviceMap);
+const openai = wrapOpenAI(new OpenAI(), {
+  apiKey: process.env.AGENTLEDGER_KEY!,
+  agent: 'openai-bot',
+});
+
+// All calls are automatically tracked
+await openai.chat.completions.create({ model: 'gpt-4', messages: [...] });
 ```
 
-### MCP Servers
-
-```typescript
-import { wrapMCPServer } from 'agentledger/integrations/mcp';
-
-wrapMCPServer(ledger, server, { agent: 'my-mcp-server' });
-```
-
-### Express
+### Express Middleware
 
 ```typescript
 import { agentLedgerMiddleware } from 'agentledger/integrations/express';
 
-app.post('/api/action', agentLedgerMiddleware(ledger, {
-  agent: 'api-bot', service: 'internal', action: 'process',
-}), handler);
+app.use('/api/agent', agentLedgerMiddleware({
+  apiKey: process.env.AGENTLEDGER_KEY!,
+  agent: 'api-agent',
+}));
+```
+
+### MCP (Model Context Protocol)
+
+```typescript
+import { wrapMCPServer } from 'agentledger/integrations/mcp';
+
+const server = wrapMCPServer(mcpServer, {
+  apiKey: process.env.AGENTLEDGER_KEY!,
+  agent: 'mcp-agent',
+});
 ```
 
 ## Self-Hosting
 
-AgentLedger is open source. You can self-host the dashboard:
-
 ```bash
 git clone https://github.com/miken1988/agentledger.git
 cd agentledger
+cp .env.example .env.local  # Add your Supabase credentials
 npm install && npm run dev
 ```
 
-Point your SDK to your own instance:
-
-```typescript
-const ledger = new AgentLedger({
-  apiKey: 'al_...',
-  baseUrl: 'https://your-instance.com',
-});
-```
+See [docs/SUPABASE_AUTH_SETUP.md](docs/SUPABASE_AUTH_SETUP.md) for full setup guide.
 
 ## License
 

@@ -18,12 +18,12 @@ export async function POST(req: NextRequest) {
     // Acknowledge all alerts for this org
     const { error } = await supabase
       .from('anomaly_alerts')
-      .update({ acknowledged: true })
+      .update({ acknowledged_at: new Date().toISOString() })
       .eq('org_id', auth.orgId)
-      .eq('acknowledged', false);
+      .is('acknowledged_at', null);
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to acknowledge alerts' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to acknowledge alerts', detail: error.message }, { status: 500 });
     }
     return NextResponse.json({ message: 'All alerts acknowledged' });
   }
@@ -34,12 +34,12 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabase
     .from('anomaly_alerts')
-    .update({ acknowledged: true })
+    .update({ acknowledged_at: new Date().toISOString() })
     .eq('id', id)
     .eq('org_id', auth.orgId);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to acknowledge alert' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to acknowledge alert', detail: error.message }, { status: 500 });
   }
 
   return NextResponse.json({ message: 'Alert acknowledged' });

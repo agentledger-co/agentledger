@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     .select('id, key_prefix, name, description, created_at')
     .single();
 
-  if (error) return NextResponse.json({ error: 'Failed to create new key' }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to create new key', detail: error.message }, { status: 500 });
 
   return NextResponse.json({ ...newKey, key, rotatedFrom: keyId });
 }

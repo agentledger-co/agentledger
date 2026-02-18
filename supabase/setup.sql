@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS budgets (
   current_actions INTEGER NOT NULL DEFAULT 0,
   current_cost_cents INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'ok' CHECK (status IN ('ok', 'warning', 'critical', 'exceeded')),
+  period_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -449,8 +449,6 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
-        ) : !stats ? (
-          <div className="text-center py-16 text-white/30 text-sm">No data yet. Try seeding demo data or sending your first action.</div>
         ) : tab === 'overview' ? (
           <OverviewTab stats={stats} actions={actions} apiKey={apiKey} />
         ) : tab === 'actions' ? (

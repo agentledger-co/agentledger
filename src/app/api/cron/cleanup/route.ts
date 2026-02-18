@@ -16,11 +16,11 @@ import { PLANS } from '@/lib/usage';
  * Protected by CRON_SECRET env var to prevent unauthorized access.
  */
 export async function GET(req: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret (required in production)
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

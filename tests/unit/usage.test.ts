@@ -11,8 +11,8 @@ describe('Usage Limits', () => {
 
     it('free plan has correct limits', () => {
       expect(PLANS.free.actionsPerMonth).toBe(1_000);
-      expect(PLANS.free.maxAgents).toBe(2);
-      expect(PLANS.free.retentionDays).toBe(1);
+      expect(PLANS.free.maxAgents).toBe(5);
+      expect(PLANS.free.retentionDays).toBe(7);
       expect(PLANS.free.webhooksAllowed).toBe(false);
       expect(PLANS.free.ratePerMinute).toBe(30);
     });
@@ -125,11 +125,11 @@ describe('Usage Limits', () => {
   });
 
   describe('Data retention calculations', () => {
-    it('free tier cutoff is 24 hours ago', () => {
+    it('free tier cutoff is 7 days ago', () => {
       const retentionDays = PLANS.free.retentionDays;
       const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
       const hoursDiff = (Date.now() - cutoff.getTime()) / (1000 * 60 * 60);
-      expect(Math.round(hoursDiff)).toBe(24);
+      expect(Math.round(hoursDiff)).toBe(168);
     });
 
     it('pro tier cutoff is 90 days ago', () => {

@@ -188,6 +188,9 @@ export default function LandingPage() {
             <a href="#demo" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Live Demo</a>
             <Link href="/docs" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Docs</Link>
             <a href="#pricing" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Pricing</a>
+            <a href="https://github.com/miken1988/agentledger" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/70 transition-colors hidden md:block" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
             <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30">
               Get Started {'\u2192'}
             </Link>
@@ -336,9 +339,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '2 agents', '24h data retention', 'Basic alerts', 'Community support'], cta: 'Get Started', hl: false },
-              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Coming Soon', hl: true },
-              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'SSO (coming soon)', 'Webhooks & API', 'Email support'], cta: 'Coming Soon', hl: false },
+              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Basic alerts', 'Community support'], cta: 'Get Started', hl: false },
+              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: true },
+              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'SSO (coming soon)', 'Webhooks & API', 'Email support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
               <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]'}`}>
                 {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Popular</div>}
@@ -350,10 +353,10 @@ export default function LandingPage() {
                 <ul className="space-y-3 mb-7">
                   {plan.features.map(f => <li key={f} className="flex items-center gap-2.5 text-[13px] text-white/50"><span className="text-blue-400/60 text-[11px]">{'\u2713'}</span> {f}</li>)}
                 </ul>
-                {plan.cta === 'Coming Soon' ? (
-                  <div className="block text-center py-2.5 rounded-xl text-[13px] font-medium bg-white/[0.04] text-white/25 border border-white/[0.08] cursor-not-allowed">
-                    {plan.cta}
-                  </div>
+                {plan.cta === 'Join Waitlist' ? (
+                  <a href="mailto:hello@agentledger.co?subject=Waitlist: AgentLedger Pro/Team" className="block text-center py-2.5 rounded-xl text-[13px] font-medium bg-white/[0.04] hover:bg-white/[0.08] text-white/50 border border-white/[0.08] transition-all">
+                    {plan.cta} {'\u2192'}
+                  </a>
                 ) : (
                   <Link href="/signup" className={`block text-center py-2.5 rounded-xl text-[13px] font-medium transition-all ${plan.hl ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25' : 'bg-white/[0.04] hover:bg-white/[0.08] text-white/50 border border-white/[0.08]'}`}>
                     {plan.cta}
@@ -363,7 +366,7 @@ export default function LandingPage() {
             ))}
           </div>
           <p className="text-center text-[12px] text-white/15 mt-6 max-w-lg mx-auto">
-            Free tier includes 1,000 actions/month with 24-hour data retention. Usage beyond plan limits is rate-limited.
+            Free tier includes 1,000 actions/month with 7-day data retention. Usage beyond plan limits is rate-limited.
             We reserve the right to enforce fair use policies to maintain service quality for all users.
           </p>
         </div>
@@ -391,8 +394,10 @@ export default function LandingPage() {
             <span className="text-[13px] text-white/25">AgentLedger</span>
           </div>
           <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
-            <a href="https://github.com/miken1988/agentledger" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">GitHub</a>
+            <a href="https://github.com/miken1988/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">GitHub</a>
+            <a href="https://x.com/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">X / Twitter</a>
             <Link href="/docs" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Docs</Link>
+            <Link href="/changelog" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Changelog</Link>
             <Link href="/terms" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Terms</Link>
             <Link href="/privacy" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Privacy</Link>
             <p className="text-[12px] text-white/15">{'\u00a9'} 2026 AgentLedger. All rights reserved.</p>

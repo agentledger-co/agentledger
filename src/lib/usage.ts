@@ -16,8 +16,8 @@ export const PLANS: Record<string, PlanLimits> = {
   free: {
     name: 'Free',
     actionsPerMonth: 1_000,
-    maxAgents: 2,
-    retentionDays: 1, // 24 hours
+    maxAgents: 5,
+    retentionDays: 7,
     webhooksAllowed: false,
     maxWebhooks: 0,
     maxApiKeys: 2,

@@ -40,19 +40,24 @@ function LiveDemo() {
   const [actions, setActions] = useState<Array<{
     id: number; agent: string; service: string; action: string; status: string; cost: number; duration: number; time: string;
   }>>([]);
+  const [agents, setAgents] = useState([
+    { name: 'support-bot', status: 'active' as const, actions: 847, cost: 342, lastActive: '2s ago' },
+    { name: 'billing-agent', status: 'active' as const, actions: 234, cost: 1891, lastActive: '14s ago' },
+    { name: 'data-sync', status: 'paused' as const, actions: 1203, cost: 0, lastActive: '2h ago' },
+  ]);
+  const [budget, setBudget] = useState({ used: 67, limit: 100, label: 'billing-agent · daily spend' });
+  const [alert, setAlert] = useState<{ show: boolean; message: string; severity: string }>({ show: false, message: '', severity: '' });
+  const [tab, setTab] = useState<'feed' | 'agents' | 'budgets'>('feed');
   const idRef = useRef(0);
 
   const DEMO_ACTIONS = [
     { agent: 'support-bot', service: 'slack', action: 'send_message', cost: 0, durationRange: [80, 200] },
     { agent: 'support-bot', service: 'gmail', action: 'send_email', cost: 1, durationRange: [400, 1200] },
-    { agent: 'support-bot', service: 'twilio', action: 'send_sms', cost: 79, durationRange: [150, 400] },
+    { agent: 'billing-agent', service: 'stripe', action: 'charge', cost: 45, durationRange: [1000, 3000] },
     { agent: 'billing-agent', service: 'stripe', action: 'create_invoice', cost: 0, durationRange: [800, 2000] },
-    { agent: 'billing-agent', service: 'stripe', action: 'charge', cost: 0, durationRange: [1000, 3000] },
     { agent: 'billing-agent', service: 'openai', action: 'completion', cost: 3, durationRange: [200, 800] },
     { agent: 'data-sync', service: 'github', action: 'create_issue', cost: 0, durationRange: [300, 700] },
-    { agent: 'data-sync', service: 'notion', action: 'update_page', cost: 0, durationRange: [200, 500] },
-    { agent: 'content-writer', service: 'anthropic', action: 'completion', cost: 4, durationRange: [500, 2000] },
-    { agent: 'content-writer', service: 'sendgrid', action: 'send_email', cost: 0, durationRange: [100, 300] },
+    { agent: 'support-bot', service: 'twilio', action: 'send_sms', cost: 79, durationRange: [150, 400] },
   ];
 
   const SERVICE_COLORS: Record<string, string> = {
@@ -64,47 +69,159 @@ function LiveDemo() {
   useEffect(() => {
     const addAction = () => {
       const template = DEMO_ACTIONS[Math.floor(Math.random() * DEMO_ACTIONS.length)];
+      if (template.agent === 'data-sync' && agents.find(a => a.name === 'data-sync')?.status === 'paused') {
+        return; // paused agents don't fire
+      }
       const duration = Math.floor(Math.random() * (template.durationRange[1] - template.durationRange[0]) + template.durationRange[0]);
       const isError = Math.random() < 0.05;
       const isBlocked = !isError && Math.random() < 0.03;
+      const status = isError ? 'error' : isBlocked ? 'blocked' : 'success';
       setActions(prev => [{
         id: idRef.current++, agent: template.agent, service: template.service,
-        action: template.action, status: isError ? 'error' : isBlocked ? 'blocked' : 'success',
-        cost: template.cost, duration,
+        action: template.action, status, cost: template.cost, duration,
         time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      }, ...prev].slice(0, 8));
+      }, ...prev].slice(0, 6));
+
+      // Update agent stats
+      setAgents(prev => prev.map(a => a.name === template.agent ? {
+        ...a, actions: a.actions + 1, cost: a.cost + template.cost, lastActive: 'just now'
+      } : a));
+
+      // Increment budget
+      if (template.agent === 'billing-agent' && template.cost > 0) {
+        setBudget(prev => {
+          const newUsed = Math.min(prev.used + template.cost / 100, prev.limit);
+          if (newUsed > 85 && prev.used <= 85) {
+            setAlert({ show: true, message: 'billing-agent approaching daily budget (85%)', severity: 'warning' });
+            setTimeout(() => setAlert({ show: false, message: '', severity: '' }), 4000);
+          }
+          return { ...prev, used: newUsed };
+        });
+      }
     };
-    for (let i = 0; i < 4; i++) setTimeout(addAction, i * 200);
-    const interval = setInterval(addAction, 2000 + Math.random() * 2000);
+    for (let i = 0; i < 3; i++) setTimeout(addAction, i * 200);
+    const interval = setInterval(addAction, 2500 + Math.random() * 2000);
     return () => clearInterval(interval);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const toggleAgent = (name: string) => {
+    setAgents(prev => prev.map(a => a.name === name ? {
+      ...a, status: a.status === 'active' ? 'paused' : 'active',
+      lastActive: a.status === 'active' ? 'just now' : a.lastActive,
+    } : a));
+  };
 
   return (
     <div className="relative group">
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-blue-500/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="relative bg-[#0c0c0c] rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl shadow-black/50">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50" />
-            <span className="text-[11px] font-medium tracking-wide uppercase text-white/30">Live Agent Feed</span>
+        {/* Alert banner */}
+        <div className={`overflow-hidden transition-all duration-500 ${alert.show ? 'max-h-12' : 'max-h-0'}`}>
+          <div className="px-5 py-2.5 bg-amber-500/10 border-b border-amber-500/20 flex items-center gap-2.5">
+            <span className="text-amber-400 text-[11px]">{'\u26a0'}</span>
+            <span className="text-[11px] text-amber-400/80">{alert.message}</span>
           </div>
-          <span className="text-[10px] text-white/15 font-mono">{actions.length} events</span>
         </div>
-        <div className="divide-y divide-white/[0.04]">
-          {actions.map((a, i) => (
-            <div key={a.id} className={`px-5 py-2.5 flex items-center gap-3 text-[12px] transition-all duration-300 hover:bg-white/[0.02] ${i === 0 ? 'animate-fade-in bg-white/[0.015]' : ''}`}>
-              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.status === 'success' ? 'bg-emerald-400' : a.status === 'error' ? 'bg-red-400' : 'bg-amber-400'}`} />
-              <span className="text-white/30 font-mono w-[60px] flex-shrink-0 tabular-nums">{a.time}</span>
-              <span className="text-white/70 font-medium w-28 flex-shrink-0 truncate">{a.agent}</span>
-              <span className="text-white/15">{'\u2192'}</span>
-              <span className={`font-medium w-16 flex-shrink-0 ${SERVICE_COLORS[a.service] || 'text-white/50'}`}>{a.service}</span>
-              <span className="text-white/30 flex-1 truncate">{a.action}</span>
-              <span className="text-white/15 w-14 text-right font-mono tabular-nums">{a.duration}ms</span>
-              {a.cost > 0 && <span className="text-blue-400/70 w-12 text-right font-mono tabular-nums">${(a.cost / 100).toFixed(2)}</span>}
-            </div>
+
+        {/* Tab bar */}
+        <div className="flex items-center gap-0 px-5 border-b border-white/[0.06]">
+          {(['feed', 'agents', 'budgets'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-3 text-[11px] font-medium tracking-wide uppercase transition-all relative ${tab === t ? 'text-white/70' : 'text-white/20 hover:text-white/40'}`}>
+              {t === 'feed' ? 'Live Feed' : t === 'agents' ? 'Agents' : 'Budgets'}
+              {tab === t && <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-blue-500 rounded-full" />}
+            </button>
           ))}
+          <div className="flex-1" />
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] text-white/15 font-mono">live</span>
+          </div>
         </div>
+
+        {/* Feed tab */}
+        {tab === 'feed' && (
+          <div className="divide-y divide-white/[0.04]">
+            {actions.map((a, i) => (
+              <div key={a.id} className={`px-5 py-2.5 flex items-center gap-3 text-[12px] transition-all duration-300 hover:bg-white/[0.02] ${i === 0 ? 'animate-fade-in bg-white/[0.015]' : ''}`}>
+                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.status === 'success' ? 'bg-emerald-400' : a.status === 'error' ? 'bg-red-400' : 'bg-amber-400'}`} />
+                <span className="text-white/30 font-mono w-[60px] flex-shrink-0 tabular-nums">{a.time}</span>
+                <span className="text-white/70 font-medium w-28 flex-shrink-0 truncate">{a.agent}</span>
+                <span className="text-white/15">{'\u2192'}</span>
+                <span className={`font-medium w-16 flex-shrink-0 ${SERVICE_COLORS[a.service] || 'text-white/50'}`}>{a.service}</span>
+                <span className="text-white/30 flex-1 truncate">{a.action}</span>
+                <span className="text-white/15 w-14 text-right font-mono tabular-nums">{a.duration}ms</span>
+                {a.cost > 0 && <span className="text-blue-400/70 w-12 text-right font-mono tabular-nums">${(a.cost / 100).toFixed(2)}</span>}
+              </div>
+            ))}
+            {actions.length === 0 && <div className="px-5 py-8 text-center text-[12px] text-white/15">Waiting for actions...</div>}
+          </div>
+        )}
+
+        {/* Agents tab */}
+        {tab === 'agents' && (
+          <div className="divide-y divide-white/[0.04]">
+            {agents.map(a => (
+              <div key={a.name} className="px-5 py-4 flex items-center gap-4">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${a.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] text-white/70 font-medium">{a.name}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${a.status === 'active' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-amber-400/10 text-amber-400'}`}>{a.status}</span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[11px] text-white/20">{a.actions.toLocaleString()} actions</span>
+                    <span className="text-[11px] text-white/20">{'\u00b7'}</span>
+                    <span className="text-[11px] text-blue-400/50">${(a.cost / 100).toFixed(2)} spent</span>
+                    <span className="text-[11px] text-white/20">{'\u00b7'}</span>
+                    <span className="text-[11px] text-white/15">{a.lastActive}</span>
+                  </div>
+                </div>
+                <button onClick={() => toggleAgent(a.name)}
+                  className={`text-[11px] px-3 py-1.5 rounded-lg border transition-all ${a.status === 'active' ? 'border-amber-500/30 text-amber-400/70 hover:bg-amber-500/10' : 'border-emerald-500/30 text-emerald-400/70 hover:bg-emerald-500/10'}`}>
+                  {a.status === 'active' ? 'Pause' : 'Resume'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Budgets tab */}
+        {tab === 'budgets' && (
+          <div className="p-5 space-y-5">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] text-white/50">{budget.label}</span>
+                <span className="text-[12px] font-mono text-white/30">${budget.used.toFixed(0)} / ${budget.limit}</span>
+              </div>
+              <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-1000 ${budget.used / budget.limit > 0.85 ? 'bg-amber-500' : budget.used / budget.limit > 0.7 ? 'bg-blue-400' : 'bg-emerald-400'}`}
+                  style={{ width: `${Math.min((budget.used / budget.limit) * 100, 100)}%` }} />
+              </div>
+              <p className="text-[11px] text-white/15 mt-1.5">Auto-pauses agent when limit is reached</p>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] text-white/50">support-bot {'\u00b7'} monthly actions</span>
+                <span className="text-[12px] font-mono text-white/30">847 / 2,000</span>
+              </div>
+              <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-blue-400 transition-all duration-1000" style={{ width: '42%' }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] text-white/50">data-sync {'\u00b7'} daily actions</span>
+                <span className="text-[12px] font-mono text-white/30">0 / 500</span>
+              </div>
+              <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-white/10 transition-all duration-1000" style={{ width: '0%' }} />
+              </div>
+              <p className="text-[11px] text-amber-400/40 mt-1.5">{'\u23f8'} Agent paused</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

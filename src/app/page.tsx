@@ -364,10 +364,6 @@ export default function LandingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/[0.06] rounded-full blur-[120px] pointer-events-none" />
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center relative">
           <div>
-            <div className="inline-flex items-center gap-2 bg-white/[0.04] text-blue-400/80 text-[11px] font-medium px-3.5 py-1.5 rounded-full mb-8 border border-blue-500/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              Open source {'\u00b7'} Free tier
-            </div>
             <h1 className="text-[40px] md:text-[56px] font-bold leading-[1.05] mb-6 tracking-tight">
               See everything your<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-500">AI agents</span>

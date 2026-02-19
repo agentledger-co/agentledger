@@ -3,48 +3,48 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-// ==================== ROTATING WORD ====================
+// ==================== TYPEWRITER WORD ====================
 const ROTATING_WORDS = ['do', 'send', 'charge', 'spend', 'build', 'deploy', 'create', 'call'];
 
-function RotatingWord() {
-  const [index, setIndex] = useState(0);
-  const [isExiting, setIsExiting] = useState(false);
+function TypewriterWord() {
+  const [wordIndex, setWordIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [phase, setPhase] = useState<'typing' | 'paused' | 'clearing'>('typing');
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsExiting(true);
-      setTimeout(() => {
-        setIndex(prev => (prev + 1) % ROTATING_WORDS.length);
-        setIsExiting(false);
-      }, 300);
-    }, 2200);
-    return () => clearInterval(interval);
-  }, []);
+    const word = ROTATING_WORDS[wordIndex];
+
+    if (phase === 'typing') {
+      if (charIndex < word.length) {
+        const timer = setTimeout(() => setCharIndex(prev => prev + 1), 100);
+        return () => clearTimeout(timer);
+      } else {
+        const timer = setTimeout(() => setPhase('paused'), 1800);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    if (phase === 'paused') {
+      setPhase('clearing');
+      return;
+    }
+
+    if (phase === 'clearing') {
+      const timer = setTimeout(() => {
+        setWordIndex(prev => (prev + 1) % ROTATING_WORDS.length);
+        setCharIndex(0);
+        setPhase('typing');
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [charIndex, phase, wordIndex]);
+
+  const displayed = ROTATING_WORDS[wordIndex].slice(0, charIndex);
 
   return (
-    <span
-      className="inline-block transition-all duration-300 ease-in-out text-blue-400 font-extrabold"
-      style={{
-        opacity: isExiting ? 0 : 1,
-        transform: isExiting ? 'translateY(-20px)' : 'translateY(0)',
-        textShadow: '0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2)',
-      }}
-    >
-      {ROTATING_WORDS[index]}
-    </span>
-  );
-}
-
-// ==================== ANIMATED DOTS ====================
-function AnimatedDots() {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setCount(prev => (prev + 1) % 4), 500);
-    return () => clearInterval(interval);
-  }, []);
-  return (
-    <span className="font-bold ml-1" style={{ textShadow: '0 0 20px rgba(59, 130, 246, 0.4)' }}>
-      {count > 0 ? '.'.repeat(count) : '\u200b'}
+    <span className="text-blue-400 font-extrabold" style={{ textShadow: '0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2)' }}>
+      {displayed}
+      <span className="inline-block w-[3px] h-[0.85em] bg-blue-400 ml-[2px] align-baseline animate-blink" />
     </span>
   );
 }
@@ -366,12 +366,8 @@ export default function LandingPage() {
           <div>
             <h1 className="text-[40px] md:text-[56px] font-bold leading-[1.05] mb-6 tracking-tight">
               See everything your<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-500">AI agents</span>
-              <span className="text-blue-400/40"><AnimatedDots /></span>{' '}
-              <span className="relative">
-                <RotatingWord />
-                <span className="absolute -inset-x-2 -inset-y-1 bg-blue-500/10 rounded-lg blur-xl pointer-events-none" />
-              </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-500">AI agents</span>{' '}
+              <TypewriterWord />
             </h1>
             <p className="text-[17px] text-white/40 mb-10 leading-relaxed max-w-[480px]">
               Your agents send emails, create tickets, charge credit cards, and call APIs. AgentLedger logs every action, tracks every cost, and kills agents when things go wrong.

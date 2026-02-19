@@ -170,3 +170,11 @@ select option {
   background: #1a1a1a;
   color: rgba(255,255,255,0.7);
 }
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 0.8s step-end infinite;
+}

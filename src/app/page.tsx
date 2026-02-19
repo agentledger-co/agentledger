@@ -43,7 +43,7 @@ function AnimatedDots() {
     return () => clearInterval(interval);
   }, []);
   return (
-    <span className="inline-block w-[1.5em] text-left font-bold" style={{ textShadow: '0 0 20px rgba(59, 130, 246, 0.4)' }}>
+    <span className="inline-block w-[1em] text-left font-bold mx-1" style={{ textShadow: '0 0 20px rgba(59, 130, 246, 0.4)' }}>
       {'.'.repeat(count || 0)}
     </span>
   );
@@ -371,7 +371,7 @@ export default function LandingPage() {
             <h1 className="text-[40px] md:text-[56px] font-bold leading-[1.05] mb-6 tracking-tight">
               See everything your<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-500">AI agents</span>
-              <span className="text-blue-400/40">{' '}<AnimatedDots />{' '}</span>
+              <span className="text-blue-400/40"><AnimatedDots /></span>
               <span className="relative">
                 <RotatingWord />
                 <span className="absolute -inset-x-2 -inset-y-1 bg-blue-500/10 rounded-lg blur-xl pointer-events-none" />

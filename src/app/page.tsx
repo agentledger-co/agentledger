@@ -348,10 +348,10 @@ export default function LandingPage() {
             <span className="text-lg font-semibold tracking-tight">AgentLedger</span>
           </div>
           <div className="flex items-center gap-8">
-            <a href="#features" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Features</a>
-            <a href="#demo" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Live Demo</a>
-            <Link href="/docs" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Docs</Link>
-            <a href="#pricing" className="text-[13px] text-white/30 hover:text-white/70 transition-colors hidden md:block">Pricing</a>
+            <a href="#features" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Features</a>
+            <a href="#demo" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Live Demo</a>
+            <Link href="/docs" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Docs</Link>
+            <a href="#pricing" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Pricing</a>
             <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30">
               Get Started {'\u2192'}
             </Link>
@@ -364,8 +364,9 @@ export default function LandingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/[0.06] rounded-full blur-[120px] pointer-events-none" />
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center relative">
           <div>
-            <h1 className="text-[40px] md:text-[56px] font-bold leading-[1.05] mb-6 tracking-tight">
-              See everything your<br />
+            <h1 className="text-[32px] md:text-[56px] font-bold leading-[1.05] mb-6 tracking-tight">
+              See everything your{' '}
+              <span className="hidden md:inline"><br /></span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-500">AI agents</span>{' '}
               <TypewriterWord />
             </h1>
@@ -494,7 +495,7 @@ export default function LandingPage() {
             {[
               { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Basic alerts', 'Community support'], cta: 'Get Started', hl: true },
               { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: false },
-              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'SSO (coming soon)', 'Webhooks & API', 'Email support'], cta: 'Join Waitlist', hl: false },
+              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
               <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]'}`}>
                 {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Available Now</div>}

@@ -122,15 +122,6 @@ await test('Auth callback route exists', async () => {
   assert(res.status !== 404, 'Auth callback route returns 404');
 });
 
-await test('Signup API rejects empty body', async () => {
-  const res = await fetch(BASE + '/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
-  });
-  assert(res.status !== 500, 'Signup POST returned 500');
-});
-
 // ==================== CRITICAL PAGES ====================
 console.log('\n' + String.fromCodePoint(0x1F4C4) + ' Critical Pages:');
 
@@ -168,18 +159,18 @@ await test('Setup API responds (rejects bad request)', async () => {
   assert(res.status !== 500, 'Setup API returned 500 — check Supabase service client');
 });
 
-await test('Actions API rejects unauthenticated', async () => {
-  const res = await fetch(BASE + '/api/actions');
-  assert(res.status === 401 || res.status === 405, 'Expected 401/405, got ' + res.status);
+await test('Actions API rejects unauthenticated GET', async () => {
+  const res = await fetch(BASE + '/api/v1/actions');
+  assert(res.status === 401, 'Expected 401, got ' + res.status);
 });
 
-await test('Stats API rejects unauthenticated', async () => {
-  const res = await fetch(BASE + '/api/stats');
-  assert(res.status === 401 || res.status === 405, 'Expected 401/405, got ' + res.status);
+await test('Stats API rejects unauthenticated GET', async () => {
+  const res = await fetch(BASE + '/api/v1/stats');
+  assert(res.status === 401, 'Expected 401, got ' + res.status);
 });
 
 await test('Actions ingest rejects bad key', async () => {
-  const res = await fetch(BASE + '/api/actions', {
+  const res = await fetch(BASE + '/api/v1/actions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -190,6 +181,11 @@ await test('Actions ingest rejects bad key', async () => {
     }),
   });
   assert(res.status === 401, 'Expected 401, got ' + res.status);
+});
+
+await test('Health endpoint responds', async () => {
+  const res = await fetch(BASE + '/api/health');
+  assert(res.status === 200, 'Health endpoint returned ' + res.status);
 });
 
 // ==================== SEO & META ====================

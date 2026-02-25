@@ -17,10 +17,14 @@ export function createBrowserClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
   return createSSRBrowserClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      // Prevent newer supabase-js from rewriting auth calls to .supabase.com
-      // Our project is on .supabase.co and the .com hostname doesn't resolve
-      apiUrl: `${supabaseUrl}/auth/v1`,
+    global: {
+      fetch: (url, options) => {
+        // Rewrite .supabase.com back to .supabase.co
+        const fixedUrl = typeof url === 'string'
+          ? url.replace('.supabase.com', '.supabase.co')
+          : url;
+        return fetch(fixedUrl, options);
+      },
     },
   });
 }

@@ -1,7 +1,13 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-// Server client for server components and API routes (with cookie-based auth)
+const supabaseFetch: typeof fetch = (url, options) => {
+  const fixedUrl = typeof url === 'string'
+    ? url.replace('.supabase.com', '.supabase.co')
+    : url;
+  return fetch(fixedUrl, options);
+};
+
 export async function createServerAuthClient() {
   const cookieStore = await cookies();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -21,6 +27,9 @@ export async function createServerAuthClient() {
           // Called from a Server Component — ignore
         }
       },
+    },
+    global: {
+      fetch: supabaseFetch,
     },
   });
 }

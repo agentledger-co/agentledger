@@ -26,6 +26,10 @@ interface ActionLog {
   created_at: string;
   user_id?: string;
   metadata?: Record<string, unknown>;
+  request_meta?: Record<string, unknown>;
+  trace_id?: string;
+  input?: unknown;
+  output?: unknown;
 }
 
 interface Alert {
@@ -106,6 +110,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'settings'>('overview');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
@@ -453,9 +458,9 @@ export default function DashboardPage() {
         ) : tab === 'overview' ? (
           <OverviewTab stats={stats} actions={actions} apiKey={apiKey} />
         ) : tab === 'actions' ? (
-          <ActionsTab actions={actions} apiKey={apiKey} />
+          <ActionsTab actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} />
         ) : tab === 'agents' ? (
-          <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} />
+          <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} />
         ) : tab === 'budgets' ? (
           <BudgetsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} />
         ) : tab === 'webhooks' ? (
@@ -480,6 +485,11 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Action Drawer */}
+      {drawerAction && (
+        <ActionDrawer action={drawerAction} onClose={() => setDrawerAction(null)} />
+      )}
 
       {/* Toast notifications */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
@@ -755,12 +765,11 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
 }
 
 // ==================== ACTIONS TAB ====================
-function ActionsTab({ actions, apiKey }: { actions: ActionLog[]; apiKey: string }) {
+function ActionsTab({ actions, apiKey, onOpenAction }: { actions: ActionLog[]; apiKey: string; onOpenAction: (a: ActionLog) => void }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [serviceFilter, setServiceFilter] = useState<string>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   // Derive unique values for filter dropdowns
   const services = [...new Set(actions.map(a => a.service))].sort();
@@ -862,47 +871,27 @@ function ActionsTab({ actions, apiKey }: { actions: ActionLog[]; apiKey: string 
                 </tr>
               ) : (
                 filtered.slice(0, 100).map(action => (
-                  <>
-                    <tr
-                      key={action.id}
-                      onClick={() => setExpandedRow(expandedRow === action.id ? null : action.id)}
-                      className="hover:bg-white/[0.015] transition-colors cursor-pointer"
-                    >
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
-                          {action.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-white/80 font-mono">{action.agent_name}</td>
-                      <td className="px-4 py-3 text-sm text-blue-400">{action.service}</td>
-                      <td className="px-4 py-3 text-sm text-white/60">{action.action}</td>
-                      <td className="px-4 py-3 text-sm text-white/40">
-                        {action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-white/40">
-                        {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-white/30">{timeAgo(action.created_at)}</td>
-                    </tr>
-                    {expandedRow === action.id && (
-                      <tr key={`${action.id}-detail`}>
-                        <td colSpan={7} className="px-4 py-3 bg-white/[0.01]">
-                          <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs">
-                            <div><span className="text-white/25">ID:</span> <span className="text-white/40 font-mono">{action.id}</span></div>
-                            <div><span className="text-white/25">Timestamp:</span> <span className="text-white/40">{new Date(action.created_at).toISOString()}</span></div>
-                            {action.metadata && Object.keys(action.metadata).length > 0 && (
-                              <div className="w-full mt-1">
-                                <span className="text-white/25">Metadata:</span>
-                                <pre className="mt-1 text-[11px] text-white/30 font-mono bg-black/30 rounded p-2 overflow-x-auto">
-                                  {JSON.stringify(action.metadata, null, 2)}
-                                </pre>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                  <tr
+                    key={action.id}
+                    onClick={() => onOpenAction(action)}
+                    className="hover:bg-white/[0.015] transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
+                        {action.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white/80 font-mono">{action.agent_name}</td>
+                    <td className="px-4 py-3 text-sm text-blue-400">{action.service}</td>
+                    <td className="px-4 py-3 text-sm text-white/60">{action.action}</td>
+                    <td className="px-4 py-3 text-sm text-white/40">
+                      {action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white/40">
+                      {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-white/30">{timeAgo(action.created_at)}</td>
+                  </tr>
                 ))
               )}
             </tbody>
@@ -919,7 +908,7 @@ function ActionsTab({ actions, apiKey }: { actions: ActionLog[]; apiKey: string 
 }
 
 // ==================== AGENTS TAB ====================
-function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, apiKey }: { 
+function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, apiKey, onOpenAction }: { 
   stats: Stats; 
   onToggle: (name: string, status: string) => void; 
   onKill: (name: string) => void;
@@ -927,6 +916,7 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
   selectedAgent: string | null;
   actions: ActionLog[];
   apiKey: string;
+  onOpenAction: (a: ActionLog) => void;
 }) {
   const [killConfirm, setKillConfirm] = useState<string | null>(null);
 
@@ -937,7 +927,7 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
       onSelect(null);
       return null;
     }
-    return <AgentDetailView agent={agent} actions={actions} onBack={() => onSelect(null)} onToggle={onToggle} onKill={onKill} apiKey={apiKey} />;
+    return <AgentDetailView agent={agent} actions={actions} onBack={() => onSelect(null)} onToggle={onToggle} onKill={onKill} apiKey={apiKey} onOpenAction={onOpenAction} />;
   }
 
   return (
@@ -1047,16 +1037,18 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
 }
 
 // ==================== AGENT DETAIL VIEW ====================
-function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey }: {
+function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onOpenAction }: {
   agent: Agent;
   actions: ActionLog[];
   onBack: () => void;
   onToggle: (name: string, status: string) => void;
   onKill: (name: string) => void;
   apiKey: string;
+  onOpenAction: (a: ActionLog) => void;
 }) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [killConfirm, setKillConfirm] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'traces'>('list');
 
   // Filter actions for this agent
   const agentActions = actions.filter(a => a.agent_name === agent.name);
@@ -1230,9 +1222,72 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey }: {
         <p className="text-xs text-white/20">Last active {timeAgo(agent.last_active_at)} · {new Date(agent.last_active_at).toLocaleString()}</p>
       )}
 
-      {/* Action history table */}
+      {/* Action history with trace/list toggle */}
       <div>
-        <h3 className="text-sm font-medium text-white/50 mb-3">Action History</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-white/50">Action History</h3>
+          {/* Show trace toggle if there are any traced actions */}
+          {agentActions.some(a => a.trace_id) && (
+            <div className="flex gap-1 bg-white/[0.03] rounded-lg p-0.5">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`text-[10px] px-2.5 py-1 rounded transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white/70' : 'text-white/30 hover:text-white/50'}`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setViewMode('traces')}
+                className={`text-[10px] px-2.5 py-1 rounded transition-colors ${viewMode === 'traces' ? 'bg-purple-500/20 text-purple-400' : 'text-white/30 hover:text-white/50'}`}
+              >
+                ⟐ Traces
+              </button>
+            </div>
+          )}
+        </div>
+
+        {viewMode === 'traces' ? (
+          // Trace view — group by trace_id
+          <div>
+            {(() => {
+              const traced = agentActions.filter(a => a.trace_id);
+              const untraced = agentActions.filter(a => !a.trace_id);
+              const traceMap = new Map<string, ActionLog[]>();
+              for (const a of traced) {
+                const list = traceMap.get(a.trace_id!) || [];
+                list.push(a);
+                traceMap.set(a.trace_id!, list);
+              }
+              return (
+                <>
+                  {[...traceMap.entries()].map(([tid, acts]) => (
+                    <TraceGroup key={tid} traceId={tid} actions={acts} onOpenAction={onOpenAction} />
+                  ))}
+                  {untraced.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-[10px] text-white/20 mb-2">Untraced actions ({untraced.length})</p>
+                      {untraced.slice(0, 20).map(action => (
+                        <div
+                          key={action.id}
+                          onClick={() => onOpenAction(action)}
+                          className="px-3 py-2 flex items-center gap-3 hover:bg-white/[0.02] cursor-pointer rounded transition-colors"
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-400' :
+                            action.status === 'error' ? 'bg-red-400' : 'bg-amber-400'
+                          }`} />
+                          <span className="text-xs text-blue-400">{action.service}</span>
+                          <span className="text-xs text-white/40">{action.action}</span>
+                          <span className="text-[10px] text-white/20 ml-auto">{timeAgo(action.created_at)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        ) : (
+        // List view — existing table
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px]">
@@ -1255,45 +1310,29 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey }: {
                   </tr>
                 ) : (
                   agentActions.slice(0, 100).map(action => (
-                    <React.Fragment key={action.id}>
-                      <tr
-                        onClick={() => setExpandedRow(expandedRow === action.id ? null : action.id)}
-                        className="hover:bg-white/[0.015] transition-colors cursor-pointer"
-                      >
-                        <td className="px-4 py-3">
-                          <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
-                            {action.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-blue-400">{action.service}</td>
-                        <td className="px-4 py-3 text-sm text-white/60">{action.action}</td>
-                        <td className="px-4 py-3 text-sm text-white/40">
-                          {action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-white/40">
-                          {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-white/30">{timeAgo(action.created_at)}</td>
-                      </tr>
-                      {expandedRow === action.id && (
-                        <tr>
-                          <td colSpan={6} className="px-4 py-3 bg-white/[0.01]">
-                            <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs">
-                              <div><span className="text-white/25">ID:</span> <span className="text-white/40 font-mono">{action.id}</span></div>
-                              <div><span className="text-white/25">Timestamp:</span> <span className="text-white/40">{new Date(action.created_at).toISOString()}</span></div>
-                              {action.metadata && Object.keys(action.metadata).length > 0 && (
-                                <div className="w-full mt-1">
-                                  <span className="text-white/25">Metadata:</span>
-                                  <pre className="mt-1 text-[11px] text-white/30 font-mono bg-black/30 rounded p-2 overflow-x-auto">
-                                    {JSON.stringify(action.metadata, null, 2)}
-                                  </pre>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
+                    <tr
+                      key={action.id}
+                      onClick={() => onOpenAction(action)}
+                      className="hover:bg-white/[0.015] transition-colors cursor-pointer"
+                    >
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
+                          {action.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-blue-400">{action.service}</td>
+                      <td className="px-4 py-3 text-sm text-white/60">{action.action}</td>
+                      <td className="px-4 py-3 text-sm text-white/40">
+                        {action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white/40">
+                        {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-white/30">
+                        {action.trace_id && <span className="text-purple-400/40 mr-1">⟐</span>}
+                        {timeAgo(action.created_at)}
+                      </td>
+                    </tr>
                   ))
                 )}
               </tbody>
@@ -1305,6 +1344,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey }: {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
@@ -2125,12 +2165,347 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         </div>
       </div>
 
+      {/* Notifications */}
+      <NotificationsSection apiKey={apiKey} onToast={onToast} />
+
       {/* Danger Zone */}
       <div className="border border-red-500/10 rounded-xl p-4">
         <h3 className="text-sm font-medium text-red-400/60 mb-1">Danger Zone</h3>
         <p className="text-xs text-white/20 mb-3">Revoking all keys will lock you out of the API. You&apos;ll need to create a new key through the dashboard.</p>
         <button className="text-xs text-red-400/40 hover:text-red-400 border border-red-500/10 hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-colors">
           Revoke All Keys
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ==================== ACTION DRAWER ====================
+function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => void }) {
+  const meta = action.metadata || action.request_meta || {};
+  const hasInput = action.input && Object.keys(action.input as object).length > 0;
+  const hasOutput = action.output && Object.keys(action.output as object).length > 0;
+  const hasMeta = Object.keys(meta).length > 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60" />
+      <div 
+        className="relative w-full max-w-lg bg-[#111] border-l border-white/[0.06] h-full overflow-y-auto shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-[#111] border-b border-white/[0.06] px-6 py-4 flex items-center justify-between z-10">
+          <div className="flex items-center gap-3">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+              action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-500/10 text-emerald-400' :
+              action.status === 'error' ? 'bg-red-500/10 text-red-400' : 'bg-amber-500/10 text-amber-400'
+            }`}>{action.status}</span>
+            <span className="text-sm font-medium text-white/80">{action.action}</span>
+          </div>
+          <button onClick={onClose} className="text-white/30 hover:text-white/60 text-lg transition-colors">✕</button>
+        </div>
+
+        <div className="px-6 py-5 space-y-6">
+          {/* Summary */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-1">Agent</p>
+              <p className="text-sm font-mono text-white/80">{action.agent_name}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-1">Service</p>
+              <p className="text-sm text-blue-400">{action.service}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-1">Duration</p>
+              <p className="text-sm text-white/60">{action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-1">Cost</p>
+              <p className="text-sm text-white/60">{action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-1">Timestamp</p>
+              <p className="text-sm text-white/60">{new Date(action.created_at).toLocaleString()}</p>
+            </div>
+            {action.trace_id && (
+              <div>
+                <p className="text-[10px] uppercase text-white/25 mb-1">Trace ID</p>
+                <p className="text-sm font-mono text-purple-400">{action.trace_id}</p>
+              </div>
+            )}
+          </div>
+
+          {/* ID */}
+          <div>
+            <p className="text-[10px] uppercase text-white/25 mb-1">Action ID</p>
+            <p className="text-xs font-mono text-white/30 break-all">{action.id}</p>
+          </div>
+
+          {/* Input */}
+          {hasInput && (
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-2">Input</p>
+              <pre className="text-[11px] text-emerald-300/70 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-words">
+                {JSON.stringify(action.input, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {/* Output */}
+          {hasOutput && (
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-2">Output</p>
+              <pre className="text-[11px] text-blue-300/70 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-words">
+                {JSON.stringify(action.output, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {/* Metadata */}
+          {hasMeta && (
+            <div>
+              <p className="text-[10px] uppercase text-white/25 mb-2">Metadata</p>
+              <pre className="text-[11px] text-white/30 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
+                {JSON.stringify(meta, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {/* No data hint */}
+          {!hasInput && !hasOutput && !hasMeta && (
+            <div className="bg-white/[0.02] rounded-lg border border-white/[0.04] p-4 text-center">
+              <p className="text-xs text-white/20 mb-2">No input/output data recorded</p>
+              <p className="text-[10px] text-white/10">Tip: Pass <code className="text-blue-400/50">input</code> and <code className="text-blue-400/50">captureOutput: true</code> in the SDK to see request/response data here.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== TRACE GROUP VIEW ====================
+function TraceGroup({ traceId, actions, onOpenAction }: { traceId: string; actions: ActionLog[]; onOpenAction: (a: ActionLog) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const sorted = [...actions].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const hasError = sorted.some(a => a.status === 'error');
+  const totalDuration = sorted.reduce((sum, a) => sum + (a.duration_ms || 0), 0);
+
+  return (
+    <div className={`bg-white/[0.02] rounded-xl border ${hasError ? 'border-red-500/15' : 'border-purple-500/15'} mb-3 overflow-hidden`}>
+      <div 
+        className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-purple-400 text-xs">⟐</span>
+          <span className="text-xs font-mono text-purple-400/70">{traceId}</span>
+          <span className="text-[10px] text-white/20">{sorted.length} steps</span>
+          <span className="text-[10px] text-white/20">{totalDuration}ms total</span>
+          {hasError && <span className="text-[10px] text-red-400">has errors</span>}
+        </div>
+        <span className="text-white/20 text-xs">{expanded ? '▾' : '▸'}</span>
+      </div>
+      {expanded && (
+        <div className="border-t border-white/[0.04]">
+          {sorted.map((action, idx) => (
+            <div 
+              key={action.id}
+              onClick={() => onOpenAction(action)}
+              className="px-4 py-2.5 flex items-center gap-3 hover:bg-white/[0.02] cursor-pointer transition-colors border-b border-white/[0.02] last:border-0"
+            >
+              {/* Step indicator */}
+              <div className="flex flex-col items-center w-6 flex-shrink-0">
+                <div className={`w-2 h-2 rounded-full ${
+                  action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-400' :
+                  action.status === 'error' ? 'bg-red-400' : 'bg-amber-400'
+                }`} />
+                {idx < sorted.length - 1 && <div className="w-px h-4 bg-white/[0.06] mt-0.5" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-blue-400">{action.service}</span>
+                  <span className="text-white/15">·</span>
+                  <span className="text-xs text-white/50">{action.action}</span>
+                </div>
+              </div>
+              <span className="text-[10px] text-white/20 flex-shrink-0">{action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== NOTIFICATIONS SECTION ====================
+function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (msg: string, type: 'success' | 'error' | 'info') => void }) {
+  const [slackUrl, setSlackUrl] = useState('');
+  const [email, setEmail] = useState('');
+  const [slackEvents, setSlackEvents] = useState<string[]>(['action.error', 'budget.exceeded', 'agent.killed']);
+  const [emailEvents, setEmailEvents] = useState<string[]>(['action.error', 'budget.exceeded', 'agent.killed']);
+  const [slackActive, setSlackActive] = useState(false);
+  const [emailActive, setEmailActive] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const ALL_EVENTS = [
+    { key: 'action.error', label: 'Action Errors', desc: 'When an agent action fails' },
+    { key: 'budget.exceeded', label: 'Budget Exceeded', desc: 'When an agent exceeds its budget' },
+    { key: 'budget.warning', label: 'Budget Warning', desc: 'When an agent reaches 75% of budget' },
+    { key: 'agent.killed', label: 'Agent Killed', desc: 'When an agent is killed' },
+  ];
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await fetch('/api/v1/notifications', {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (!res.ok) return;
+      const { settings } = await res.json();
+      for (const s of settings || []) {
+        if (s.channel === 'slack') {
+          setSlackUrl(s.config?.webhook_url || '');
+          setSlackEvents(s.events || []);
+          setSlackActive(s.active);
+        }
+        if (s.channel === 'email') {
+          setEmail(s.config?.email || '');
+          setEmailEvents(s.events || []);
+          setEmailActive(s.active);
+        }
+      }
+    };
+    load();
+  }, [apiKey]);
+
+  const saveChannel = async (channel: 'slack' | 'email') => {
+    setSaving(true);
+    const config = channel === 'slack' ? { webhook_url: slackUrl } : { email };
+    const events = channel === 'slack' ? slackEvents : emailEvents;
+    const active = channel === 'slack' ? slackActive : emailActive;
+
+    const res = await fetch('/api/v1/notifications', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel, config, events, active }),
+    });
+
+    if (res.ok) {
+      onToast(`${channel === 'slack' ? 'Slack' : 'Email'} notifications saved`, 'success');
+      if (channel === 'slack') setSlackActive(true);
+      else setEmailActive(true);
+    } else {
+      const data = await res.json();
+      onToast(data.error || 'Failed to save', 'error');
+    }
+    setSaving(false);
+  };
+
+  const toggleEvent = (list: string[], setList: (v: string[]) => void, event: string) => {
+    setList(list.includes(event) ? list.filter(e => e !== event) : [...list, event]);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-sm font-medium text-white/60 mb-1">Notifications</h3>
+        <p className="text-xs text-white/20">Get alerted via Slack or email when things go wrong.</p>
+      </div>
+
+      {/* Slack */}
+      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💬</span>
+            <h4 className="text-sm font-medium">Slack</h4>
+            {slackActive && <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase">active</span>}
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-white/30 block mb-1">Webhook URL</label>
+          <input
+            type="url"
+            value={slackUrl}
+            onChange={e => setSlackUrl(e.target.value)}
+            placeholder="https://hooks.slack.com/services/..."
+            className="w-full bg-black/30 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/15 focus:border-blue-500/50 focus:outline-none"
+          />
+          <p className="text-[10px] text-white/15 mt-1">Create an incoming webhook in your Slack workspace settings.</p>
+        </div>
+        <div>
+          <label className="text-xs text-white/30 block mb-2">Events</label>
+          <div className="flex flex-wrap gap-2">
+            {ALL_EVENTS.map(e => (
+              <button
+                key={e.key}
+                onClick={() => toggleEvent(slackEvents, setSlackEvents, e.key)}
+                className={`text-[11px] px-2.5 py-1 rounded-lg transition-colors ${
+                  slackEvents.includes(e.key)
+                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
+                    : 'bg-white/[0.03] text-white/30 border border-white/[0.04] hover:border-white/10'
+                }`}
+                title={e.desc}
+              >
+                {e.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={() => saveChannel('slack')}
+          disabled={!slackUrl || saving}
+          className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
+        >
+          {saving ? 'Saving...' : slackActive ? 'Update Slack' : 'Enable Slack'}
+        </button>
+      </div>
+
+      {/* Email */}
+      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📧</span>
+            <h4 className="text-sm font-medium">Email</h4>
+            {emailActive && <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase">active</span>}
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-white/30 block mb-1">Email Address</label>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="alerts@yourcompany.com"
+            className="w-full bg-black/30 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/15 focus:border-blue-500/50 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-white/30 block mb-2">Events</label>
+          <div className="flex flex-wrap gap-2">
+            {ALL_EVENTS.map(e => (
+              <button
+                key={e.key}
+                onClick={() => toggleEvent(emailEvents, setEmailEvents, e.key)}
+                className={`text-[11px] px-2.5 py-1 rounded-lg transition-colors ${
+                  emailEvents.includes(e.key)
+                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
+                    : 'bg-white/[0.03] text-white/30 border border-white/[0.04] hover:border-white/10'
+                }`}
+                title={e.desc}
+              >
+                {e.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={() => saveChannel('email')}
+          disabled={!email || saving}
+          className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
+        >
+          {saving ? 'Saving...' : emailActive ? 'Update Email' : 'Enable Email'}
         </button>
       </div>
     </div>

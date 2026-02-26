@@ -22,6 +22,14 @@ export interface TrackOptions {
   costCents?: number;
   /** Additional metadata to log with the action */
   metadata?: Record<string, unknown>;
+  /** Trace ID to group related actions into a session/trace */
+  traceId?: string;
+  /** Input data sent to the service (e.g. prompt, request body). Stored for debugging. */
+  input?: unknown;
+  /** If true, automatically capture the return value as output. Default: false */
+  captureOutput?: boolean;
+  /** Explicit output data to log. Overrides captureOutput. */
+  output?: unknown;
 }
 
 export interface TrackResult<T> {
@@ -104,17 +112,21 @@ export class AgentLedger {
     } catch (err) {
       status = 'error';
       const durationMs = Date.now() - start;
-      // Log the error, then re-throw
-      this.logAction(options, status, durationMs).catch(this.handleError.bind(this));
+      // Log the error with error details as output
+      const errorOutput = err instanceof Error ? { error: err.message, stack: err.stack } : { error: String(err) };
+      this.logAction(options, status, durationMs, errorOutput).catch(this.handleError.bind(this));
       throw err;
     }
 
     const durationMs = Date.now() - start;
 
-    // Log the action (fire and forget for speed, unless we need the ID)
+    // Capture output if requested
+    const capturedOutput = options.captureOutput ? result : undefined;
+
+    // Log the action
     let actionId: string | undefined;
     try {
-      const logResult = await this.logAction(options, status, durationMs);
+      const logResult = await this.logAction(options, status, durationMs, capturedOutput);
       actionId = logResult?.id;
     } catch (err) {
       this.handleError(err);
@@ -186,19 +198,29 @@ export class AgentLedger {
   private async logAction(
     options: TrackOptions,
     status: string,
-    durationMs: number
+    durationMs: number,
+    capturedOutput?: unknown
   ): Promise<{ id?: string }> {
+    // Determine output: explicit > captured > none
+    const output = options.output !== undefined ? options.output : capturedOutput;
+
+    const body: Record<string, unknown> = {
+      agent: options.agent,
+      service: options.service,
+      action: options.action,
+      status,
+      cost_cents: options.costCents || 0,
+      duration_ms: durationMs,
+      metadata: options.metadata || {},
+    };
+
+    if (options.traceId) body.trace_id = options.traceId;
+    if (options.input !== undefined) body.input = this.truncate(options.input, 50000);
+    if (output !== undefined) body.output = this.truncate(output, 50000);
+
     const res = await this.fetch('/api/v1/actions', {
       method: 'POST',
-      body: JSON.stringify({
-        agent: options.agent,
-        service: options.service,
-        action: options.action,
-        status,
-        cost_cents: options.costCents || 0,
-        duration_ms: durationMs,
-        metadata: options.metadata || {},
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -207,6 +229,31 @@ export class AgentLedger {
 
     const data = await res.json() as { id?: string };
     return { id: data.id };
+  }
+
+  // Truncate large objects to prevent oversized payloads
+  private truncate(data: unknown, maxChars: number): unknown {
+    try {
+      const json = JSON.stringify(data);
+      if (json.length <= maxChars) return data;
+      return { _truncated: true, _originalSize: json.length, _preview: json.slice(0, 500) };
+    } catch {
+      return { _error: 'Could not serialize' };
+    }
+  }
+
+  /**
+   * Generate a unique trace ID for grouping related actions.
+   * Call once per "session" or "workflow", then pass to all track() calls.
+   * 
+   * @example
+   * const traceId = AgentLedger.traceId();
+   * await ledger.track({ agent: 'bot', service: 'email', action: 'read', traceId }, ...);
+   * await ledger.track({ agent: 'bot', service: 'openai', action: 'classify', traceId }, ...);
+   * await ledger.track({ agent: 'bot', service: 'email', action: 'reply', traceId }, ...);
+   */
+  static traceId(): string {
+    return `tr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
   }
 
   // Internal: fetch with timeout and auth

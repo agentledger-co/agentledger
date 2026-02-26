@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { fireWebhooks } from '@/lib/webhooks';
+import { sendNotifications } from '@/lib/notifications';
 import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
 import { reportError } from '@/lib/errors';
 import { sanitizeString, sanitizeMetadata, sanitizePositiveInt, validateStatus } from '@/lib/validate';
@@ -46,6 +47,9 @@ export async function POST(req: NextRequest) {
   const cost_cents = sanitizePositiveInt(body.cost_cents);
   const duration_ms = sanitizePositiveInt(body.duration_ms);
   const metadata = sanitizeMetadata(body.metadata);
+  const trace_id = sanitizeString(body.trace_id, 200) || null;
+  const input = body.input !== undefined ? sanitizeMetadata(body.input) : null;
+  const output = body.output !== undefined ? sanitizeMetadata(body.output) : null;
 
   if (!agent || !service || !action) {
     return NextResponse.json({ error: 'Missing required fields: agent, service, action' }, { status: 400 });
@@ -123,6 +127,9 @@ export async function POST(req: NextRequest) {
       estimated_cost_cents: cost_cents,
       duration_ms,
       request_meta: metadata,
+      trace_id,
+      input,
+      output,
     })
     .select()
     .single();
@@ -182,6 +189,18 @@ export async function POST(req: NextRequest) {
           agent, alert_type: 'budget_exceeded', severity: 'critical',
           message: `Budget for ${agent} (${budget.period}) has been exceeded`,
         }).catch(() => {});
+
+        // Send Slack/email notifications
+        sendNotifications(auth.orgId, {
+          event: 'budget.exceeded',
+          agentName: agent,
+          message: `Budget for *${agent}* (${budget.period}) has been exceeded.`,
+          details: {
+            period: budget.period,
+            actions: `${newActions}/${budget.max_actions || '∞'}`,
+            cost: `$${(newCost / 100).toFixed(2)}/${budget.max_cost_cents ? '$' + (budget.max_cost_cents / 100).toFixed(2) : '∞'}`,
+          },
+        }).catch(() => {});
       }
 
       // Fire budget warning webhook
@@ -198,6 +217,16 @@ export async function POST(req: NextRequest) {
   fireWebhooks(auth.orgId, 'action.logged', {
     id: actionLog?.id, agent, service, action, status, cost_cents, duration_ms,
   }).catch(() => {});
+
+  // Send notification on errors
+  if (status === 'error') {
+    sendNotifications(auth.orgId, {
+      event: 'action.error',
+      agentName: agent,
+      message: `Action \`${action}\` on \`${service}\` failed.`,
+      details: { service, action, duration: `${duration_ms}ms` },
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ logged: true, id: actionLog?.id });
 }

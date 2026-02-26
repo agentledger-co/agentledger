@@ -299,35 +299,45 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
 }
 
 const FEATURES = [
-  { icon: '\ud83d\udce1', title: 'Real-Time Action Feed', desc: 'Every API call, email, ticket \u2014 logged with timing, cost, and metadata. Live dashboard updates.' },
-  { icon: '\ud83d\udcb0', title: 'Cost Tracking & Budgets', desc: 'Know what your agents spend. Set daily/weekly/monthly budgets per agent with automatic enforcement.' },
-  { icon: '\ud83d\udea8', title: 'Anomaly Detection', desc: 'Automatic alerts when agents spike in activity, hit new services, or approach budget limits.' },
-  { icon: '\u23f9\ufe0f', title: 'Kill Switches', desc: 'Pause or permanently kill any agent instantly from the dashboard or API.' },
-  { icon: '\ud83d\udd0c', title: '2-Line Integration', desc: 'Wrap any async function with ledger.track(). Works with LangChain, OpenAI, MCP Servers, Express, or plain code.' },
-  { icon: '\ud83d\udee1\ufe0f', title: 'Fail-Open by Default', desc: 'If AgentLedger is down, your agents keep running. Never blocks production unless configured.' },
+  { icon: '📡', title: 'Real-Time Action Feed', desc: 'Every API call, email, ticket — logged with timing, cost, and metadata. Live dashboard updates.' },
+  { icon: '💰', title: 'Cost Tracking & Budgets', desc: 'Know what your agents spend. Set daily/weekly/monthly budgets per agent with automatic enforcement.' },
+  { icon: '🔍', title: 'Action Drawer & I/O Logging', desc: 'Click any action to see full input, output, and metadata. Debug agent behavior without adding console.logs.' },
+  { icon: '⏹️', title: 'Kill Switches', desc: 'Pause or permanently kill any agent instantly from the dashboard or API.' },
+  { icon: '🔗', title: 'Traces & Sessions', desc: 'Group related actions into traces. See the full chain: read email → classify → draft → send → log.' },
+  { icon: '🔔', title: 'Slack & Email Alerts', desc: 'Get notified instantly via Slack or email when agents error, budgets exceed, or agents get killed.' },
+  { icon: '🔌', title: '2-Line Integration', desc: 'Wrap any async function with ledger.track(). Works with LangChain, OpenAI, MCP Servers, Express, or plain code.' },
+  { icon: '🛡️', title: 'Fail-Open by Default', desc: 'If AgentLedger is down, your agents keep running. Never blocks production unless configured.' },
+  { icon: '🚨', title: 'Anomaly Detection', desc: 'Automatic alerts when agents spike in activity, hit new services, or approach budget limits.' },
 ];
 
 const COMPARISON = [
   { feature: 'LLM call tracing', us: false, them: true },
   { feature: 'Real-world action logging', us: true, them: false },
   { feature: 'Cross-service cost tracking', us: true, them: false },
+  { feature: 'Input/output inspection', us: true, them: true },
+  { feature: 'Multi-step trace grouping', us: true, them: true },
   { feature: 'Agent kill switches', us: true, them: false },
   { feature: 'Budget controls & enforcement', us: true, them: false },
-  { feature: 'Anomaly detection', us: true, them: false },
+  { feature: 'Slack & email notifications', us: true, them: false },
   { feature: 'Pre-flight action checks', us: true, them: false },
 ];
 
-const SDK_CODE = `import { AgentLedger } from 'agentledger';
+const SDK_CODE = `import AgentLedger from 'agentledger';
 
 const ledger = new AgentLedger({
   apiKey: process.env.AGENTLEDGER_KEY
 });
 
-// Wrap any agent action
-const result = await ledger.track({
+// Group related actions into a trace
+const traceId = AgentLedger.traceId();
+
+const { result } = await ledger.track({
   agent: 'support-bot',
   service: 'slack',
   action: 'send_message',
+  traceId,
+  input: { channel: '#support' },
+  captureOutput: true,
 }, async () => {
   return await slack.chat.postMessage({
     channel: '#support',
@@ -439,7 +449,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: '1', title: 'Install the SDK', code: 'npm install agentledger' },
-              { step: '2', title: 'Wrap your agent actions', code: "await ledger.track({\n  agent: 'my-bot',\n  service: 'gmail',\n  action: 'send_email',\n}, sendEmailFn)" },
+              { step: '2', title: 'Wrap your agent actions', code: "await ledger.track({\n  agent: 'my-bot',\n  service: 'gmail',\n  action: 'send_email',\n  traceId,\n  captureOutput: true,\n}, sendEmailFn)" },
               { step: '3', title: 'Watch the dashboard', code: '\u2192 agentledger.co/dashboard' },
             ].map(s => (
               <div key={s.step} className="text-center">
@@ -493,9 +503,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Basic alerts', 'Community support'], cta: 'Get Started', hl: true },
-              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: false },
-              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Anomaly detection', 'Budget controls', 'Webhooks', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
+              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Action drawer & I/O', 'Slack & email alerts', 'Community support'], cta: 'Get Started', hl: true },
+              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: false },
+              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
               <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]'}`}>
                 {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Available Now</div>}

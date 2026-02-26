@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
@@ -105,6 +105,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'settings'>('overview');
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
@@ -454,7 +455,7 @@ export default function DashboardPage() {
         ) : tab === 'actions' ? (
           <ActionsTab actions={actions} apiKey={apiKey} />
         ) : tab === 'agents' ? (
-          <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} />
+          <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} />
         ) : tab === 'budgets' ? (
           <BudgetsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} />
         ) : tab === 'webhooks' ? (
@@ -918,8 +919,26 @@ function ActionsTab({ actions, apiKey }: { actions: ActionLog[]; apiKey: string 
 }
 
 // ==================== AGENTS TAB ====================
-function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name: string, status: string) => void; onKill: (name: string) => void }) {
+function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, apiKey }: { 
+  stats: Stats; 
+  onToggle: (name: string, status: string) => void; 
+  onKill: (name: string) => void;
+  onSelect: (name: string | null) => void;
+  selectedAgent: string | null;
+  actions: ActionLog[];
+  apiKey: string;
+}) {
   const [killConfirm, setKillConfirm] = useState<string | null>(null);
+
+  // If an agent is selected, show detail view
+  if (selectedAgent) {
+    const agent = stats.agents.find(a => a.name === selectedAgent);
+    if (!agent) {
+      onSelect(null);
+      return null;
+    }
+    return <AgentDetailView agent={agent} actions={actions} onBack={() => onSelect(null)} onToggle={onToggle} onKill={onKill} apiKey={apiKey} />;
+  }
 
   return (
     <div className="space-y-4">
@@ -958,7 +977,10 @@ function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name:
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {stats.agents.map(agent => (
-            <div key={agent.id} className={`bg-white/[0.03] rounded-xl border p-5 transition-colors ${
+            <div 
+              key={agent.id} 
+              onClick={() => onSelect(agent.name)}
+              className={`bg-white/[0.03] rounded-xl border p-5 transition-colors cursor-pointer hover:bg-white/[0.05] ${
               agent.status === 'killed' ? 'border-red-500/20 opacity-60' : 
               agent.status === 'paused' ? 'border-amber-500/20' : 'border-white/[0.06]'
             }`}>
@@ -970,6 +992,7 @@ function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name:
                     <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded uppercase font-medium">killed</span>
                   )}
                 </div>
+                <span className="text-xs text-white/20">→</span>
               </div>
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
@@ -989,7 +1012,7 @@ function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name:
                 {agent.status !== 'killed' ? (
                   <>
                     <button
-                      onClick={() => onToggle(agent.name, agent.status)}
+                      onClick={(e) => { e.stopPropagation(); onToggle(agent.name, agent.status); }}
                       className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors ${
                         agent.status === 'active'
                           ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
@@ -999,7 +1022,7 @@ function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name:
                       {agent.status === 'active' ? '⏸ Pause' : '▶ Resume'}
                     </button>
                     <button
-                      onClick={() => setKillConfirm(agent.name)}
+                      onClick={(e) => { e.stopPropagation(); setKillConfirm(agent.name); }}
                       className="text-xs py-2 px-3 rounded-lg font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                       title="Kill this agent"
                     >
@@ -1008,7 +1031,7 @@ function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name:
                   </>
                 ) : (
                   <button
-                    onClick={() => onToggle(agent.name, agent.status)}
+                    onClick={(e) => { e.stopPropagation(); onToggle(agent.name, agent.status); }}
                     className="flex-1 text-xs py-2 rounded-lg font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
                   >
                     ▶ Revive Agent
@@ -1019,6 +1042,270 @@ function AgentsTab({ stats, onToggle, onKill }: { stats: Stats; onToggle: (name:
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ==================== AGENT DETAIL VIEW ====================
+function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey }: {
+  agent: Agent;
+  actions: ActionLog[];
+  onBack: () => void;
+  onToggle: (name: string, status: string) => void;
+  onKill: (name: string) => void;
+  apiKey: string;
+}) {
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [killConfirm, setKillConfirm] = useState(false);
+
+  // Filter actions for this agent
+  const agentActions = actions.filter(a => a.agent_name === agent.name);
+  
+  // Compute stats
+  const successCount = agentActions.filter(a => a.status === 'success' || a.status === 'allowed').length;
+  const errorCount = agentActions.filter(a => a.status === 'error').length;
+  const blockedCount = agentActions.filter(a => a.status === 'blocked').length;
+  const avgDuration = agentActions.length > 0 
+    ? Math.round(agentActions.reduce((sum, a) => sum + (a.duration_ms || 0), 0) / agentActions.length)
+    : 0;
+  const totalCost = agentActions.reduce((sum, a) => sum + (a.estimated_cost_cents || 0), 0);
+  const services = [...new Set(agentActions.map(a => a.service))];
+  const actionTypes = [...new Set(agentActions.map(a => a.action))];
+  
+  // Success rate
+  const successRate = agentActions.length > 0 
+    ? Math.round((successCount / agentActions.length) * 100) 
+    : 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Kill confirmation modal */}
+      {killConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setKillConfirm(false)}>
+          <div className="bg-[#1a1a1a] border border-red-500/30 rounded-xl p-6 max-w-md mx-4" onClick={e => e.stopPropagation()}>
+            <div className="text-2xl mb-3">🚨</div>
+            <h3 className="font-semibold text-lg mb-2">Kill Agent: {agent.name}?</h3>
+            <p className="text-sm text-white/50 mb-4">
+              This will permanently stop the agent from performing any actions. 
+              All future API calls through the SDK will be blocked.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { onKill(agent.name); setKillConfirm(false); }}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
+              >
+                Kill Agent
+              </button>
+              <button
+                onClick={() => setKillConfirm(false)}
+                className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 font-medium py-2.5 rounded-lg transition-colors text-sm border border-white/[0.06]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header with back button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onBack}
+            className="text-white/40 hover:text-white/70 transition-colors text-sm"
+          >
+            ← All Agents
+          </button>
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${STATUS_DOT[agent.status]}`} />
+            <h2 className="text-xl font-semibold font-mono">{agent.name}</h2>
+            <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-medium ${
+              agent.status === 'killed' ? 'bg-red-500/10 text-red-400' :
+              agent.status === 'paused' ? 'bg-amber-500/10 text-amber-400' :
+              'bg-emerald-500/10 text-emerald-400'
+            }`}>{agent.status}</span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {agent.status !== 'killed' ? (
+            <>
+              <button
+                onClick={() => onToggle(agent.name, agent.status)}
+                className={`text-xs py-2 px-4 rounded-lg font-medium transition-colors ${
+                  agent.status === 'active'
+                    ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
+                    : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                }`}
+              >
+                {agent.status === 'active' ? '⏸ Pause' : '▶ Resume'}
+              </button>
+              <button
+                onClick={() => setKillConfirm(true)}
+                className="text-xs py-2 px-4 rounded-lg font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+              >
+                ⏹ Kill
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => onToggle(agent.name, agent.status)}
+              className="text-xs py-2 px-4 rounded-lg font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+            >
+              ▶ Revive Agent
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <p className="text-xs text-white/30 mb-1">Total Actions</p>
+          <p className="text-2xl font-semibold">{(agent.total_actions || 0).toLocaleString()}</p>
+        </div>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <p className="text-xs text-white/30 mb-1">Total Cost</p>
+          <p className="text-2xl font-semibold">{formatCost(agent.total_cost_cents || 0)}</p>
+        </div>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <p className="text-xs text-white/30 mb-1">Success Rate</p>
+          <p className={`text-2xl font-semibold ${successRate >= 95 ? 'text-emerald-400' : successRate >= 80 ? 'text-amber-400' : 'text-red-400'}`}>
+            {successRate}%
+          </p>
+        </div>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <p className="text-xs text-white/30 mb-1">Avg Duration</p>
+          <p className="text-2xl font-semibold">{avgDuration > 0 ? `${avgDuration}ms` : '—'}</p>
+        </div>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <p className="text-xs text-white/30 mb-1">Errors</p>
+          <p className={`text-2xl font-semibold ${errorCount > 0 ? 'text-red-400' : 'text-white/60'}`}>{errorCount}</p>
+        </div>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <p className="text-xs text-white/30 mb-1">Blocked</p>
+          <p className={`text-2xl font-semibold ${blockedCount > 0 ? 'text-amber-400' : 'text-white/60'}`}>{blockedCount}</p>
+        </div>
+      </div>
+
+      {/* Services & Action Types */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+          <h3 className="text-sm font-medium text-white/50 mb-3">Services Used</h3>
+          {services.length === 0 ? (
+            <p className="text-xs text-white/20">No services recorded</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {services.map(s => {
+                const count = agentActions.filter(a => a.service === s).length;
+                return (
+                  <span key={s} className="text-xs bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-lg">
+                    {s} <span className="text-blue-400/50 ml-1">{count}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+          <h3 className="text-sm font-medium text-white/50 mb-3">Action Types</h3>
+          {actionTypes.length === 0 ? (
+            <p className="text-xs text-white/20">No actions recorded</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {actionTypes.map(a => {
+                const count = agentActions.filter(act => act.action === a).length;
+                return (
+                  <span key={a} className="text-xs bg-white/[0.05] text-white/50 px-2.5 py-1 rounded-lg">
+                    {a} <span className="text-white/20 ml-1">{count}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Last active */}
+      {agent.last_active_at && (
+        <p className="text-xs text-white/20">Last active {timeAgo(agent.last_active_at)} · {new Date(agent.last_active_at).toLocaleString()}</p>
+      )}
+
+      {/* Action history table */}
+      <div>
+        <h3 className="text-sm font-medium text-white/50 mb-3">Action History</h3>
+        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b border-white/[0.06] text-left">
+                  <th className="px-4 py-3 text-xs font-medium text-white/40">Status</th>
+                  <th className="px-4 py-3 text-xs font-medium text-white/40">Service</th>
+                  <th className="px-4 py-3 text-xs font-medium text-white/40">Action</th>
+                  <th className="px-4 py-3 text-xs font-medium text-white/40">Cost</th>
+                  <th className="px-4 py-3 text-xs font-medium text-white/40">Duration</th>
+                  <th className="px-4 py-3 text-xs font-medium text-white/40">Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04]">
+                {agentActions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center text-white/20 text-sm">
+                      No actions recorded for this agent yet.
+                    </td>
+                  </tr>
+                ) : (
+                  agentActions.slice(0, 100).map(action => (
+                    <React.Fragment key={action.id}>
+                      <tr
+                        onClick={() => setExpandedRow(expandedRow === action.id ? null : action.id)}
+                        className="hover:bg-white/[0.015] transition-colors cursor-pointer"
+                      >
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
+                            {action.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-blue-400">{action.service}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{action.action}</td>
+                        <td className="px-4 py-3 text-sm text-white/40">
+                          {action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-white/40">
+                          {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-white/30">{timeAgo(action.created_at)}</td>
+                      </tr>
+                      {expandedRow === action.id && (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-3 bg-white/[0.01]">
+                            <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs">
+                              <div><span className="text-white/25">ID:</span> <span className="text-white/40 font-mono">{action.id}</span></div>
+                              <div><span className="text-white/25">Timestamp:</span> <span className="text-white/40">{new Date(action.created_at).toISOString()}</span></div>
+                              {action.metadata && Object.keys(action.metadata).length > 0 && (
+                                <div className="w-full mt-1">
+                                  <span className="text-white/25">Metadata:</span>
+                                  <pre className="mt-1 text-[11px] text-white/30 font-mono bg-black/30 rounded p-2 overflow-x-auto">
+                                    {JSON.stringify(action.metadata, null, 2)}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          {agentActions.length > 100 && (
+            <div className="px-4 py-2 border-t border-white/[0.04] text-xs text-white/20 text-center">
+              Showing first 100 of {agentActions.length} actions
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

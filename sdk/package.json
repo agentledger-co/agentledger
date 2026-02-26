@@ -1,6 +1,6 @@
 {
   "name": "agentledger",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Track, monitor, and control AI agent actions. The missing observability layer for AI agents. Zero dependencies.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -32,7 +32,10 @@
       "types": "./dist/cjs/integrations/express.d.ts"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build:cjs": "tsc -p tsconfig.json",
     "build:esm": "tsc -p tsconfig.esm.json",
@@ -40,9 +43,21 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "ai", "agents", "monitoring", "observability", "langchain", "openai",
-    "mcp", "safety", "llm", "ai-agents", "kill-switch", "budget",
-    "cost-tracking", "anthropic", "claude"
+    "ai",
+    "agents",
+    "monitoring",
+    "observability",
+    "langchain",
+    "openai",
+    "mcp",
+    "safety",
+    "llm",
+    "ai-agents",
+    "kill-switch",
+    "budget",
+    "cost-tracking",
+    "anthropic",
+    "claude"
   ],
   "author": "AgentLedger",
   "license": "MIT",

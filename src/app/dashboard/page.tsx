@@ -2182,9 +2182,9 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 
 // ==================== ACTION DRAWER ====================
 function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => void }) {
-  const meta = action.metadata || action.request_meta || {};
-  const hasInput = action.input && Object.keys(action.input as object).length > 0;
-  const hasOutput = action.output && Object.keys(action.output as object).length > 0;
+  const meta = (action.metadata || action.request_meta || {}) as Record<string, unknown>;
+  const hasInput = action.input != null && typeof action.input === 'object' && Object.keys(action.input as Record<string, unknown>).length > 0;
+  const hasOutput = action.output != null && typeof action.output === 'object' && Object.keys(action.output as Record<string, unknown>).length > 0;
   const hasMeta = Object.keys(meta).length > 0;
 
   return (
@@ -2229,12 +2229,12 @@ function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => v
               <p className="text-[10px] uppercase text-white/25 mb-1">Timestamp</p>
               <p className="text-sm text-white/60">{new Date(action.created_at).toLocaleString()}</p>
             </div>
-            {action.trace_id && (
+            {action.trace_id ? (
               <div>
                 <p className="text-[10px] uppercase text-white/25 mb-1">Trace ID</p>
                 <p className="text-sm font-mono text-purple-400">{action.trace_id}</p>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* ID */}
@@ -2244,34 +2244,34 @@ function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => v
           </div>
 
           {/* Input */}
-          {hasInput && (
+          {hasInput ? (
             <div>
               <p className="text-[10px] uppercase text-white/25 mb-2">Input</p>
               <pre className="text-[11px] text-emerald-300/70 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(action.input, null, 2)}
               </pre>
             </div>
-          )}
+          ) : null}
 
           {/* Output */}
-          {hasOutput && (
+          {hasOutput ? (
             <div>
               <p className="text-[10px] uppercase text-white/25 mb-2">Output</p>
               <pre className="text-[11px] text-blue-300/70 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(action.output, null, 2)}
               </pre>
             </div>
-          )}
+          ) : null}
 
           {/* Metadata */}
-          {hasMeta && (
+          {hasMeta ? (
             <div>
               <p className="text-[10px] uppercase text-white/25 mb-2">Metadata</p>
               <pre className="text-[11px] text-white/30 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(meta, null, 2)}
               </pre>
             </div>
-          )}
+          ) : null}
 
           {/* No data hint */}
           {!hasInput && !hasOutput && !hasMeta && (

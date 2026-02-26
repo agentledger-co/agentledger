@@ -202,7 +202,7 @@ function LiveDemo() {
                 {a.cost > 0 && <span className="text-blue-400/70 w-12 text-right font-mono tabular-nums">${(a.cost / 100).toFixed(2)}</span>}
               </div>
             ))}
-            {actions.length === 0 && <div className="px-5 py-8 text-center text-[12px] text-white/15">Waiting for actions...</div>}
+            {actions.length === 0 && <div className="px-5 py-8 text-center text-[12px] text-white/30">Waiting for actions...</div>}
           </div>
         )}
 
@@ -358,10 +358,10 @@ export default function LandingPage() {
             <span className="text-lg font-semibold tracking-tight">AgentLedger</span>
           </div>
           <div className="flex items-center gap-8">
-            <a href="#features" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Features</a>
-            <a href="#demo" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Live Demo</a>
-            <Link href="/docs" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Docs</Link>
-            <a href="#pricing" className="text-[13px] text-white/50 hover:text-white/90 transition-colors hidden md:block">Pricing</a>
+            <a href="#features" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Features</a>
+            <a href="#demo" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Live Demo</a>
+            <Link href="/docs" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Docs</Link>
+            <a href="#pricing" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Pricing</a>
             <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30">
               Get Started {'\u2192'}
             </Link>
@@ -380,14 +380,14 @@ export default function LandingPage() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-400 to-blue-500">AI agents</span>{' '}
               <TypewriterWord />
             </h1>
-            <p className="text-[17px] text-white/40 mb-10 leading-relaxed max-w-[480px]">
+            <p className="text-[17px] text-white/55 mb-10 leading-relaxed max-w-[480px]">
               Your agents send emails, create tickets, charge credit cards, and call APIs. AgentLedger logs every action, tracks every cost, and kills agents when things go wrong.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-6 py-3 rounded-xl transition-all text-[14px] shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
                 Start Free {'\u2192'}
               </Link>
-              <a href="#demo" className="bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white/70 font-medium px-6 py-3 rounded-xl transition-all text-[14px] border border-white/[0.08]">
+              <a href="#demo" className="bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/80 font-medium px-6 py-3 rounded-xl transition-all text-[14px] border border-white/[0.08]">
                 See live demo
               </a>
               <div className="flex items-center bg-white/[0.04] rounded-xl border border-white/[0.08] px-4 py-2.5">
@@ -402,7 +402,7 @@ export default function LandingPage() {
       {/* Social Proof */}
       <section className="border-y border-white/[0.04] px-6 py-5">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[12px] text-white/15 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Any agent framework</p>
+          <p className="text-[12px] text-white/30 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Any agent framework</p>
         </div>
       </section>
 
@@ -412,7 +412,7 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <p className="text-[11px] font-medium tracking-widest uppercase text-blue-400/50 mb-3">Live Preview</p>
             <h2 className="text-[32px] font-bold mb-4 tracking-tight">Watch agents in real-time</h2>
-            <p className="text-white/30 max-w-md mx-auto text-[15px]">This is what your dashboard looks like when agents are running. Every action logged, every cost tracked.</p>
+            <p className="text-white/50 max-w-md mx-auto text-[15px]">This is what your dashboard looks like when agents are running. Every action logged, every cost tracked.</p>
           </div>
           <div className="max-w-4xl mx-auto"><LiveDemo /></div>
         </div>
@@ -424,14 +424,14 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <p className="text-[11px] font-medium tracking-widest uppercase text-blue-400/50 mb-3">Features</p>
             <h2 className="text-[32px] font-bold mb-4 tracking-tight">Everything you need to trust your agents</h2>
-            <p className="text-white/30 max-w-md mx-auto text-[15px]">LLM observability tools track token usage. AgentLedger tracks what agents actually <em className="text-white/50 not-italic">do</em>.</p>
+            <p className="text-white/50 max-w-md mx-auto text-[15px]">LLM observability tools track token usage. AgentLedger tracks what agents actually <em className="text-white/50 not-italic">do</em>.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(f => (
               <div key={f.title} className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-7 hover:border-blue-500/20 hover:bg-white/[0.03] transition-all duration-300 group">
                 <div className="text-2xl mb-4">{f.icon}</div>
                 <h3 className="font-semibold mb-2 text-[15px] group-hover:text-blue-400 transition-colors">{f.title}</h3>
-                <p className="text-[13px] text-white/30 leading-relaxed">{f.desc}</p>
+                <p className="text-[13px] text-white/45 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -444,7 +444,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <p className="text-[11px] font-medium tracking-widest uppercase text-blue-400/50 mb-3">Get Started</p>
             <h2 className="text-[32px] font-bold mb-4 tracking-tight">Three steps. Five minutes.</h2>
-            <p className="text-white/30 text-[15px]">No infrastructure. No config files. Just wrap and go.</p>
+            <p className="text-white/50 text-[15px]">No infrastructure. No config files. Just wrap and go.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -470,19 +470,19 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <p className="text-[11px] font-medium tracking-widest uppercase text-blue-400/50 mb-3">Comparison</p>
             <h2 className="text-[32px] font-bold mb-4 tracking-tight">Not another LLM tracer</h2>
-            <p className="text-white/30 text-[15px]">Helicone and Langfuse track LLM calls. We track what happens <em className="text-white/50 not-italic">after</em>.</p>
+            <p className="text-white/50 text-[15px]">Helicone and Langfuse track LLM calls. We track what happens <em className="text-white/50 not-italic">after</em>.</p>
           </div>
           <div className="bg-white/[0.02] rounded-2xl border border-white/[0.06] overflow-hidden">
             <table className="w-full">
               <thead><tr className="border-b border-white/[0.06]">
-                <th className="px-6 py-4 text-left text-[12px] font-medium text-white/30">Feature</th>
+                <th className="px-6 py-4 text-left text-[12px] font-medium text-white/45">Feature</th>
                 <th className="px-6 py-4 text-center text-[12px] font-medium text-blue-400">AgentLedger</th>
-                <th className="px-6 py-4 text-center text-[12px] font-medium text-white/30">LLM Tracers</th>
+                <th className="px-6 py-4 text-center text-[12px] font-medium text-white/45">LLM Tracers</th>
               </tr></thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {COMPARISON.map(c => (
                   <tr key={c.feature} className="hover:bg-white/[0.015] transition-colors">
-                    <td className="px-6 py-3.5 text-[13px] text-white/50">{c.feature}</td>
+                    <td className="px-6 py-3.5 text-[13px] text-white/60">{c.feature}</td>
                     <td className="px-6 py-3.5 text-center text-[14px]">{c.us ? '\u2705' : '\u2014'}</td>
                     <td className="px-6 py-3.5 text-center text-[14px]">{c.them ? '\u2705' : '\u2014'}</td>
                   </tr>
@@ -499,7 +499,7 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <p className="text-[11px] font-medium tracking-widest uppercase text-blue-400/50 mb-3">Pricing</p>
             <h2 className="text-[32px] font-bold mb-4 tracking-tight">Simple pricing</h2>
-            <p className="text-white/30 text-[15px]">Start free, scale when you need to.</p>
+            <p className="text-white/50 text-[15px]">Start free, scale when you need to.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
@@ -512,10 +512,10 @@ export default function LandingPage() {
                 <h3 className="font-semibold text-[17px] mb-1">{plan.name}</h3>
                 <div className="flex items-baseline gap-1 mb-7">
                   <span className="text-[36px] font-bold tracking-tight">{plan.price}</span>
-                  <span className="text-[13px] text-white/25">{plan.period}</span>
+                  <span className="text-[13px] text-white/35">{plan.period}</span>
                 </div>
                 <ul className="space-y-3 mb-7">
-                  {plan.features.map(f => <li key={f} className="flex items-center gap-2.5 text-[13px] text-white/50"><span className="text-blue-400/60 text-[11px]">{'\u2713'}</span> {f}</li>)}
+                  {plan.features.map(f => <li key={f} className="flex items-center gap-2.5 text-[13px] text-white/60"><span className="text-blue-400/60 text-[11px]">{'\u2713'}</span> {f}</li>)}
                 </ul>
                 {plan.cta === 'Join Waitlist' ? (
                   <a href="mailto:hello@agentledger.co?subject=Waitlist: AgentLedger Pro/Team" className="block text-center py-2.5 rounded-xl text-[13px] font-medium bg-white/[0.04] hover:bg-white/[0.08] text-white/50 border border-white/[0.08] transition-all">
@@ -529,7 +529,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="text-center text-[12px] text-white/15 mt-6 max-w-lg mx-auto">
+          <p className="text-center text-[12px] text-white/25 mt-6 max-w-lg mx-auto">
             Free tier includes 1,000 actions/month with 7-day data retention. Usage beyond plan limits is rate-limited.
             We reserve the right to enforce fair use policies to maintain service quality for all users.
           </p>
@@ -541,7 +541,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-blue-500/[0.03] to-transparent pointer-events-none" />
         <div className="max-w-2xl mx-auto text-center relative">
           <h2 className="text-[32px] font-bold mb-4 tracking-tight">Stop flying blind with your agents</h2>
-          <p className="text-white/30 mb-10 text-[15px]">Know exactly what your agents are doing, what they cost, and how to stop them when things go sideways.</p>
+          <p className="text-white/50 mb-10 text-[15px]">Know exactly what your agents are doing, what they cost, and how to stop them when things go sideways.</p>
           <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-8 py-3.5 rounded-xl transition-all inline-block shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 text-[14px]">
             Get Started Free {'\u2192'}
           </Link>
@@ -555,15 +555,15 @@ export default function LandingPage() {
             <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center logo-heartbeat-glow">
               <svg className="logo-heartbeat" width="14" height="14" viewBox="0 0 48 48" fill="none"><path d="M8 26H14L17 20L21 32L25 14L29 28L32 22H40" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <span className="text-[13px] text-white/25">AgentLedger</span>
+            <span className="text-[13px] text-white/35">AgentLedger</span>
           </div>
           <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
-            <a href="https://github.com/miken1988/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">GitHub</a>
-            <Link href="/docs" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Docs</Link>
-            <Link href="/changelog" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Changelog</Link>
-            <Link href="/terms" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Terms</Link>
-            <Link href="/privacy" className="text-[12px] text-white/15 hover:text-white/40 transition-colors">Privacy</Link>
-            <p className="text-[12px] text-white/15">{'\u00a9'} 2026 AgentLedger. All rights reserved.</p>
+            <a href="https://github.com/miken1988/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">GitHub</a>
+            <Link href="/docs" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Docs</Link>
+            <Link href="/changelog" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Changelog</Link>
+            <Link href="/terms" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Terms</Link>
+            <Link href="/privacy" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Privacy</Link>
+            <p className="text-[12px] text-white/30">{'\u00a9'} 2026 AgentLedger. All rights reserved.</p>
           </div>
         </div>
       </footer>

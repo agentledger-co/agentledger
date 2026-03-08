@@ -5,7 +5,7 @@ import { fireWebhooks } from '@/lib/webhooks';
 import { sendNotifications } from '@/lib/notifications';
 import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
 import { reportError } from '@/lib/errors';
-import { sanitizeString, sanitizeMetadata, sanitizePositiveInt, validateStatus } from '@/lib/validate';
+import { sanitizeString, sanitizeMetadata, sanitizePayload, sanitizePositiveInt, validateStatus } from '@/lib/validate';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
   const duration_ms = sanitizePositiveInt(body.duration_ms);
   const metadata = sanitizeMetadata(body.metadata);
   const trace_id = sanitizeString(body.trace_id, 200) || null;
-  const input = body.input !== undefined ? sanitizeMetadata(body.input) : null;
-  const output = body.output !== undefined ? sanitizeMetadata(body.output) : null;
+  const input = body.input !== undefined ? sanitizePayload(body.input) : null;
+  const output = body.output !== undefined ? sanitizePayload(body.output) : null;
 
   if (!agent || !service || !action) {
     return NextResponse.json({ error: 'Missing required fields: agent, service, action' }, { status: 400 });

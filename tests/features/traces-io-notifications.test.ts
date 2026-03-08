@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentLedger } from '../../sdk/src/index';
-import { sanitizeString, sanitizeMetadata, sanitizePositiveInt, validateStatus } from '@/lib/validate';
+import { sanitizeString, sanitizeMetadata, sanitizePayload, sanitizePositiveInt, validateStatus } from '@/lib/validate';
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -396,14 +396,52 @@ describe('Input Validation for New Fields', () => {
     });
   });
 
-  // ==================== INPUT/OUTPUT METADATA VALIDATION ====================
-  describe('input/output as metadata', () => {
+  // ==================== INPUT/OUTPUT PAYLOAD VALIDATION ====================
+  describe('input/output as payload (sanitizePayload)', () => {
+    it('accepts plain objects', () => {
+      const input = { prompt: 'hello', model: 'gpt-4o' };
+      expect(sanitizePayload(input)).toEqual(input);
+    });
+
+    it('accepts arrays (e.g. chat messages)', () => {
+      const messages = [{ role: 'user', content: 'Hi' }, { role: 'assistant', content: 'Hello!' }];
+      expect(sanitizePayload(messages)).toEqual(messages);
+    });
+
+    it('accepts strings', () => {
+      expect(sanitizePayload('plain text')).toBe('plain text');
+    });
+
+    it('accepts numbers', () => {
+      expect(sanitizePayload(42)).toBe(42);
+    });
+
+    it('returns null for null/undefined', () => {
+      expect(sanitizePayload(null)).toBeNull();
+      expect(sanitizePayload(undefined)).toBeNull();
+    });
+
+    it('truncates oversized payloads', () => {
+      const huge = 'x'.repeat(60000);
+      const result = sanitizePayload(huge) as Record<string, unknown>;
+      expect(result._truncated).toBe(true);
+      expect(result._originalSize).toBeGreaterThan(50000);
+    });
+
+    it('preserves nested objects', () => {
+      const nested = { user: { name: 'test', roles: ['admin'] }, count: 5 };
+      expect(sanitizePayload(nested)).toEqual(nested);
+    });
+  });
+
+  // ==================== METADATA VALIDATION (unchanged) ====================
+  describe('metadata validation (sanitizeMetadata)', () => {
     it('sanitizeMetadata accepts valid objects', () => {
       const input = { prompt: 'hello', model: 'gpt-4o' };
       expect(sanitizeMetadata(input)).toEqual(input);
     });
 
-    it('sanitizeMetadata rejects arrays', () => {
+    it('sanitizeMetadata rejects arrays (metadata only)', () => {
       expect(sanitizeMetadata([1, 2, 3])).toEqual({});
     });
 
@@ -420,11 +458,6 @@ describe('Input Validation for New Fields', () => {
       }
       const result = sanitizeMetadata(huge);
       expect(result._truncated).toBe(true);
-    });
-
-    it('sanitizeMetadata preserves nested objects', () => {
-      const nested = { user: { name: 'test', roles: ['admin'] }, count: 5 };
-      expect(sanitizeMetadata(nested)).toEqual(nested);
     });
   });
 

@@ -85,6 +85,9 @@ CREATE TABLE IF NOT EXISTS action_logs (
   estimated_cost_cents INTEGER NOT NULL DEFAULT 0,
   duration_ms INTEGER NOT NULL DEFAULT 0,
   request_meta JSONB DEFAULT '{}',
+  trace_id TEXT,
+  input JSONB,
+  output JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -92,6 +95,7 @@ CREATE INDEX IF NOT EXISTS idx_action_logs_org ON action_logs(org_id);
 CREATE INDEX IF NOT EXISTS idx_action_logs_org_created ON action_logs(org_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_action_logs_agent ON action_logs(org_id, agent_name);
 CREATE INDEX IF NOT EXISTS idx_action_logs_service ON action_logs(org_id, service);
+CREATE INDEX IF NOT EXISTS idx_action_logs_trace ON action_logs(org_id, trace_id) WHERE trace_id IS NOT NULL;
 
 -- ============================================================
 -- 6. BUDGETS
@@ -173,6 +177,23 @@ CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_webhook ON webhook_deliveries(
 CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_org ON webhook_deliveries(org_id, created_at DESC);
 
 -- ============================================================
+-- 10. NOTIFICATION SETTINGS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS notification_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  channel TEXT NOT NULL CHECK (channel IN ('email', 'slack')),
+  config JSONB NOT NULL DEFAULT '{}',
+  events TEXT[] NOT NULL DEFAULT '{}',
+  active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(org_id, channel)
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_settings_org ON notification_settings(org_id);
+
+-- ============================================================
 -- ROW LEVEL SECURITY
 -- ============================================================
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
@@ -184,6 +205,7 @@ ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE anomaly_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE webhooks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE webhook_deliveries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_settings ENABLE ROW LEVEL SECURITY;
 
 -- Note: All API access uses the service_role key which bypasses RLS.
 -- Application code filters by org_id to enforce data isolation.
@@ -201,6 +223,7 @@ CREATE POLICY "Service role only" ON budgets FOR ALL USING (false);
 CREATE POLICY "Service role only" ON anomaly_alerts FOR ALL USING (false);
 CREATE POLICY "Service role only" ON webhooks FOR ALL USING (false);
 CREATE POLICY "Service role only" ON webhook_deliveries FOR ALL USING (false);
+CREATE POLICY "Service role only" ON notification_settings FOR ALL USING (false);
 
 -- ============================================================
 -- BUDGET RESET FUNCTION (for cron jobs)

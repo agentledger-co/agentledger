@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { fireWebhooks } from '@/lib/webhooks';
+import { sendNotifications } from '@/lib/notifications';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
   const auth = await authenticateApiKey(req);
@@ -43,6 +44,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
 
   fireWebhooks(auth.orgId, 'agent.killed', { agent: name }).catch(() => {});
   fireWebhooks(auth.orgId, 'alert.created', { agent: name, alert_type: 'agent_killed', severity: 'critical' }).catch(() => {});
+
+  sendNotifications(auth.orgId, {
+    event: 'agent.killed',
+    agentName: name,
+    message: `Agent *${name}* was killed.`,
+    details: { killed_by: 'dashboard' },
+  }).catch(() => {});
 
   return NextResponse.json({ status: 'killed', agent: name });
 }

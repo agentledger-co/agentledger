@@ -28,6 +28,23 @@ export function sanitizeMetadata(input: unknown): Record<string, unknown> {
 }
 
 /**
+ * Validate and sanitize input/output payloads — more permissive than metadata.
+ * Accepts objects, arrays, strings, numbers — anything JSON-serializable.
+ */
+export function sanitizePayload(input: unknown, maxSize = 50_000): unknown {
+  if (input === undefined || input === null) return null;
+  try {
+    const json = JSON.stringify(input);
+    if (json.length > maxSize) {
+      return { _truncated: true, _originalSize: json.length, _preview: json.slice(0, 500) };
+    }
+    return input;
+  } catch {
+    return { _error: 'Could not serialize' };
+  }
+}
+
+/**
  * Validate a positive integer.
  */
 export function sanitizePositiveInt(input: unknown, max = 1_000_000): number {

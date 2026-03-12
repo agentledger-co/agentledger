@@ -73,29 +73,30 @@ export async function GET(req: NextRequest) {
   const errorCount = (todayLogs || []).filter((l: any) => l.status === 'error').length;
   const blockedCount = (todayLogs || []).filter((l: any) => l.status === 'blocked').length;
 
-  // Enrich agents with aggregated totals
-  // Note: total_actions comes from agent's full history, not just 7 days
-  const enrichedAgents = await Promise.all((agents || []).map(async (agent: any) => {
-    // All-time count for this agent
-    const { count: allTimeCount } = await safe(
-      supabase.from('action_logs').select('*', { count: 'exact', head: true })
-        .eq('org_id', auth.orgId).eq('agent_name', agent.name),
-      { count: 0 }
-    );
-    // All-time cost for this agent
-    const { data: allCostData } = await safe(
-      supabase.from('action_logs').select('estimated_cost_cents')
-        .eq('org_id', auth.orgId).eq('agent_name', agent.name),
-      { data: [] }
-    );
-    const totalCost = (allCostData || []).reduce((s: number, l: any) => s + (l.estimated_cost_cents || 0), 0);
-    
-    return {
-      ...agent,
-      total_actions: allTimeCount || 0,
-      total_cost_cents: totalCost,
-      last_active_at: agent.last_active_at || agent.updated_at || agent.created_at,
-    };
+  // Enrich agents with aggregated totals — single query instead of N+1
+  const { data: agentStats } = await safe(
+    supabase.rpc('get_agent_stats_placeholder', {}).catch(() => null) || 
+    // Fallback: aggregate from action_logs in one query
+    supabase.from('action_logs')
+      .select('agent_name, estimated_cost_cents')
+      .eq('org_id', auth.orgId),
+    { data: [] }
+  );
+
+  // Build lookup map from all action logs
+  const agentStatsMap: Record<string, { count: number; cost: number }> = {};
+  (agentStats || []).forEach((row: any) => {
+    const name = row.agent_name;
+    if (!agentStatsMap[name]) agentStatsMap[name] = { count: 0, cost: 0 };
+    agentStatsMap[name].count++;
+    agentStatsMap[name].cost += (row.estimated_cost_cents || 0);
+  });
+
+  const enrichedAgents = (agents || []).map((agent: any) => ({
+    ...agent,
+    total_actions: agentStatsMap[agent.name]?.count || 0,
+    total_cost_cents: agentStatsMap[agent.name]?.cost || 0,
+    last_active_at: agent.last_active_at || agent.updated_at || agent.created_at,
   }));
 
   return NextResponse.json({

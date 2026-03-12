@@ -15,8 +15,8 @@ export async function GET(req: NextRequest) {
 
   const supabase = createServiceClient();
   const url = new URL(req.url);
-  const limit = parseInt(url.searchParams.get('limit') || '50');
-  const offset = parseInt(url.searchParams.get('offset') || '0');
+  const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '50') || 50, 1), 200);
+  const offset = Math.max(parseInt(url.searchParams.get('offset') || '0') || 0, 0);
 
   const { data: actions, error, count } = await supabase
     .from('action_logs')
@@ -39,7 +39,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
   const agent = sanitizeString(body.agent);
   const service = sanitizeString(body.service);
   const action = sanitizeString(body.action);
@@ -55,15 +61,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields: agent, service, action' }, { status: 400 });
   }
 
-  // Rate limit check (per-minute burst protection)
-  const rateCheck = checkRateLimit(auth.orgId);
-  if (!rateCheck.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded. Please slow down.', retryAfter: rateCheck.retryAfter },
-      { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
-    );
-  }
-
   // Monthly usage limit check
   const usageCheck = await checkUsageLimits(auth.orgId);
   if (!usageCheck.allowed) {
@@ -73,7 +70,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Rate limit check using actual plan
+  const rateCheck = checkRateLimit(auth.orgId, usageCheck.plan);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded. Please slow down.', retryAfter: rateCheck.retryAfter },
+      { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
+    );
+  }
+
   const supabase = createServiceClient();
+
+  // Resolve agent: try to find existing, create if new
+  // This avoids overwriting paused/killed status via upsert
+  let agentId: string;
+  let agentStatus: string;
 
   const { data: existingAgent } = await supabase
     .from('agents')
@@ -82,37 +93,45 @@ export async function POST(req: NextRequest) {
     .eq('name', agent)
     .single();
 
-  if (existingAgent?.status === 'killed') {
+  if (existingAgent) {
+    agentId = existingAgent.id;
+    agentStatus = existingAgent.status;
+    // Update timestamps (non-blocking)
+    supabase.from('agents').update({ last_active_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', agentId).then(() => {}).catch(() => {});
+  } else {
+    // Try to create — catch unique constraint race condition
+    const { data: newAgent, error: insertErr } = await supabase
+      .from('agents')
+      .insert({ org_id: auth.orgId, name: agent, status: 'active', last_active_at: new Date().toISOString() })
+      .select('id, status')
+      .single();
+
+    if (insertErr) {
+      // Race condition — another request created it first. Re-fetch.
+      const { data: raceAgent } = await supabase
+        .from('agents')
+        .select('id, status')
+        .eq('org_id', auth.orgId)
+        .eq('name', agent)
+        .single();
+
+      if (!raceAgent) {
+        return NextResponse.json({ error: 'Failed to resolve agent' }, { status: 500 });
+      }
+      agentId = raceAgent.id;
+      agentStatus = raceAgent.status;
+    } else {
+      agentId = newAgent.id;
+      agentStatus = newAgent.status;
+    }
+  }
+
+  if (agentStatus === 'killed') {
     return NextResponse.json({ allowed: false, reason: 'Agent has been killed' }, { status: 403 });
   }
 
-  if (existingAgent?.status === 'paused') {
+  if (agentStatus === 'paused') {
     return NextResponse.json({ allowed: false, reason: 'Agent is paused' }, { status: 403 });
-  }
-
-  let agentId: string;
-
-  if (!existingAgent) {
-    const { data: newAgent, error: agentErr } = await supabase
-      .from('agents')
-      .insert({ org_id: auth.orgId, name: agent, status: 'active' })
-      .select('id')
-      .single();
-
-    if (agentErr || !newAgent) {
-      return NextResponse.json({ error: 'Failed to create agent', detail: (agentErr || new Error('unknown')).message }, { status: 500 });
-    }
-    agentId = newAgent.id;
-  } else {
-    agentId = existingAgent.id;
-    // Update last active timestamp
-    await supabase
-      .from('agents')
-      .update({
-        last_active_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', agentId);
   }
 
   // Insert action log
@@ -208,6 +227,17 @@ export async function POST(req: NextRequest) {
         fireWebhooks(auth.orgId, 'budget.warning', {
           agent, period: budget.period, current_actions: newActions, current_cost_cents: newCost,
           max_actions: budget.max_actions, max_cost_cents: budget.max_cost_cents,
+        }).catch(() => {});
+
+        sendNotifications(auth.orgId, {
+          event: 'budget.warning',
+          agentName: agent,
+          message: `Agent *${agent}* is approaching its ${budget.period} budget (75%+).`,
+          details: {
+            period: budget.period,
+            actions: `${newActions}/${budget.max_actions || '∞'}`,
+            cost: `$${(newCost / 100).toFixed(2)}/${budget.max_cost_cents ? '$' + (budget.max_cost_cents / 100).toFixed(2) : '∞'}`,
+          },
         }).catch(() => {});
       }
     }

@@ -29,6 +29,11 @@ const nextConfig: NextConfig = {
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
           // Prevent API responses from being embedded
           { key: 'X-Frame-Options', value: 'DENY' },
+          // CORS — allow SDK access from any origin
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+          { key: 'Access-Control-Max-Age', value: '86400' },
         ],
       },
     ];

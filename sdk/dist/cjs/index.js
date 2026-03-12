@@ -54,15 +54,18 @@ class AgentLedger {
         catch (err) {
             status = 'error';
             const durationMs = Date.now() - start;
-            // Log the error, then re-throw
-            this.logAction(options, status, durationMs).catch(this.handleError.bind(this));
+            // Log the error with error details as output
+            const errorOutput = err instanceof Error ? { error: err.message, stack: err.stack } : { error: String(err) };
+            this.logAction(options, status, durationMs, errorOutput).catch(this.handleError.bind(this));
             throw err;
         }
         const durationMs = Date.now() - start;
-        // Log the action (fire and forget for speed, unless we need the ID)
+        // Capture output if requested
+        const capturedOutput = options.captureOutput ? result : undefined;
+        // Log the action
         let actionId;
         try {
-            const logResult = await this.logAction(options, status, durationMs);
+            const logResult = await this.logAction(options, status, durationMs, capturedOutput);
             actionId = logResult?.id;
         }
         catch (err) {
@@ -126,24 +129,58 @@ class AgentLedger {
             throw new Error(`AgentLedger: Failed to kill agent (${res.status})`);
     }
     // Internal: log action to API
-    async logAction(options, status, durationMs) {
+    async logAction(options, status, durationMs, capturedOutput) {
+        // Determine output: explicit > captured > none
+        const output = options.output !== undefined ? options.output : capturedOutput;
+        const body = {
+            agent: options.agent,
+            service: options.service,
+            action: options.action,
+            status,
+            cost_cents: options.costCents || 0,
+            duration_ms: durationMs,
+            metadata: options.metadata || {},
+        };
+        if (options.traceId)
+            body.trace_id = options.traceId;
+        if (options.input !== undefined)
+            body.input = this.truncate(options.input, 50000);
+        if (output !== undefined)
+            body.output = this.truncate(output, 50000);
         const res = await this.fetch('/api/v1/actions', {
             method: 'POST',
-            body: JSON.stringify({
-                agent: options.agent,
-                service: options.service,
-                action: options.action,
-                status,
-                cost_cents: options.costCents || 0,
-                duration_ms: durationMs,
-                metadata: options.metadata || {},
-            }),
+            body: JSON.stringify(body),
         });
         if (!res.ok) {
             throw new Error(`AgentLedger: Failed to log action (${res.status})`);
         }
         const data = await res.json();
         return { id: data.id };
+    }
+    // Truncate large objects to prevent oversized payloads
+    truncate(data, maxChars) {
+        try {
+            const json = JSON.stringify(data);
+            if (json.length <= maxChars)
+                return data;
+            return { _truncated: true, _originalSize: json.length, _preview: json.slice(0, 500) };
+        }
+        catch {
+            return { _error: 'Could not serialize' };
+        }
+    }
+    /**
+     * Generate a unique trace ID for grouping related actions.
+     * Call once per "session" or "workflow", then pass to all track() calls.
+     *
+     * @example
+     * const traceId = AgentLedger.traceId();
+     * await ledger.track({ agent: 'bot', service: 'email', action: 'read', traceId }, ...);
+     * await ledger.track({ agent: 'bot', service: 'openai', action: 'classify', traceId }, ...);
+     * await ledger.track({ agent: 'bot', service: 'email', action: 'reply', traceId }, ...);
+     */
+    static traceId() {
+        return `tr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
     }
     // Internal: fetch with timeout and auth
     async fetch(path, init = {}) {

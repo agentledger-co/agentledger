@@ -21,6 +21,14 @@ export interface TrackOptions {
     costCents?: number;
     /** Additional metadata to log with the action */
     metadata?: Record<string, unknown>;
+    /** Trace ID to group related actions into a session/trace */
+    traceId?: string;
+    /** Input data sent to the service (e.g. prompt, request body). Stored for debugging. */
+    input?: unknown;
+    /** If true, automatically capture the return value as output. Default: false */
+    captureOutput?: boolean;
+    /** Explicit output data to log. Overrides captureOutput. */
+    output?: unknown;
 }
 export interface TrackResult<T> {
     /** The return value of the wrapped function */
@@ -88,6 +96,18 @@ export declare class AgentLedger {
      */
     killAgent(name: string): Promise<void>;
     private logAction;
+    private truncate;
+    /**
+     * Generate a unique trace ID for grouping related actions.
+     * Call once per "session" or "workflow", then pass to all track() calls.
+     *
+     * @example
+     * const traceId = AgentLedger.traceId();
+     * await ledger.track({ agent: 'bot', service: 'email', action: 'read', traceId }, ...);
+     * await ledger.track({ agent: 'bot', service: 'openai', action: 'classify', traceId }, ...);
+     * await ledger.track({ agent: 'bot', service: 'email', action: 'reply', traceId }, ...);
+     */
+    static traceId(): string;
     private fetch;
     private handleError;
 }

@@ -32,7 +32,12 @@ export async function POST(req: NextRequest) {
   const auth = await authenticateApiKey(req);
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
   const url = sanitizeString(body.url, 2000);
   const description = sanitizeString(body.description, 500);
   const events = body.events;
@@ -97,7 +102,12 @@ export async function PATCH(req: NextRequest) {
   const auth = await authenticateApiKey(req);
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
   const { id, active, events, url, description } = body;
 
   if (!id) return NextResponse.json({ error: 'Missing webhook id' }, { status: 400 });

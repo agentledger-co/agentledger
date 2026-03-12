@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Webhook URL must use HTTPS' }, { status: 400 });
   }
 
-  const selectedEvents = events?.filter((e: string) => VALID_EVENTS.includes(e)) || VALID_EVENTS;
+  const selectedEvents = Array.isArray(events) ? events.filter((e: string) => VALID_EVENTS.includes(e)) : VALID_EVENTS;
   const secret = generateWebhookSecret();
 
   const supabase = createServiceClient();
@@ -116,7 +116,7 @@ export async function PATCH(req: NextRequest) {
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
 
   if (active !== undefined) updates.active = active;
-  if (events) updates.events = events.filter((e: string) => VALID_EVENTS.includes(e));
+  if (Array.isArray(events)) updates.events = events.filter((e: string) => VALID_EVENTS.includes(e));
   if (url) updates.url = url;
   if (description !== undefined) updates.description = description;
   if (active === true) updates.failure_count = 0; // Reset failures on re-enable

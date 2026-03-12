@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
-  const { channel, config, events, active } = body;
+  const { channel, events, active } = body;
+  const config = (body.config || {}) as Record<string, unknown>;
 
   if (!channel || !['email', 'slack'].includes(String(channel))) {
     return NextResponse.json({ error: 'Invalid channel. Must be "email" or "slack".' }, { status: 400 });
@@ -44,11 +45,11 @@ export async function POST(req: NextRequest) {
   const validEvents = ['action.error', 'agent.killed', 'budget.exceeded', 'budget.warning'];
   const filteredEvents = events.filter((e: string) => validEvents.includes(e));
 
-  if (channel === 'slack' && (!config?.webhook_url || typeof config.webhook_url !== 'string')) {
+  if (channel === 'slack' && (!config.webhook_url || typeof config.webhook_url !== 'string')) {
     return NextResponse.json({ error: 'Slack channel requires config.webhook_url' }, { status: 400 });
   }
 
-  if (channel === 'email' && (!config?.email || typeof config.email !== 'string')) {
+  if (channel === 'email' && (!config.email || typeof config.email !== 'string')) {
     return NextResponse.json({ error: 'Email channel requires config.email' }, { status: 400 });
   }
 
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
     .from('notification_settings')
     .upsert({
       org_id: auth.orgId,
-      channel,
+      channel: String(channel),
       config: { ...config, _org_id: auth.orgId },
       events: filteredEvents,
       active: active !== false,

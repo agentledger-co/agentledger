@@ -503,7 +503,7 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: 'Free', price: '$0', period: 'forever', features: ['1,000 actions/mo', '5 agents', '7-day data retention', 'Action drawer & I/O', 'Slack & email alerts', 'Community support'], cta: 'Get Started', hl: true },
+              { name: 'Free', price: '$0', period: 'forever', features: ['5,000 actions/mo', '5 agents', '7-day data retention', 'Action drawer & I/O', 'Slack & email alerts', 'Community support'], cta: 'Get Started', hl: true },
               { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: false },
               { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
@@ -530,7 +530,7 @@ export default function LandingPage() {
             ))}
           </div>
           <p className="text-center text-[12px] text-white/25 mt-6 max-w-lg mx-auto">
-            Free tier includes 1,000 actions/month with 7-day data retention. Usage beyond plan limits is rate-limited.
+            Free tier includes 5,000 actions/month with 7-day data retention. Usage beyond plan limits is rate-limited.
             We reserve the right to enforce fair use policies to maintain service quality for all users.
           </p>
         </div>

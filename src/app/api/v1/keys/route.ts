@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { getAuthenticatedUser } from '@/lib/auth-user';
 
 export async function GET(req: NextRequest) {
-  // Get user ID from header (set by authenticated client)
-  const userId = req.headers.get('x-user-id');
+  const userId = await getAuthenticatedUser(req);
   if (!userId) {
-    return NextResponse.json({ error: 'Missing user ID' }, { status: 401 });
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
   const supabase = createServiceClient();
 
-  // Find user's org
   const { data: member } = await supabase
     .from('org_members')
     .select('org_id, role')
@@ -21,7 +20,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ orgId: null, apiKey: null });
   }
 
-  // Get active API key for the org
   const { data: key } = await supabase
     .from('api_keys')
     .select('id, key_prefix, name, last_used_at, created_at')
@@ -29,7 +27,6 @@ export async function GET(req: NextRequest) {
     .is('revoked_at', null)
     .order('created_at', { ascending: false });
 
-  // Get org details
   const { data: org } = await supabase
     .from('organizations')
     .select('id, name, plan')

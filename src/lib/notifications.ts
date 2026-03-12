@@ -87,25 +87,66 @@ async function sendEmail(
   config: Record<string, unknown>,
   payload: NotificationPayload
 ): Promise<void> {
-  const email = config.email as string;
-  if (!email) return;
+  const toEmail = config.email as string;
+  if (!toEmail) return;
 
-  // Use Supabase Edge Functions or a simple SMTP relay
-  // For now, we'll use the Supabase built-in email via a webhook-style approach
-  // In production, you'd integrate with Resend, SendGrid, or Zoho SMTP
-
-  // Store as a pending notification for now — the dashboard will show it
-  // and we can add SMTP later without changing the architecture
-  const supabase = createServiceClient();
+  const resendKey = process.env.RESEND_API_KEY;
   
+  // If Resend is configured, send real emails
+  if (resendKey) {
+    const emoji = payload.event === 'action.error' ? '🔴' :
+      payload.event === 'agent.killed' ? '💀' :
+      payload.event === 'budget.exceeded' ? '🚨' : '⚠️';
+
+    const detailsHtml = payload.details 
+      ? Object.entries(payload.details).map(([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`).join('')
+      : '';
+
+    const html = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 500px;">
+        <h2 style="margin: 0 0 12px;">${emoji} AgentLedger Alert</h2>
+        <p style="color: #555; margin: 0 0 4px;"><strong>Agent:</strong> ${payload.agentName}</p>
+        <p style="color: #555; margin: 0 0 4px;"><strong>Event:</strong> ${payload.event}</p>
+        <p style="color: #333; margin: 12px 0;">${payload.message.replace(/\*/g, '')}</p>
+        ${detailsHtml ? `<ul style="color: #555; padding-left: 20px;">${detailsHtml}</ul>` : ''}
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="color: #999; font-size: 12px;">Sent by <a href="https://agentledger.co" style="color: #3b82f6;">AgentLedger</a></p>
+      </div>`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${resendKey}`,
+        },
+        body: JSON.stringify({
+          from: 'AgentLedger <alerts@agentledger.co>',
+          to: [toEmail],
+          subject: `[AgentLedger] ${payload.event}: ${payload.agentName}`,
+          html,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+    return;
+  }
+
+  // Fallback: store as pending alert if no email provider configured
+  const supabase = createServiceClient();
   try {
     await supabase.from('anomaly_alerts').insert({
       org_id: config._org_id as string,
       agent_name: payload.agentName,
       alert_type: `email_pending_${payload.event}`,
       severity: payload.event === 'budget.exceeded' || payload.event === 'action.error' ? 'critical' : 'warning',
-      message: `[Email → ${email}] ${payload.message}`,
-      metadata: { email, event: payload.event, details: payload.details },
+      message: `[Email → ${toEmail}] ${payload.message}`,
+      metadata: { email: toEmail, event: payload.event, details: payload.details },
     });
   } catch { /* Non-critical */ }
 }

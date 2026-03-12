@@ -10,11 +10,11 @@ describe('Usage Limits', () => {
     });
 
     it('free plan has correct limits', () => {
-      expect(PLANS.free.actionsPerMonth).toBe(1_000);
+      expect(PLANS.free.actionsPerMonth).toBe(5_000);
       expect(PLANS.free.maxAgents).toBe(5);
       expect(PLANS.free.retentionDays).toBe(7);
-      expect(PLANS.free.webhooksAllowed).toBe(false);
-      expect(PLANS.free.ratePerMinute).toBe(30);
+      expect(PLANS.free.webhooksAllowed).toBe(true);
+      expect(PLANS.free.ratePerMinute).toBe(60);
     });
 
     it('pro plan has higher limits than free', () => {
@@ -59,7 +59,7 @@ describe('Usage Limits', () => {
     it('blocks requests over free tier limit (30/min)', () => {
       const orgId = `test-org-limit-${Date.now()}`;
       // Exhaust the limit
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 60; i++) {
         checkRateLimit(orgId, 'free');
       }
       const result = checkRateLimit(orgId, 'free');
@@ -72,7 +72,7 @@ describe('Usage Limits', () => {
       const org2 = `test-org-ind-2-${Date.now()}`;
 
       // Exhaust org1
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 60; i++) {
         checkRateLimit(org1, 'free');
       }
 
@@ -94,7 +94,7 @@ describe('Usage Limits', () => {
 
     it('returns retryAfter in seconds', () => {
       const orgId = `test-org-retry-${Date.now()}`;
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 60; i++) {
         checkRateLimit(orgId, 'free');
       }
       const result = checkRateLimit(orgId, 'free');

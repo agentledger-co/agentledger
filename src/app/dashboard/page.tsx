@@ -149,7 +149,7 @@ export default function DashboardPage() {
 
         // Look up user's org and API key
         const res = await fetch('/api/v1/keys', {
-          headers: { 'x-user-id': user.id },
+          
         });
 
         if (res.ok) {
@@ -164,7 +164,7 @@ export default function DashboardPage() {
               // Returning user without stored key — generate a new one
               const recoverRes = await fetch('/api/v1/keys/recover', {
                 method: 'POST',
-                headers: { 'x-user-id': user.id },
+                
               });
               if (recoverRes.ok) {
                 const recoverData = await recoverRes.json();

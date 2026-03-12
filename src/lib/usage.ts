@@ -15,13 +15,13 @@ export interface PlanLimits {
 export const PLANS: Record<string, PlanLimits> = {
   free: {
     name: 'Free',
-    actionsPerMonth: 1_000,
+    actionsPerMonth: 5_000,
     maxAgents: 5,
     retentionDays: 7,
-    webhooksAllowed: false,
-    maxWebhooks: 0,
+    webhooksAllowed: true,
+    maxWebhooks: 2,
     maxApiKeys: 2,
-    ratePerMinute: 30,
+    ratePerMinute: 60,
   },
   pro: {
     name: 'Pro',

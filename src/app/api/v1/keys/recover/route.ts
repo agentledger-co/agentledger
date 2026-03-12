@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { generateApiKey } from '@/lib/auth';
+import { getAuthenticatedUser } from '@/lib/auth-user';
 
-// Generate a new API key for an authenticated user who lost their key
-// Authenticated via x-user-id header (set by browser client from Supabase session)
 export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id');
+  const userId = await getAuthenticatedUser(req);
   if (!userId) {
-    return NextResponse.json({ error: 'Missing user ID' }, { status: 401 });
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
   const supabase = createServiceClient();
 
-  // Find user's org
   const { data: member } = await supabase
     .from('org_members')
     .select('org_id, role')
@@ -23,10 +21,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No organization found' }, { status: 404 });
   }
 
-  // Generate new key
   const { key, hash, prefix } = generateApiKey();
 
-  // Count existing keys
   const { count } = await supabase
     .from('api_keys')
     .select('*', { count: 'exact', head: true })

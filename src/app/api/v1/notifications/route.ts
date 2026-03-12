@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   }
   const { channel, config, events, active } = body;
 
-  if (!channel || !['email', 'slack'].includes(channel)) {
+  if (!channel || !['email', 'slack'].includes(String(channel))) {
     return NextResponse.json({ error: 'Invalid channel. Must be "email" or "slack".' }, { status: 400 });
   }
 

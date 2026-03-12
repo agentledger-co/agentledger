@@ -32,12 +32,9 @@ export async function authenticateApiKey(req: NextRequest): Promise<AuthContext 
   // Only update last_used_at every 5 minutes to reduce DB writes
   const lastUsed = data.last_used_at ? new Date(data.last_used_at).getTime() : 0;
   if (Date.now() - lastUsed > 5 * 60 * 1000) {
-    supabase
-      .from('api_keys')
-      .update({ last_used_at: new Date().toISOString() })
-      .eq('id', data.id)
-      .then(() => {})
-      .catch(() => {});
+    Promise.resolve(
+      supabase.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', data.id)
+    ).catch(() => {});
   }
 
   return {

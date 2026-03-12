@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
     agentId = existingAgent.id;
     agentStatus = existingAgent.status;
     // Update timestamps (non-blocking)
-    supabase.from('agents').update({ last_active_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', agentId).then(() => {}).catch(() => {});
+    Promise.resolve(supabase.from('agents').update({ last_active_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', agentId)).catch(() => {});
   } else {
     // Try to create — catch unique constraint race condition
     const { data: newAgent, error: insertErr } = await supabase

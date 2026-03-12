@@ -75,8 +75,6 @@ export async function GET(req: NextRequest) {
 
   // Enrich agents with aggregated totals — single query instead of N+1
   const { data: agentStats } = await safe(
-    supabase.rpc('get_agent_stats_placeholder', {}).catch(() => null) || 
-    // Fallback: aggregate from action_logs in one query
     supabase.from('action_logs')
       .select('agent_name, estimated_cost_cents')
       .eq('org_id', auth.orgId),

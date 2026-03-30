@@ -12,11 +12,21 @@ function Code({ code, lang = 'typescript', filename }: { code: string; lang?: st
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const highlighted = code
-    .replace(/(import|from|const|await|return|async|new|export|interface|type|function|if|else|for|of|throw|try|catch)/g, '<span class="text-violet-400">$1</span>')
-    .replace(/('[@\w/.*#:!{} -]+'|"[@\w/.*#:!{} -]+")/g, '<span class="text-emerald-400">$1</span>')
-    .replace(/(\/\/[^\n]*)/g, '<span class="text-white/20">$1</span>')
-    .replace(/(AgentLedger|ledger|handler|wrapMCPServer|wrapMCPTool|createToolExecutor|withAgentLedger|trackFunction|agentLedgerMiddleware|AgentLedgerCallbackHandler|wrapOpenAICompletion)/g, '<span class="text-blue-400">$1</span>');
+  const highlighted = lang === 'sql'
+    ? code
+        .replace(/(--[^\n]*)/g, '<span class="text-white/20">$1</span>')
+        .replace(/\b(CREATE|TABLE|ALTER|ADD|COLUMN|INSERT|INTO|VALUES|SELECT|FROM|WHERE|UPDATE|SET|DELETE|DROP|INDEX|ON|IF|NOT|EXISTS|NULL|DEFAULT|PRIMARY|KEY|REFERENCES|UNIQUE|CONSTRAINT|ENABLE|ROW|LEVEL|SECURITY|USING|WITH|CHECK|GRANT|ALL|TO|POLICY|FOR|TIMESTAMPTZ|TEXT|UUID|INTEGER|BOOLEAN|JSONB|SERIAL|CASCADE|OR|REPLACE|FUNCTION|RETURNS|TRIGGER|BEFORE|AFTER|EACH|BEGIN|END|RETURN|NEW|AS|EXECUTE|PROCEDURE|LANGUAGE|plpgsql)\b/gi, '<span class="text-violet-400">$1</span>')
+        .replace(/('[@\w/.*#:!{} -]+')/g, '<span class="text-emerald-400">$1</span>')
+    : lang === 'bash'
+    ? code
+        .replace(/(#[^\n]*)/g, '<span class="text-white/20">$1</span>')
+        .replace(/\b(npm|npx|git|cd|cp|curl|mkdir)\b/g, '<span class="text-violet-400">$1</span>')
+        .replace(/('[@\w/.*#:!{} -]+'|"[@\w/.*#:!{} -]+")/g, '<span class="text-emerald-400">$1</span>')
+    : code
+        .replace(/(import|from|const|await|return|async|new|export|interface|type|function|if|else|for|of|throw|try|catch)/g, '<span class="text-violet-400">$1</span>')
+        .replace(/('[@\w/.*#:!{} -]+'|"[@\w/.*#:!{} -]+")/g, '<span class="text-emerald-400">$1</span>')
+        .replace(/(\/\/[^\n]*)/g, '<span class="text-white/20">$1</span>')
+        .replace(/(AgentLedger|ledger|handler|wrapMCPServer|wrapMCPTool|createToolExecutor|withAgentLedger|trackFunction|agentLedgerMiddleware|AgentLedgerCallbackHandler|wrapOpenAICompletion)/g, '<span class="text-blue-400">$1</span>');
 
   return (
     <div className="relative group my-4">

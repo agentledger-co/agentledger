@@ -2172,7 +2172,23 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       <div className="border border-red-500/10 rounded-xl p-4">
         <h3 className="text-sm font-medium text-red-400/60 mb-1">Danger Zone</h3>
         <p className="text-xs text-white/20 mb-3">Revoking all keys will lock you out of the API. You&apos;ll need to create a new key through the dashboard.</p>
-        <button className="text-xs text-red-400/40 hover:text-red-400 border border-red-500/10 hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-colors">
+        <button
+          onClick={async () => {
+            if (!confirm('Are you sure you want to revoke ALL API keys? This will lock you out of the API. You will need to create a new key through the dashboard.')) return;
+            for (const k of keys) {
+              if (k.id === 'current') continue;
+              await fetch('/api/v1/keys/revoke', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyId: k.id }),
+              });
+            }
+            onToast('All keys revoked', 'success');
+            sessionStorage.removeItem('agentledger_api_key');
+            window.location.href = '/login';
+          }}
+          className="text-xs text-red-400/40 hover:text-red-400 border border-red-500/10 hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-colors"
+        >
           Revoke All Keys
         </button>
       </div>

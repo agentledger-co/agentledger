@@ -715,7 +715,11 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-[200px] text-white/20 text-sm">No data yet</div>
+            <div className="flex flex-col items-center justify-center h-[200px] text-center">
+              <div className="text-2xl mb-2 opacity-30">📊</div>
+              <p className="text-white/30 text-sm">No service data yet</p>
+              <p className="text-white/15 text-xs mt-1">Charts appear once your agents start logging actions</p>
+            </div>
           )}
         </div>
       </div>
@@ -727,8 +731,19 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
         </div>
         <div className="divide-y divide-white/[0.04]">
           {actions.length === 0 ? (
-            <div className="px-5 py-12 text-center text-white/20 text-sm">
-              No actions yet. Integrate the SDK to start tracking.
+            <div className="px-5 py-12 text-center">
+              <div className="text-2xl mb-3 opacity-30">📡</div>
+              <p className="text-white/30 text-sm font-medium mb-2">No actions yet</p>
+              <p className="text-white/15 text-xs mb-4 max-w-sm mx-auto">Send a test action to see it appear here in real-time:</p>
+              <div className="bg-black/30 rounded-lg p-3 max-w-md mx-auto mb-4">
+                <code className="text-[11px] text-blue-400/70 font-mono whitespace-pre-wrap break-all">
+                  {`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/actions \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"agent":"test-bot","service":"test","action":"hello"}'`}
+                </code>
+              </div>
+              <a href="/docs#core-sdk" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">Read the SDK docs →</a>
             </div>
           ) : (
             actions.slice(0, 10).map(action => (
@@ -962,7 +977,13 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
 
       {stats.agents.length === 0 ? (
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-12 text-center">
-          <p className="text-white/30 text-sm">No agents registered yet. Agents are auto-registered when they first log an action.</p>
+          <div className="text-2xl mb-3 opacity-30">🤖</div>
+          <p className="text-white/30 text-sm font-medium mb-2">No agents registered yet</p>
+          <p className="text-white/15 text-xs mb-4">Agents are auto-registered when they first log an action. Use the SDK to get started:</p>
+          <div className="bg-black/30 rounded-lg p-3 max-w-sm mx-auto mb-3">
+            <code className="text-[11px] text-blue-400/70 font-mono">await ledger.track({'{'} agent: &apos;my-bot&apos;, service: &apos;slack&apos;, action: &apos;send&apos; {'}'}, fn)</code>
+          </div>
+          <a href="/docs#core-sdk" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">View integration guide →</a>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1377,8 +1398,9 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
       )}
       {stats.alerts.length === 0 ? (
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-12 text-center">
-          <div className="text-4xl mb-3">✓</div>
-          <p className="text-white/30 text-sm">No active alerts. Your agents are behaving normally.</p>
+          <div className="text-2xl mb-3 opacity-50">✓</div>
+          <p className="text-white/30 text-sm font-medium mb-1">All clear</p>
+          <p className="text-white/15 text-xs">No active alerts. Your agents are behaving normally.</p>
         </div>
       ) : (
         stats.alerts.map(alert => (
@@ -1648,8 +1670,11 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
         {loading ? (
           <div className="px-5 py-12 text-center text-white/20 text-sm">Loading budgets...</div>
         ) : budgets.length === 0 ? (
-          <div className="px-5 py-12 text-center text-white/20 text-sm">
-            No budgets configured. Create one to set spending limits on your agents.
+          <div className="px-5 py-12 text-center">
+            <div className="text-2xl mb-3 opacity-30">💰</div>
+            <p className="text-white/30 text-sm font-medium mb-2">No budgets configured</p>
+            <p className="text-white/15 text-xs mb-4">Set spending limits to automatically pause agents when they exceed their budget.</p>
+            <a href="/docs#budgets" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">Learn about budgets →</a>
           </div>
         ) : (
           <div className="divide-y divide-white/[0.04]">
@@ -1904,8 +1929,12 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 
       {webhooks.length === 0 && !showCreate ? (
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
-          <p className="text-white/30 text-sm">No webhooks configured yet.</p>
-          <p className="text-white/15 text-xs mt-1">Create one to get HTTP notifications for agent events.</p>
+          <div className="text-2xl mb-3 opacity-30">🔗</div>
+          <p className="text-white/30 text-sm font-medium mb-2">No webhooks configured</p>
+          <p className="text-white/15 text-xs mb-4">Get HTTP notifications when agents act, budgets exceed, or alerts fire.</p>
+          <button onClick={() => setShowCreate(true)} className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20">
+            Create your first webhook
+          </button>
         </div>
       ) : (
         <div className="space-y-2">

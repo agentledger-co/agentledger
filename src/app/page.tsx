@@ -345,7 +345,27 @@ const { result } = await ledger.track({
   });
 });`;
 
+const FAQ_ITEMS = [
+  { q: 'Is AgentLedger open source?', a: 'Yes. The entire platform is open source on GitHub. You can self-host it on your own infrastructure or use our hosted version at agentledger.co.' },
+  { q: 'Can I self-host AgentLedger?', a: 'Absolutely. You need a Supabase project (or any PostgreSQL 13+ database) and can deploy to Vercel, Railway, or any Node.js host. Full instructions are in the docs.' },
+  { q: 'What happens if AgentLedger goes down?', a: 'AgentLedger is fail-open by default. If our service is unreachable, your agents continue running normally. No action is ever blocked due to an AgentLedger outage.' },
+  { q: 'How is this different from Langfuse or Helicone?', a: 'Those tools trace LLM API calls (tokens, latency, prompts). AgentLedger tracks what happens after the LLM decides to act: the emails sent, tickets created, payments charged, and APIs called.' },
+  { q: 'What frameworks do you support?', a: 'LangChain, OpenAI Agents, MCP Servers, and Express out of the box. The core SDK works with any async function in any framework — just wrap it with ledger.track().' },
+  { q: 'Where is my data stored?', a: 'On the hosted version, data is stored in Supabase (PostgreSQL) with row-level security. If you self-host, data stays entirely on your infrastructure. We never share or sell your data.' },
+];
+
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [stars, setStars] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/miken1988/agentledger')
+      .then(r => r.json())
+      .then(d => { if (d.stargazers_count != null) setStars(d.stargazers_count); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
       {/* Nav */}
@@ -362,11 +382,28 @@ export default function LandingPage() {
             <a href="#demo" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Live Demo</a>
             <Link href="/docs" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Docs</Link>
             <a href="#pricing" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Pricing</a>
-            <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30">
+            <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hidden md:block">
+              Get Started {'\u2192'}
+            </Link>
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white/60 hover:text-white/90 p-1">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                {mobileMenuOpen ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></> : <><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></>}
+              </svg>
+            </button>
+          </div>
+        </div>
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-2 border-t border-white/[0.06] pt-4 flex flex-col gap-3">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Features</a>
+            <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Live Demo</a>
+            <Link href="/docs" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Docs</Link>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Pricing</a>
+            <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="bg-blue-500 hover:bg-blue-400 text-white text-[14px] font-medium px-4 py-2.5 rounded-lg transition-all text-center mt-1">
               Get Started {'\u2192'}
             </Link>
           </div>
-        </div>
+        )}
       </nav>
 
       {/* Hero */}
@@ -394,6 +431,13 @@ export default function LandingPage() {
                 <code className="text-[13px] text-blue-400/80 font-mono">npm i agentledger</code>
               </div>
             </div>
+            {stars !== null && (
+              <a href="https://github.com/miken1988/agentledger" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-5 text-[13px] text-white/40 hover:text-white/60 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                <span>{stars} stars on GitHub</span>
+              </a>
+            )}
           </div>
           <CodeBlock code={SDK_CODE} filename="agent.ts" />
         </div>
@@ -493,6 +537,26 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Trust & Security */}
+      <section className="px-6 py-16 border-t border-white/[0.04]">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: 'Open Source', desc: 'Fully auditable codebase on GitHub' },
+            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>, title: 'Self-Hostable', desc: 'Run on your own infrastructure' },
+            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>, title: 'Fail-Open', desc: 'Never blocks your production agents' },
+            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>, title: 'Zero Dependencies', desc: 'SDK adds no bloat to your project' },
+          ].map(item => (
+            <div key={item.title} className="text-center">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-3 border border-blue-500/10">
+                {item.icon}
+              </div>
+              <h3 className="text-[13px] font-semibold mb-1">{item.title}</h3>
+              <p className="text-[11px] text-white/35">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="px-6 py-24 border-t border-white/[0.04]">
         <div className="max-w-4xl mx-auto">
@@ -533,6 +597,37 @@ export default function LandingPage() {
             Free tier includes 5,000 actions/month with 7-day data retention. Usage beyond plan limits is rate-limited.
             We reserve the right to enforce fair use policies to maintain service quality for all users.
           </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="px-6 py-24 border-t border-white/[0.04]">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-[11px] font-medium tracking-widest uppercase text-blue-400/50 mb-3">FAQ</p>
+            <h2 className="text-[32px] font-bold mb-4 tracking-tight">Common questions</h2>
+          </div>
+          <div className="space-y-2">
+            {FAQ_ITEMS.map((item, i) => (
+              <div key={i} className="border border-white/[0.06] rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="text-[14px] font-medium text-white/80">{item.q}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                    className={`text-white/30 flex-shrink-0 ml-4 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-4">
+                    <p className="text-[13px] text-white/45 leading-relaxed">{item.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -247,16 +247,61 @@ export default function OnboardingPage() {
               <code className="text-[13px] text-emerald-400/70 font-mono">npm install agentledger</code>
             </div>
 
+            {/* Quick start snippet */}
+            <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.06] p-4 mb-6 text-left">
+              <p className="text-[11px] text-white/20 mb-2 font-medium uppercase tracking-wider">Quick start</p>
+              <pre className="text-[12px] text-blue-400/70 font-mono whitespace-pre leading-relaxed">{`import AgentLedger from 'agentledger';
+
+const ledger = new AgentLedger({
+  apiKey: '${apiKey.slice(0, 10)}...'
+});
+
+await ledger.track({
+  agent: 'my-bot',
+  service: 'slack',
+  action: 'send_message'
+}, myFunction);`}</pre>
+            </div>
+
+            {/* What's next checklist */}
+            <div className="bg-white/[0.02] rounded-xl border border-white/[0.06] p-4 mb-6 text-left">
+              <p className="text-[11px] text-white/20 mb-3 font-medium uppercase tracking-wider">What&apos;s next</p>
+              <div className="space-y-2.5">
+                {[
+                  { label: 'Track your first real action', link: '/docs#core-sdk' },
+                  { label: 'Set up a budget for cost control', link: '/docs#budgets' },
+                  { label: 'Configure Slack or email alerts', link: '/docs#webhooks' },
+                ].map(item => (
+                  <a key={item.label} href={item.link} className="flex items-center gap-2.5 text-[13px] text-white/40 hover:text-white/70 transition-colors group">
+                    <div className="w-4 h-4 rounded border border-white/10 group-hover:border-blue-400/30 flex items-center justify-center flex-shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-blue-400/30" />
+                    </div>
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Framework links */}
+            <div className="flex flex-wrap gap-2 mb-6 justify-center">
+              {[
+                { label: 'LangChain', href: '/docs#langchain' },
+                { label: 'OpenAI', href: '/docs#openai' },
+                { label: 'MCP', href: '/docs#mcp' },
+                { label: 'Express', href: '/docs#express' },
+              ].map(fw => (
+                <a key={fw.label} href={fw.href} className="text-[11px] text-white/25 hover:text-blue-400/60 border border-white/[0.06] hover:border-blue-400/20 px-3 py-1.5 rounded-lg transition-colors">
+                  {fw.label}
+                </a>
+              ))}
+            </div>
+
             <button
               onClick={() => { sessionStorage.setItem('al_api_key', apiKey); window.location.href = '/dashboard'; }}
               className="w-full bg-blue-500 hover:bg-blue-400 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-blue-500/20 text-[14px]"
             >
               Open dashboard →
             </button>
-
-            <a href="/docs" className="block text-[13px] text-white/20 hover:text-white/40 transition-colors mt-4">
-              Read the docs
-            </a>
           </div>
         )}
       </div>

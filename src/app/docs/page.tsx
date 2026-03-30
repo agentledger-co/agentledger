@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 // ==================== CODE BLOCK WITH COPY ====================
@@ -12,11 +12,32 @@ function Code({ code, lang = 'typescript', filename }: { code: string; lang?: st
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const highlighted = code
-    .replace(/(import|from|const|await|return|async|new|export|interface|type|function|if|else|for|of|throw|try|catch)/g, '<span class="text-violet-400">$1</span>')
-    .replace(/('[@\w/.*#:!{} -]+'|"[@\w/.*#:!{} -]+")/g, '<span class="text-emerald-400">$1</span>')
-    .replace(/(\/\/[^\n]*)/g, '<span class="text-white/20">$1</span>')
-    .replace(/(AgentLedger|ledger|handler|wrapMCPServer|wrapMCPTool|createToolExecutor|withAgentLedger|trackFunction|agentLedgerMiddleware|AgentLedgerCallbackHandler|wrapOpenAICompletion)/g, '<span class="text-blue-400">$1</span>');
+  // HTML-escape first, then apply syntax highlighting spans
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const escaped = esc(code);
+
+  const highlighted = lang === 'sql'
+    ? escaped.split('\n').map(line => {
+        if (line.trimStart().startsWith('--')) return `<span class="text-white/20">${line}</span>`;
+        return line.replace(/\b(CREATE|TABLE|ALTER|ADD|COLUMN|INSERT|INTO|VALUES|SELECT|FROM|WHERE|UPDATE|SET|DELETE|DROP|INDEX|ON|IF|NOT|EXISTS|NULL|DEFAULT|PRIMARY|KEY|REFERENCES|UNIQUE|CONSTRAINT|ENABLE|ROW|LEVEL|SECURITY)\b/gi, '<span class="text-violet-400">$1</span>');
+      }).join('\n')
+    : lang === 'bash'
+    ? escaped.split('\n').map(line => {
+        if (line.trimStart().startsWith('#')) return `<span class="text-white/20">${line}</span>`;
+        return line
+          .replace(/^(\s*)(npm|npx|git|cd|cp|curl|mkdir|vercel)\b/g, '$1<span class="text-violet-400">$2</span>')
+          .replace(/(\| )(npm|npx|git|cd|cp|curl|mkdir|vercel)\b/g, '$1<span class="text-violet-400">$2</span>');
+      }).join('\n')
+    : (() => {
+        // Process TypeScript line-by-line to avoid cross-regex corruption
+        return escaped.split('\n').map(line => {
+          if (line.trimStart().startsWith('//')) return `<span class="text-white/20">${line}</span>`;
+          return line
+            .replace(/('[@\w/.*#:!{} -]+'|"[@\w/.*#:!{} -]+")/g, '<span class="text-emerald-400">$1</span>')
+            .replace(/\b(import|from|const|await|return|async|new|export|interface|type|function|if|else|for|of|throw|try|catch)\b/g, '<span class="text-violet-400">$1</span>')
+            .replace(/\b(AgentLedger|ledger|handler|wrapMCPServer|wrapMCPTool|createToolExecutor|withAgentLedger|trackFunction|agentLedgerMiddleware|AgentLedgerCallbackHandler|wrapOpenAICompletion)\b/g, '<span class="text-blue-400">$1</span>');
+        }).join('\n');
+      })();
 
   return (
     <div className="relative group my-4">
@@ -84,6 +105,25 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState('quickstart');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: '-80px 0px -60% 0px', threshold: 0 }
+    );
+    const sections = NAV.map(n => document.getElementById(n.id)).filter(Boolean) as HTMLElement[];
+    sections.forEach(s => observerRef.current?.observe(s));
+    return () => observerRef.current?.disconnect();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
@@ -108,6 +148,30 @@ export default function DocsPage() {
           </div>
         </div>
       </nav>
+
+      {/* Mobile section nav */}
+      <div className="lg:hidden border-b border-white/[0.06] px-6 py-3 sticky top-[57px] bg-[#08080a]/90 backdrop-blur-xl z-40">
+        <button onClick={() => setMobileNavOpen(!mobileNavOpen)} className="flex items-center justify-between w-full text-left">
+          <span className="text-[13px] text-white/60">{NAV.find(n => n.id === activeSection)?.label || 'Navigate'}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+            className={`text-white/30 transition-transform ${mobileNavOpen ? 'rotate-180' : ''}`}>
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        {mobileNavOpen && (
+          <nav className="mt-3 space-y-1 pb-1">
+            {NAV.map(item => (
+              <a key={item.id} href={`#${item.id}`}
+                onClick={() => { setActiveSection(item.id); setMobileNavOpen(false); }}
+                className={`block px-3 py-1.5 rounded-lg text-[13px] transition-colors ${
+                  activeSection === item.id ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-white/30 hover:text-white/60'
+                }`}>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
 
       <div className="max-w-7xl mx-auto flex">
         {/* Sidebar */}

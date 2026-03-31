@@ -55,7 +55,7 @@ export async function GET(
 
   // Compute parallel groups: group overlapping [start, start+duration] ranges
   // Two actions overlap if action B starts before action A ends
-  const intervals = actionsWithOffset.map((a, idx) => ({
+  const intervals = actionsWithOffset.map((a: Record<string, unknown> & { offsetMs: number }, idx: number) => ({
     idx,
     start: a.offsetMs,
     end: a.offsetMs + ((a.duration_ms as number) || 0),

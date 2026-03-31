@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { reportError } from '@/lib/errors';
+import { sanitizeString } from '@/lib/validate';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
   if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const url = new URL(req.url);
+  const environment = sanitizeString(url.searchParams.get('environment') ?? undefined);
 
   const supabase = createServiceClient();
   const now = new Date();
@@ -20,12 +24,15 @@ export async function GET(req: NextRequest) {
   const safe = (p: PromiseLike<any>, fallback: any) =>
     Promise.resolve(p).catch(() => fallback);
 
+  // Helper to conditionally filter by environment
+  const envFilter = (q: any) => environment ? q.eq('environment', environment) : q;
+
   const [totalResult, todayResult, agentsResult, todayLogsResult, weekLogsResult, alertsResult] = await Promise.all([
-    safe(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId), { count: 0 }),
-    safe(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId).gte('created_at', todayStart.toISOString()), { count: 0 }),
-    safe(supabase.from('agents').select('*').eq('org_id', auth.orgId), { data: [] }),
-    safe(supabase.from('action_logs').select('estimated_cost_cents, service, status, created_at, agent_name').eq('org_id', auth.orgId).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: false }), { data: [] }),
-    safe(supabase.from('action_logs').select('estimated_cost_cents, service, created_at, agent_name').eq('org_id', auth.orgId).gte('created_at', weekAgo.toISOString()).order('created_at', { ascending: true }), { data: [] }),
+    safe(envFilter(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId)), { count: 0 }),
+    safe(envFilter(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId)).gte('created_at', todayStart.toISOString()), { count: 0 }),
+    safe(envFilter(supabase.from('agents').select('*').eq('org_id', auth.orgId)), { data: [] }),
+    safe(envFilter(supabase.from('action_logs').select('estimated_cost_cents, service, status, created_at, agent_name').eq('org_id', auth.orgId)).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: false }), { data: [] }),
+    safe(envFilter(supabase.from('action_logs').select('estimated_cost_cents, service, created_at, agent_name').eq('org_id', auth.orgId)).gte('created_at', weekAgo.toISOString()).order('created_at', { ascending: true }), { data: [] }),
     safe(supabase.from('anomaly_alerts').select('*').eq('org_id', auth.orgId).is('acknowledged_at', null).order('created_at', { ascending: false }).limit(10), { data: [] }),
   ]);
 
@@ -75,9 +82,9 @@ export async function GET(req: NextRequest) {
 
   // Enrich agents with aggregated totals — single query instead of N+1
   const { data: agentStats } = await safe(
-    supabase.from('action_logs')
+    envFilter(supabase.from('action_logs')
       .select('agent_name, estimated_cost_cents')
-      .eq('org_id', auth.orgId),
+      .eq('org_id', auth.orgId)),
     { data: [] }
   );
 

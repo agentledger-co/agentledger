@@ -10,13 +10,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
   }
 
   const { name } = await params;
+  const url = new URL(req.url);
+  const environment = url.searchParams.get('environment') || 'production';
   const supabase = createServiceClient();
 
   const { error } = await supabase
     .from('agents')
     .update({ status: 'paused', updated_at: new Date().toISOString() })
     .eq('org_id', auth.orgId)
-    .eq('name', name);
+    .eq('name', name)
+    .eq('environment', environment);
 
   if (error) {
     return NextResponse.json({ error: 'Failed to pause agent', detail: error.message }, { status: 500 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sanitizeString } from '@/lib/validate';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
+import { evaluatePolicies } from '@/lib/policies';
 
 export async function POST(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -16,6 +17,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
   const agent = sanitizeString(body.agent);
+  const environment = sanitizeString(body.environment) || 'production';
 
   if (!agent) {
     return NextResponse.json({ error: 'Missing required field: agent' }, { status: 400 });
@@ -29,6 +31,7 @@ export async function POST(req: NextRequest) {
     .select('id, status')
     .eq('org_id', auth.orgId)
     .eq('name', agent)
+    .eq('environment', environment)
     .single();
 
   if (agentData?.status === 'paused') {
@@ -74,6 +77,26 @@ export async function POST(req: NextRequest) {
         }
       }
     }
+  }
+
+  // Policy engine checks
+  const service = sanitizeString(body.service) || '';
+  const action = sanitizeString(body.action) || '';
+  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action, undefined, undefined, environment);
+  if (!policyResult.allowed) {
+    if (policyResult.requiresApproval) {
+      return NextResponse.json({
+        allowed: false,
+        requiresApproval: true,
+        approvalId: policyResult.approvalId,
+        policyId: policyResult.policyId,
+      });
+    }
+    return NextResponse.json({
+      allowed: false,
+      blockReason: policyResult.blockReason,
+      policyId: policyResult.policyId,
+    });
   }
 
   return NextResponse.json({

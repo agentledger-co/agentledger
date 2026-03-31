@@ -68,6 +68,13 @@ export async function GET(req: NextRequest) {
     
   budgetsReset += monthlyReset || 0;
 
+  // ==================== EXPIRE PENDING APPROVALS ====================
+  const { count: approvalsExpired } = await supabase
+    .from('approval_requests')
+    .update({ status: 'expired' })
+    .eq('status', 'pending')
+    .lt('expires_at', now.toISOString());
+
   // ==================== DATA RETENTION CLEANUP ====================
   const { data: orgs } = await supabase
     .from('organizations')
@@ -109,6 +116,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     message: `Maintenance complete.`,
     budgetsReset,
+    approvalsExpired: approvalsExpired || 0,
     dataDeleted: totalDeleted,
     details: results,
     timestamp: now.toISOString(),

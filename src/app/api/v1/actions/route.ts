@@ -6,6 +6,9 @@ import { sendNotifications } from '@/lib/notifications';
 import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
 import { reportError } from '@/lib/errors';
 import { sanitizeString, sanitizeMetadata, sanitizePayload, sanitizePositiveInt, validateStatus } from '@/lib/validate';
+import { evaluatePolicies } from '@/lib/policies';
+import { checkAnomalies } from '@/lib/anomalies';
+import { fireRollbacks } from '@/lib/rollbacks';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -18,18 +21,93 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '50') || 50, 1), 200);
   const offset = Math.max(parseInt(url.searchParams.get('offset') || '0') || 0, 0);
 
-  const { data: actions, error, count } = await supabase
+  // Filter params
+  const agent = sanitizeString(url.searchParams.get('agent') ?? undefined);
+  const service = sanitizeString(url.searchParams.get('service') ?? undefined);
+  const statusParam = url.searchParams.get('status');
+  const from = sanitizeString(url.searchParams.get('from') ?? undefined);
+  const to = sanitizeString(url.searchParams.get('to') ?? undefined);
+  const traceId = sanitizeString(url.searchParams.get('trace_id') ?? undefined);
+  const search = sanitizeString(url.searchParams.get('search') ?? undefined);
+  const cursorParam = url.searchParams.get('cursor');
+
+  // Validate status if provided
+  if (statusParam !== null) {
+    const validStatuses = ['success', 'error', 'blocked'];
+    if (!validStatuses.includes(statusParam)) {
+      return NextResponse.json({ error: 'Invalid status. Must be one of: success, error, blocked' }, { status: 400 });
+    }
+  }
+
+  // Validate ISO date params
+  if (from && isNaN(Date.parse(from))) {
+    return NextResponse.json({ error: 'Invalid "from" date. Must be ISO 8601 format.' }, { status: 400 });
+  }
+  if (to && isNaN(Date.parse(to))) {
+    return NextResponse.json({ error: 'Invalid "to" date. Must be ISO 8601 format.' }, { status: 400 });
+  }
+
+  // Decode cursor for cursor-based pagination
+  let cursorCreatedAt: string | null = null;
+  let cursorId: string | null = null;
+  if (cursorParam) {
+    try {
+      const decoded = JSON.parse(Buffer.from(cursorParam, 'base64').toString('utf-8'));
+      cursorCreatedAt = decoded.created_at || null;
+      cursorId = decoded.id || null;
+    } catch {
+      return NextResponse.json({ error: 'Invalid cursor' }, { status: 400 });
+    }
+  }
+
+  // Build query
+  let query = supabase
     .from('action_logs')
     .select('*', { count: 'exact' })
-    .eq('org_id', auth.orgId)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    .eq('org_id', auth.orgId);
+
+  const environment = sanitizeString(url.searchParams.get('environment') ?? undefined);
+
+  if (environment) query = query.eq('environment', environment);
+  if (agent) query = query.eq('agent_name', agent);
+  if (service) query = query.eq('service', service);
+  if (statusParam) query = query.eq('status', statusParam);
+  if (from) query = query.gte('created_at', from);
+  if (to) query = query.lte('created_at', to);
+  if (traceId) query = query.eq('trace_id', traceId);
+  if (search) query = query.ilike('action', `%${search}%`);
+
+  // Apply cursor-based pagination if cursor provided, otherwise use offset
+  if (cursorCreatedAt && cursorId) {
+    // Fetch rows strictly older than the cursor (or same timestamp but with a different id)
+    query = query.or(`created_at.lt.${cursorCreatedAt},and(created_at.eq.${cursorCreatedAt},id.lt.${cursorId})`);
+  }
+
+  query = query.order('created_at', { ascending: false }).order('id', { ascending: false });
+
+  // Use offset only when no cursor is provided
+  if (!cursorParam) {
+    query = query.range(offset, offset + limit - 1);
+  } else {
+    query = query.limit(limit);
+  }
+
+  const { data: actions, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch actions', detail: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ actions: actions || [], total: count || 0 });
+  const result: Record<string, unknown> = { actions: actions || [], total: count || 0 };
+
+  // Generate nextCursor if there are more results
+  if (actions && actions.length === limit) {
+    const last = actions[actions.length - 1];
+    const nextCursor = Buffer.from(JSON.stringify({ created_at: last.created_at, id: last.id })).toString('base64');
+    result.nextCursor = nextCursor;
+  }
+
+  return NextResponse.json(result);
 }
 
 // POST /api/v1/actions - Log an agent action
@@ -54,6 +132,7 @@ export async function POST(req: NextRequest) {
   const duration_ms = sanitizePositiveInt(body.duration_ms);
   const metadata = sanitizeMetadata(body.metadata);
   const trace_id = sanitizeString(body.trace_id, 200) || null;
+  const environment = sanitizeString(body.environment) || 'production';
   const input = body.input !== undefined ? sanitizePayload(body.input) : null;
   const output = body.output !== undefined ? sanitizePayload(body.output) : null;
 
@@ -91,6 +170,7 @@ export async function POST(req: NextRequest) {
     .select('id, status')
     .eq('org_id', auth.orgId)
     .eq('name', agent)
+    .eq('environment', environment)
     .single();
 
   if (existingAgent) {
@@ -102,7 +182,7 @@ export async function POST(req: NextRequest) {
     // Try to create — catch unique constraint race condition
     const { data: newAgent, error: insertErr } = await supabase
       .from('agents')
-      .insert({ org_id: auth.orgId, name: agent, status: 'active', last_active_at: new Date().toISOString() })
+      .insert({ org_id: auth.orgId, name: agent, environment, status: 'active', last_active_at: new Date().toISOString() })
       .select('id, status')
       .single();
 
@@ -113,6 +193,7 @@ export async function POST(req: NextRequest) {
         .select('id, status')
         .eq('org_id', auth.orgId)
         .eq('name', agent)
+        .eq('environment', environment)
         .single();
 
       if (!raceAgent) {
@@ -134,6 +215,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ allowed: false, reason: 'Agent is paused' }, { status: 403 });
   }
 
+  // Policy engine checks
+  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action, cost_cents, input, environment);
+  if (!policyResult.allowed) {
+    if (policyResult.requiresApproval) {
+      return NextResponse.json(
+        { blocked: true, requiresApproval: true, approvalId: policyResult.approvalId, reason: 'Approval required by policy', policyId: policyResult.policyId },
+        { status: 403 },
+      );
+    }
+    return NextResponse.json(
+      { blocked: true, reason: policyResult.blockReason, policyId: policyResult.policyId },
+      { status: 403 },
+    );
+  }
+
   // Insert action log
   const { data: actionLog, error: logErr } = await supabase
     .from('action_logs')
@@ -149,6 +245,7 @@ export async function POST(req: NextRequest) {
       trace_id,
       input,
       output,
+      environment,
     })
     .select()
     .single();
@@ -220,6 +317,9 @@ export async function POST(req: NextRequest) {
             cost: `$${(newCost / 100).toFixed(2)}/${budget.max_cost_cents ? '$' + (budget.max_cost_cents / 100).toFixed(2) : '∞'}`,
           },
         }).catch(() => {});
+
+        // Fire rollback hooks (non-blocking)
+        fireRollbacks(auth.orgId, 'budget_exceeded', agent, trace_id || undefined).catch(() => {});
       }
 
       // Fire budget warning webhook
@@ -242,6 +342,14 @@ export async function POST(req: NextRequest) {
       }
     }
   }
+
+  // Statistical anomaly detection (non-blocking)
+  checkAnomalies(auth.orgId, agent, {
+    service,
+    estimated_cost_cents: cost_cents,
+    duration_ms,
+    status,
+  }).catch(() => {});
 
   // Fire action logged webhook (non-blocking)
   fireWebhooks(auth.orgId, 'action.logged', {

@@ -1,6 +1,6 @@
 import { createServiceClient } from './supabase';
 
-type NotificationEvent = 'action.error' | 'agent.killed' | 'budget.exceeded' | 'budget.warning';
+type NotificationEvent = 'action.error' | 'agent.killed' | 'budget.exceeded' | 'budget.warning' | 'anomaly.detected';
 
 interface NotificationPayload {
   event: NotificationEvent;

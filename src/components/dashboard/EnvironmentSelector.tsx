@@ -2,11 +2,6 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 
-interface Environment {
-  id: string;
-  name: string;
-}
-
 interface EnvironmentSelectorProps {
   apiKey: string;
   environment: string;
@@ -28,7 +23,7 @@ function getEnvDotColor(envName: string): string {
 }
 
 export default function EnvironmentSelector({ apiKey, environment, onChange }: EnvironmentSelectorProps) {
-  const [environments, setEnvironments] = useState<Environment[]>([]);
+  const [environments, setEnvironments] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -92,14 +87,14 @@ export default function EnvironmentSelector({ apiKey, environment, onChange }: E
 
           {environments.map(env => (
             <button
-              key={env.id}
-              onClick={() => { onChange(env.name); setOpen(false); }}
+              key={env}
+              onClick={() => { onChange(env); setOpen(false); }}
               className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] text-left transition-colors hover:bg-white/[0.06] ${
-                environment === env.name ? 'bg-white/[0.04] text-white' : 'text-white/60'
+                environment === env ? 'bg-white/[0.04] text-white' : 'text-white/60'
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${getEnvDotColor(env.name)}`} />
-              <span className="capitalize">{env.name}</span>
+              <span className={`w-2 h-2 rounded-full ${getEnvDotColor(env)}`} />
+              <span className="capitalize">{env}</span>
             </button>
           ))}
 

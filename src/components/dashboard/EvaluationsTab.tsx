@@ -6,12 +6,11 @@ import {
 } from 'recharts';
 
 interface EvalStats {
-  avg_score: number;
-  total_evaluations: number;
-  top_agent: { name: string; avg_score: number } | null;
-  score_trend: { date: string; avg_score: number; count: number }[];
-  per_agent: { agent_name: string; avg_score: number; count: number }[];
-  label_distribution: { label: string; count: number }[];
+  avgScore: number;
+  totalEvaluations: number;
+  trend: { date: string; avg_score: number; count: number }[];
+  byAgent: { agent_name: string; avg_score: number; count: number }[];
+  byLabel: { label: string; count: number }[];
 }
 
 interface Evaluation {
@@ -92,7 +91,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
 
   if (loading) return <div className="text-white/30 text-center py-16">Loading evaluations...</div>;
 
-  if (!evalStats || (evalStats.total_evaluations === 0 && evaluations.length === 0)) {
+  if (!evalStats || (evalStats.totalEvaluations === 0 && evaluations.length === 0)) {
     return (
       <div className="space-y-4">
         <div>
@@ -108,8 +107,8 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
     );
   }
 
-  const maxLabelCount = Math.max(...(evalStats.label_distribution || []).map(l => l.count), 1);
-  const maxAgentCount = Math.max(...(evalStats.per_agent || []).map(a => a.count), 1);
+  const maxLabelCount = Math.max(...(evalStats.byLabel || []).map(l => l.count), 1);
+  const maxAgentCount = Math.max(...(evalStats.byAgent || []).map(a => a.count), 1);
 
   return (
     <div className="space-y-6">
@@ -122,23 +121,23 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
           <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Average Score</p>
-          <p className={`text-3xl font-bold ${scoreColor(evalStats.avg_score)}`}>
-            {evalStats.avg_score.toFixed(1)}
+          <p className={`text-3xl font-bold ${scoreColor(evalStats.avgScore)}`}>
+            {evalStats.avgScore.toFixed(1)}
           </p>
           <p className="text-[11px] text-white/20 mt-1">out of 100</p>
         </div>
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
           <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Total Evaluations</p>
-          <p className="text-3xl font-bold text-white/80">{evalStats.total_evaluations.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-white/80">{evalStats.totalEvaluations.toLocaleString()}</p>
           <p className="text-[11px] text-white/20 mt-1">all time</p>
         </div>
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
           <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Top Agent</p>
-          {evalStats.top_agent ? (
+          {evalStats.byAgent.length > 0 ? (
             <>
-              <p className="text-lg font-semibold text-white/70 truncate">{evalStats.top_agent.name}</p>
-              <p className={`text-[13px] mt-0.5 ${scoreColor(evalStats.top_agent.avg_score)}`}>
-                {evalStats.top_agent.avg_score.toFixed(1)} avg score
+              <p className="text-lg font-semibold text-white/70 truncate">{evalStats.byAgent.sort((a, b) => b.avg_score - a.avg_score)[0].agent_name}</p>
+              <p className={`text-[13px] mt-0.5 ${scoreColor(evalStats.byAgent.sort((a, b) => b.avg_score - a.avg_score)[0].avg_score)}`}>
+                {evalStats.byAgent.sort((a, b) => b.avg_score - a.avg_score)[0].avg_score.toFixed(1)} avg score
               </p>
             </>
           ) : (
@@ -148,11 +147,11 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
       </div>
 
       {/* Score trend chart */}
-      {evalStats.score_trend && evalStats.score_trend.length > 1 && (
+      {evalStats.trend && evalStats.trend.length > 1 && (
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
           <h4 className="text-sm font-medium text-white/60 mb-4">Score Trend</h4>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={evalStats.score_trend}>
+            <AreaChart data={evalStats.trend}>
               <defs>
                 <linearGradient id="evalScoreGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -194,7 +193,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
       )}
 
       {/* Per-agent breakdown */}
-      {evalStats.per_agent && evalStats.per_agent.length > 0 && (
+      {evalStats.byAgent && evalStats.byAgent.length > 0 && (
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
           <div className="px-5 py-4 border-b border-white/[0.06]">
             <h4 className="text-sm font-medium text-white/60">Per-Agent Breakdown</h4>
@@ -209,7 +208,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              {evalStats.per_agent.map(agent => (
+              {evalStats.byAgent.map(agent => (
                 <tr key={agent.agent_name} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-4 py-3 text-white/70 font-medium">{agent.agent_name}</td>
                   <td className={`px-4 py-3 font-medium ${scoreColor(agent.avg_score)}`}>{agent.avg_score.toFixed(1)}</td>
@@ -233,11 +232,11 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
       )}
 
       {/* Label distribution */}
-      {evalStats.label_distribution && evalStats.label_distribution.length > 0 && (
+      {evalStats.byLabel && evalStats.byLabel.length > 0 && (
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
           <h4 className="text-sm font-medium text-white/60 mb-4">Label Distribution</h4>
           <div className="space-y-2.5">
-            {evalStats.label_distribution.map(item => (
+            {evalStats.byLabel.map(item => (
               <div key={item.label} className="flex items-center gap-3">
                 <span className="text-[13px] text-white/50 w-24 truncate">{item.label}</span>
                 <div className="flex-1 h-5 bg-white/[0.04] rounded-md overflow-hidden">

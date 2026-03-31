@@ -5,6 +5,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
+import TraceTimeline from '@/components/TraceTimeline';
 
 interface Agent {
   id: string;
@@ -111,6 +112,8 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'settings'>('overview');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
+  const [traceData, setTraceData] = useState<{ traceId: string; actions: unknown[]; summary: unknown } | null>(null);
+  const [traceLoading, setTraceLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
@@ -120,6 +123,26 @@ export default function DashboardPage() {
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   }, []);
+
+  const openTrace = useCallback(async (traceId: string) => {
+    if (!apiKey || traceLoading) return;
+    setTraceLoading(true);
+    try {
+      const res = await fetch(`/api/v1/traces/${encodeURIComponent(traceId)}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (!res.ok) {
+        addToast('Failed to load trace', 'error');
+        return;
+      }
+      const data = await res.json();
+      setTraceData(data);
+    } catch {
+      addToast('Failed to load trace', 'error');
+    } finally {
+      setTraceLoading(false);
+    }
+  }, [apiKey, traceLoading, addToast]);
 
   // Initialize auth — get user session, look up org, get API key
   useEffect(() => {
@@ -458,9 +481,9 @@ export default function DashboardPage() {
         ) : tab === 'overview' ? (
           <OverviewTab stats={stats} actions={actions} apiKey={apiKey} />
         ) : tab === 'actions' ? (
-          <ActionsTab actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} />
+          <ActionsTab actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} onOpenTrace={openTrace} />
         ) : tab === 'agents' ? (
-          <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} />
+          <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} onOpenTrace={openTrace} />
         ) : tab === 'budgets' ? (
           <BudgetsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} />
         ) : tab === 'webhooks' ? (
@@ -488,7 +511,17 @@ export default function DashboardPage() {
 
       {/* Action Drawer */}
       {drawerAction && (
-        <ActionDrawer action={drawerAction} onClose={() => setDrawerAction(null)} />
+        <ActionDrawer action={drawerAction} onClose={() => setDrawerAction(null)} onOpenTrace={openTrace} />
+      )}
+
+      {/* Trace Timeline */}
+      {traceData && (
+        <TraceTimeline
+          traceId={traceData.traceId}
+          actions={traceData.actions as React.ComponentProps<typeof TraceTimeline>['actions']}
+          summary={traceData.summary as React.ComponentProps<typeof TraceTimeline>['summary']}
+          onClose={() => setTraceData(null)}
+        />
       )}
 
       {/* Toast notifications */}
@@ -780,7 +813,7 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
 }
 
 // ==================== ACTIONS TAB ====================
-function ActionsTab({ actions, apiKey, onOpenAction }: { actions: ActionLog[]; apiKey: string; onOpenAction: (a: ActionLog) => void }) {
+function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: ActionLog[]; apiKey: string; onOpenAction: (a: ActionLog) => void; onOpenTrace: (traceId: string) => void }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [serviceFilter, setServiceFilter] = useState<string>('all');
@@ -905,7 +938,16 @@ function ActionsTab({ actions, apiKey, onOpenAction }: { actions: ActionLog[]; a
                     <td className="px-4 py-3 text-sm text-white/40">
                       {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-white/30">{timeAgo(action.created_at)}</td>
+                    <td className="px-4 py-3 text-xs text-white/30">
+                      {action.trace_id && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onOpenTrace(action.trace_id!); }}
+                          className="text-purple-400/50 hover:text-purple-400 mr-1.5 transition-colors"
+                          title="View trace timeline"
+                        >⟐</button>
+                      )}
+                      {timeAgo(action.created_at)}
+                    </td>
                   </tr>
                 ))
               )}
@@ -923,15 +965,16 @@ function ActionsTab({ actions, apiKey, onOpenAction }: { actions: ActionLog[]; a
 }
 
 // ==================== AGENTS TAB ====================
-function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, apiKey, onOpenAction }: { 
-  stats: Stats; 
-  onToggle: (name: string, status: string) => void; 
+function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, apiKey, onOpenAction, onOpenTrace }: {
+  stats: Stats;
+  onToggle: (name: string, status: string) => void;
   onKill: (name: string) => void;
   onSelect: (name: string | null) => void;
   selectedAgent: string | null;
   actions: ActionLog[];
   apiKey: string;
   onOpenAction: (a: ActionLog) => void;
+  onOpenTrace: (traceId: string) => void;
 }) {
   const [killConfirm, setKillConfirm] = useState<string | null>(null);
 
@@ -942,7 +985,7 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
       onSelect(null);
       return null;
     }
-    return <AgentDetailView agent={agent} actions={actions} onBack={() => onSelect(null)} onToggle={onToggle} onKill={onKill} apiKey={apiKey} onOpenAction={onOpenAction} />;
+    return <AgentDetailView agent={agent} actions={actions} onBack={() => onSelect(null)} onToggle={onToggle} onKill={onKill} apiKey={apiKey} onOpenAction={onOpenAction} onOpenTrace={onOpenTrace} />;
   }
 
   return (
@@ -1058,7 +1101,7 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
 }
 
 // ==================== AGENT DETAIL VIEW ====================
-function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onOpenAction }: {
+function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onOpenAction, onOpenTrace }: {
   agent: Agent;
   actions: ActionLog[];
   onBack: () => void;
@@ -1066,6 +1109,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
   onKill: (name: string) => void;
   apiKey: string;
   onOpenAction: (a: ActionLog) => void;
+  onOpenTrace: (traceId: string) => void;
 }) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [killConfirm, setKillConfirm] = useState(false);
@@ -1281,7 +1325,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
               return (
                 <>
                   {[...traceMap.entries()].map(([tid, acts]) => (
-                    <TraceGroup key={tid} traceId={tid} actions={acts} onOpenAction={onOpenAction} />
+                    <TraceGroup key={tid} traceId={tid} actions={acts} onOpenAction={onOpenAction} onOpenTrace={onOpenTrace} />
                   ))}
                   {untraced.length > 0 && (
                     <div className="mt-4">
@@ -1350,7 +1394,13 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
                         {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
                       </td>
                       <td className="px-4 py-3 text-xs text-white/30">
-                        {action.trace_id && <span className="text-purple-400/40 mr-1">⟐</span>}
+                        {action.trace_id && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onOpenTrace(action.trace_id!); }}
+                            className="text-purple-400/50 hover:text-purple-400 mr-1.5 transition-colors"
+                            title="View trace timeline"
+                          >⟐</button>
+                        )}
                         {timeAgo(action.created_at)}
                       </td>
                     </tr>
@@ -2226,7 +2276,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 }
 
 // ==================== ACTION DRAWER ====================
-function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => void }) {
+function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onClose: () => void; onOpenTrace?: (traceId: string) => void }) {
   const meta = (action.metadata || action.request_meta || {}) as Record<string, unknown>;
   const hasInput = action.input != null && typeof action.input === 'object' && Object.keys(action.input as Record<string, unknown>).length > 0;
   const hasOutput = action.output != null && typeof action.output === 'object' && Object.keys(action.output as Record<string, unknown>).length > 0;
@@ -2277,7 +2327,17 @@ function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => v
             {action.trace_id ? (
               <div>
                 <p className="text-[10px] uppercase text-white/25 mb-1">Trace ID</p>
-                <p className="text-sm font-mono text-purple-400">{action.trace_id}</p>
+                {onOpenTrace ? (
+                  <button
+                    onClick={() => onOpenTrace(action.trace_id!)}
+                    className="text-sm font-mono text-purple-400 hover:text-purple-300 underline decoration-purple-400/30 hover:decoration-purple-300/50 transition-colors"
+                    title="View trace timeline"
+                  >
+                    {action.trace_id}
+                  </button>
+                ) : (
+                  <p className="text-sm font-mono text-purple-400">{action.trace_id}</p>
+                )}
               </div>
             ) : null}
           </div>
@@ -2332,7 +2392,7 @@ function ActionDrawer({ action, onClose }: { action: ActionLog; onClose: () => v
 }
 
 // ==================== TRACE GROUP VIEW ====================
-function TraceGroup({ traceId, actions, onOpenAction }: { traceId: string; actions: ActionLog[]; onOpenAction: (a: ActionLog) => void }) {
+function TraceGroup({ traceId, actions, onOpenAction, onOpenTrace }: { traceId: string; actions: ActionLog[]; onOpenAction: (a: ActionLog) => void; onOpenTrace?: (traceId: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const sorted = [...actions].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   const hasError = sorted.some(a => a.status === 'error');
@@ -2351,7 +2411,18 @@ function TraceGroup({ traceId, actions, onOpenAction }: { traceId: string; actio
           <span className="text-[10px] text-white/20">{totalDuration}ms total</span>
           {hasError && <span className="text-[10px] text-red-400">has errors</span>}
         </div>
-        <span className="text-white/20 text-xs">{expanded ? '▾' : '▸'}</span>
+        <div className="flex items-center gap-2">
+          {onOpenTrace && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onOpenTrace(traceId); }}
+              className="text-[10px] text-purple-400/50 hover:text-purple-400 hover:bg-purple-500/10 px-2 py-0.5 rounded transition-colors"
+              title="View trace timeline"
+            >
+              Timeline
+            </button>
+          )}
+          <span className="text-white/20 text-xs">{expanded ? '▾' : '▸'}</span>
+        </div>
       </div>
       {expanded && (
         <div className="border-t border-white/[0.04]">

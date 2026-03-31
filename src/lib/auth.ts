@@ -43,6 +43,38 @@ export async function authenticateApiKey(req: NextRequest): Promise<AuthContext 
   };
 }
 
+/**
+ * Authenticate using a raw API key string (no request object needed).
+ * Useful for SSE endpoints where EventSource doesn't support custom headers.
+ */
+export async function authenticateApiKeyFromString(key: string): Promise<AuthContext | null> {
+  if (!key.startsWith('al_')) return null;
+
+  const keyHash = hashApiKey(key);
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase
+    .from('api_keys')
+    .select('id, org_id, revoked_at, last_used_at')
+    .eq('key_hash', keyHash)
+    .single();
+
+  if (error || !data || data.revoked_at) return null;
+
+  // Only update last_used_at every 5 minutes to reduce DB writes
+  const lastUsed = data.last_used_at ? new Date(data.last_used_at).getTime() : 0;
+  if (Date.now() - lastUsed > 5 * 60 * 1000) {
+    Promise.resolve(
+      supabase.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', data.id)
+    ).catch(() => {});
+  }
+
+  return {
+    orgId: data.org_id,
+    apiKeyId: data.id,
+  };
+}
+
 export function hashApiKey(key: string): string {
   return createHash('sha256').update(key).digest('hex');
 }

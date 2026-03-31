@@ -6,6 +6,7 @@ import { sendNotifications } from '@/lib/notifications';
 import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
 import { reportError } from '@/lib/errors';
 import { sanitizeString, sanitizeMetadata, sanitizePayload, sanitizePositiveInt, validateStatus } from '@/lib/validate';
+import { evaluatePolicies } from '@/lib/policies';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -210,6 +211,21 @@ export async function POST(req: NextRequest) {
 
   if (agentStatus === 'paused') {
     return NextResponse.json({ allowed: false, reason: 'Agent is paused' }, { status: 403 });
+  }
+
+  // Policy engine checks
+  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action, cost_cents, input);
+  if (!policyResult.allowed) {
+    if (policyResult.requiresApproval) {
+      return NextResponse.json(
+        { blocked: true, requiresApproval: true, reason: 'Approval required by policy', policyId: policyResult.policyId },
+        { status: 403 },
+      );
+    }
+    return NextResponse.json(
+      { blocked: true, reason: policyResult.blockReason, policyId: policyResult.policyId },
+      { status: 403 },
+    );
   }
 
   // Insert action log

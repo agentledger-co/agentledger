@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sanitizeString } from '@/lib/validate';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
+import { evaluatePolicies } from '@/lib/policies';
 
 export async function POST(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -76,6 +77,25 @@ export async function POST(req: NextRequest) {
         }
       }
     }
+  }
+
+  // Policy engine checks
+  const service = sanitizeString(body.service) || '';
+  const action = sanitizeString(body.action) || '';
+  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action);
+  if (!policyResult.allowed) {
+    if (policyResult.requiresApproval) {
+      return NextResponse.json({
+        allowed: false,
+        requiresApproval: true,
+        policyId: policyResult.policyId,
+      });
+    }
+    return NextResponse.json({
+      allowed: false,
+      blockReason: policyResult.blockReason,
+      policyId: policyResult.policyId,
+    });
   }
 
   return NextResponse.json({

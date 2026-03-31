@@ -54,6 +54,56 @@ export interface CheckResult {
   };
 }
 
+export interface ActionLog {
+  id: string;
+  org_id: string;
+  agent_name: string;
+  service: string;
+  action: string;
+  status: string;
+  estimated_cost_cents: number;
+  duration_ms: number;
+  request_meta: Record<string, unknown>;
+  trace_id: string | null;
+  input: unknown;
+  output: unknown;
+  environment: string;
+  created_at: string;
+}
+
+export interface Alert {
+  id: string;
+  org_id: string;
+  agent_id: string;
+  agent_name: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  metadata: Record<string, unknown>;
+  acknowledged_at: string | null;
+  created_at: string;
+}
+
+export interface StreamOptions {
+  /** Event types to subscribe to (e.g. ['action.new', 'alert.new']). Default: all */
+  events?: string[];
+  /** Filter by agent name */
+  agent?: string;
+  /** Filter by environment */
+  environment?: string;
+  /** Called when a new action is logged */
+  onAction?: (action: ActionLog) => void;
+  /** Called when a new alert is created */
+  onAlert?: (alert: Alert) => void;
+  /** Called on stream errors */
+  onError?: (error: Error) => void;
+}
+
+export interface StreamHandle {
+  /** Close the SSE connection */
+  close: () => void;
+}
+
 export class AgentLedger {
   private apiKey: string;
   private baseUrl: string;
@@ -200,6 +250,147 @@ export class AgentLedger {
       method: 'POST',
     });
     if (!res.ok) throw new Error(`AgentLedger: Failed to kill agent (${res.status})`);
+  }
+
+  /**
+   * Open an SSE stream to receive real-time action and alert events.
+   * Returns a handle with a close() method to terminate the connection.
+   *
+   * @example
+   * const handle = ledger.stream({
+   *   agent: 'support-bot',
+   *   onAction: (action) => console.log('New action:', action),
+   *   onAlert: (alert) => console.log('Alert:', alert),
+   *   onError: (err) => console.error('Stream error:', err),
+   * });
+   * // Later: handle.close();
+   */
+  stream(options: StreamOptions = {}): StreamHandle {
+    const controller = new AbortController();
+    let lastEventId = '';
+
+    const connect = () => {
+      const params = new URLSearchParams();
+      params.set('key', this.apiKey);
+      if (options.events && options.events.length > 0) {
+        params.set('events', options.events.join(','));
+      }
+      if (options.agent) {
+        params.set('agent', options.agent);
+      }
+      const env = options.environment || this.environment;
+      if (env) {
+        params.set('environment', env);
+      }
+
+      const url = `${this.baseUrl}/api/v1/stream?${params.toString()}`;
+      const headers: Record<string, string> = {};
+      if (lastEventId) {
+        headers['Last-Event-ID'] = lastEventId;
+      }
+
+      fetch(url, {
+        signal: controller.signal,
+        headers,
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Stream connection failed (${res.status})`);
+          }
+
+          const reader = res.body?.getReader();
+          if (!reader) {
+            throw new Error('No response body for stream');
+          }
+
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          const read = (): void => {
+            reader
+              .read()
+              .then(({ done, value }) => {
+                if (done) {
+                  // Connection closed, attempt reconnect
+                  if (!controller.signal.aborted) {
+                    setTimeout(connect, 3000);
+                  }
+                  return;
+                }
+
+                buffer += decoder.decode(value, { stream: true });
+
+                // Parse SSE messages (split on double newline)
+                const parts = buffer.split('\n\n');
+                // Keep the last incomplete chunk in the buffer
+                buffer = parts.pop() || '';
+
+                for (const part of parts) {
+                  if (!part.trim()) continue;
+
+                  let eventType = '';
+                  let data = '';
+                  let id = '';
+
+                  for (const line of part.split('\n')) {
+                    if (line.startsWith('event: ')) {
+                      eventType = line.slice(7);
+                    } else if (line.startsWith('data: ')) {
+                      data = line.slice(6);
+                    } else if (line.startsWith('id: ')) {
+                      id = line.slice(4);
+                    }
+                  }
+
+                  if (id) {
+                    lastEventId = id;
+                  }
+
+                  if (eventType === 'heartbeat') continue;
+
+                  if (data) {
+                    try {
+                      const parsed = JSON.parse(data);
+                      if (eventType === 'action.new' && options.onAction) {
+                        options.onAction(parsed as ActionLog);
+                      } else if (eventType === 'alert.new' && options.onAlert) {
+                        options.onAlert(parsed as Alert);
+                      }
+                    } catch {
+                      // Ignore malformed data
+                    }
+                  }
+                }
+
+                read();
+              })
+              .catch((err) => {
+                if (controller.signal.aborted) return;
+                if (options.onError) {
+                  options.onError(err instanceof Error ? err : new Error(String(err)));
+                }
+                // Reconnect after error
+                setTimeout(connect, 3000);
+              });
+          };
+
+          read();
+        })
+        .catch((err) => {
+          if (controller.signal.aborted) return;
+          if (options.onError) {
+            options.onError(err instanceof Error ? err : new Error(String(err)));
+          }
+          // Reconnect after error
+          setTimeout(connect, 3000);
+        });
+    };
+
+    connect();
+
+    return {
+      close: () => controller.abort(),
+    };
   }
 
   // Internal: log action to API

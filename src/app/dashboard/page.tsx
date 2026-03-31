@@ -6,6 +6,11 @@ import {
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 import TraceTimeline from '@/components/TraceTimeline';
+import PoliciesTab from '@/components/dashboard/PoliciesTab';
+import ApprovalsTab from '@/components/dashboard/ApprovalsTab';
+import EvaluationsTab from '@/components/dashboard/EvaluationsTab';
+import RollbackHooksTab from '@/components/dashboard/RollbackHooksTab';
+import EnvironmentSelector from '@/components/dashboard/EnvironmentSelector';
 
 interface Agent {
   id: string;
@@ -109,7 +114,8 @@ export default function DashboardPage() {
   const [actions, setActions] = useState<ActionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'settings'>('overview');
+  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'policies' | 'approvals' | 'evaluations' | 'rollbacks' | 'settings'>('overview');
+  const [environment, setEnvironment] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('al_environment') || '' : '');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
   const [traceData, setTraceData] = useState<{ traceId: string; actions: unknown[]; summary: unknown } | null>(null);
@@ -388,6 +394,7 @@ export default function DashboardPage() {
               <span className="hidden md:inline">+ Seed Demo Data</span>
               <span className="md:hidden">+ Seed</span>
             </button>
+            <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); sessionStorage.setItem('al_environment', env); }} />
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-colors ${
@@ -427,7 +434,7 @@ export default function DashboardPage() {
 
         {/* Tabs — scrollable on mobile */}
         <div className="flex gap-1 mb-6 bg-white/[0.03] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit">
-          {(['overview', 'actions', 'agents', 'budgets', 'alerts', 'webhooks', 'settings'] as const).map(t => (
+          {(['overview', 'actions', 'agents', 'budgets', 'alerts', 'policies', 'approvals', 'evaluations', 'webhooks', 'rollbacks', 'settings'] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -488,6 +495,14 @@ export default function DashboardPage() {
           <BudgetsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} />
         ) : tab === 'webhooks' ? (
           <WebhooksTab apiKey={apiKey} onToast={addToast} />
+        ) : tab === 'policies' ? (
+          <PoliciesTab apiKey={apiKey} onToast={addToast} />
+        ) : tab === 'approvals' ? (
+          <ApprovalsTab apiKey={apiKey} onToast={addToast} />
+        ) : tab === 'evaluations' ? (
+          <EvaluationsTab apiKey={apiKey} onToast={addToast} />
+        ) : tab === 'rollbacks' ? (
+          <RollbackHooksTab apiKey={apiKey} onToast={addToast} />
         ) : tab === 'settings' ? (
           <SettingsTab apiKey={apiKey} onToast={addToast} />
         ) : (

@@ -10,6 +10,7 @@ import PoliciesTab from '@/components/dashboard/PoliciesTab';
 import ApprovalsTab from '@/components/dashboard/ApprovalsTab';
 import EvaluationsTab from '@/components/dashboard/EvaluationsTab';
 import RollbackHooksTab from '@/components/dashboard/RollbackHooksTab';
+import TeamTab from '@/components/dashboard/TeamTab';
 import EnvironmentSelector from '@/components/dashboard/EnvironmentSelector';
 
 interface Agent {
@@ -114,7 +115,7 @@ export default function DashboardPage() {
   const [actions, setActions] = useState<ActionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'policies' | 'approvals' | 'evaluations' | 'rollbacks' | 'settings'>('overview');
+  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'policies' | 'approvals' | 'evaluations' | 'rollbacks' | 'team' | 'settings'>('overview');
   const [environment, setEnvironment] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('al_environment') || '' : '');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
@@ -434,7 +435,7 @@ export default function DashboardPage() {
 
         {/* Tabs — scrollable on mobile */}
         <div className="flex gap-1 mb-6 bg-white/[0.03] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit">
-          {(['overview', 'actions', 'agents', 'budgets', 'alerts', 'policies', 'approvals', 'evaluations', 'webhooks', 'rollbacks', 'settings'] as const).map(t => (
+          {(['overview', 'actions', 'agents', 'budgets', 'alerts', 'policies', 'approvals', 'evaluations', 'webhooks', 'rollbacks', 'team', 'settings'] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -503,6 +504,8 @@ export default function DashboardPage() {
           <EvaluationsTab apiKey={apiKey} onToast={addToast} />
         ) : tab === 'rollbacks' ? (
           <RollbackHooksTab apiKey={apiKey} onToast={addToast} />
+        ) : tab === 'team' ? (
+          <TeamTab onToast={addToast} />
         ) : tab === 'settings' ? (
           <SettingsTab apiKey={apiKey} onToast={addToast} />
         ) : (

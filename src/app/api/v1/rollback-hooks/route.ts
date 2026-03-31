@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { sanitizeString } from '@/lib/validate';
+import { logAudit } from '@/lib/audit';
 
 // GET /api/v1/rollback-hooks - List rollback hooks
 export async function GET(req: NextRequest) {
@@ -79,6 +80,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create rollback hook', detail: error.message }, { status: 500 });
   }
 
+  logAudit({
+    orgId: auth.orgId,
+    action: 'rollback_hook.created',
+    resourceType: 'rollback_hook',
+    resourceId: hook.id,
+    details: { agent_name: agent_name, service, action },
+  });
+
   return NextResponse.json(hook, { status: 201 });
 }
 
@@ -137,6 +146,14 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to update rollback hook', detail: error.message }, { status: 500 });
   }
 
+  logAudit({
+    orgId: auth.orgId,
+    action: 'rollback_hook.updated',
+    resourceType: 'rollback_hook',
+    resourceId: id,
+    details: { updates: Object.keys(updates) },
+  });
+
   return NextResponse.json(hook);
 }
 
@@ -165,6 +182,13 @@ export async function DELETE(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: 'Failed to delete rollback hook', detail: error.message }, { status: 500 });
   }
+
+  logAudit({
+    orgId: auth.orgId,
+    action: 'rollback_hook.deleted',
+    resourceType: 'rollback_hook',
+    resourceId: id,
+  });
 
   return NextResponse.json({ deleted: true });
 }

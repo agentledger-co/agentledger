@@ -3,6 +3,7 @@ import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { sanitizeString, sanitizePositiveInt } from '@/lib/validate';
 import { invalidatePolicyCache } from '@/lib/policies';
+import { logAudit } from '@/lib/audit';
 
 const VALID_RULE_TYPES = [
   'rate_limit',
@@ -157,6 +158,14 @@ export async function POST(req: NextRequest) {
 
   invalidatePolicyCache(auth.orgId);
 
+  logAudit({
+    orgId: auth.orgId,
+    action: 'policy.created',
+    resourceType: 'policy',
+    resourceId: data.id,
+    details: { rule_type: ruleType, agent_name: agentName },
+  });
+
   return NextResponse.json({ policy: data }, { status: 201 });
 }
 
@@ -242,6 +251,14 @@ export async function PATCH(req: NextRequest) {
 
   invalidatePolicyCache(auth.orgId);
 
+  logAudit({
+    orgId: auth.orgId,
+    action: 'policy.updated',
+    resourceType: 'policy',
+    resourceId: id,
+    details: { updates: Object.keys(updates) },
+  });
+
   return NextResponse.json({ policy: data });
 }
 
@@ -276,6 +293,13 @@ export async function DELETE(req: NextRequest) {
   }
 
   invalidatePolicyCache(auth.orgId);
+
+  logAudit({
+    orgId: auth.orgId,
+    action: 'policy.deleted',
+    resourceType: 'policy',
+    resourceId: id,
+  });
 
   return NextResponse.json({ deleted: true });
 }

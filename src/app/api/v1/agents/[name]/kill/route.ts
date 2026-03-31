@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { fireWebhooks } from '@/lib/webhooks';
 import { sendNotifications } from '@/lib/notifications';
 import { fireRollbacks } from '@/lib/rollbacks';
+import { logAudit } from '@/lib/audit';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
   const auth = await authenticateApiKey(req);
@@ -71,6 +72,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     .single();
 
   fireRollbacks(auth.orgId, 'agent_killed', name, recentAction?.trace_id || undefined).catch(() => {});
+
+  logAudit({
+    orgId: auth.orgId,
+    action: 'agent.killed',
+    resourceType: 'agent',
+    resourceId: name,
+    details: { environment },
+  });
 
   return NextResponse.json({ status: 'killed', agent: name });
 }

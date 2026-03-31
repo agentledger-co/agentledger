@@ -79,6 +79,29 @@ export async function POST(req: NextRequest) {
     details: { email, role },
   });
 
+  // Send invite email via Resend
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    const acceptUrl = `${req.nextUrl.origin}/invite?token=${token}`;
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'AgentLedger <noreply@agentledger.co>',
+          to: [email],
+          subject: 'You\'ve been invited to AgentLedger',
+          html: `<p>You've been invited to join an AgentLedger workspace as <strong>${role}</strong>.</p><p><a href="${acceptUrl}">Accept Invitation</a></p><p>This invite expires in 7 days.</p>`,
+        }),
+      });
+    } catch {
+      // Email send failure shouldn't block the invite creation
+    }
+  }
+
   return NextResponse.json({ invite }, { status: 201 });
 }
 

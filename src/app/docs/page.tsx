@@ -1052,7 +1052,7 @@ handle.close();`} filename="stream-example.ts" />
             <p className="text-white/30 text-[14px] mb-4">Full-featured Python client with sync and async support.</p>
 
             <h3 className="text-[16px] font-medium mt-4 mb-3">Installation</h3>
-            <Code code="pip install agentledger" lang="bash" />
+            <Code code="pip install agentledger-py" lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Sync client</h3>
             <Code code={`from agentledger import AgentLedger

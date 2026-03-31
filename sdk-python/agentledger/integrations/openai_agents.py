@@ -5,7 +5,7 @@ AgentLedger tracking.
 
 Requires the ``openai`` optional dependency::
 
-    pip install agentledger[openai]
+    pip install agentledger-py[openai]
 """
 
 from __future__ import annotations

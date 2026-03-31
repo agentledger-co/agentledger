@@ -5,7 +5,7 @@ calls to AgentLedger.
 
 Requires the ``langchain`` optional dependency::
 
-    pip install agentledger[langchain]
+    pip install agentledger-py[langchain]
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ if not _HAS_LANGCHAIN:
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(
                 "langchain-core is required for the LangChain integration. "
-                "Install it with: pip install agentledger[langchain]"
+                "Install it with: pip install agentledger-py[langchain]"
             )
 
 else:

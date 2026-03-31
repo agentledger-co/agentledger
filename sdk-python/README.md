@@ -5,14 +5,14 @@ Python SDK for [AgentLedger](https://agentledger.co) - AI agent observability, b
 ## Installation
 
 ```bash
-pip install agentledger
+pip install agentledger-py
 ```
 
 With optional integrations:
 
 ```bash
-pip install agentledger[langchain]   # LangChain callback handler
-pip install agentledger[openai]      # OpenAI Agents helpers
+pip install agentledger-py[langchain]   # LangChain callback handler
+pip install agentledger-py[openai]      # OpenAI Agents helpers
 ```
 
 ## Quick Start

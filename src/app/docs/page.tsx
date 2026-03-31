@@ -82,6 +82,16 @@ const NAV = [
   { id: 'api-keys', label: 'API Key Management' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'budgets', label: 'Budgets & Alerts' },
+  { id: 'environments', label: 'Environments' },
+  { id: 'search', label: 'Search & Filtering' },
+  { id: 'traces', label: 'Traces' },
+  { id: 'policies', label: 'Policy Engine' },
+  { id: 'approvals', label: 'Approvals' },
+  { id: 'streaming', label: 'Live Streaming (SSE)' },
+  { id: 'anomalies', label: 'Anomaly Detection' },
+  { id: 'evaluations', label: 'Evaluations' },
+  { id: 'rollbacks', label: 'Rollback Hooks' },
+  { id: 'python', label: 'Python SDK' },
   { id: 'self-hosting', label: 'Self-Hosting' },
 ];
 
@@ -688,6 +698,426 @@ curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
             <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
               <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Automatic budget resets</strong> require enabling pg_cron in your Supabase project. See the migration file for the cron schedule SQL.</p>
             </div>
+          </section>
+
+          {/* Environments */}
+          <section id="environments" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Environments</h2>
+            <p className="text-white/30 text-[14px] mb-4">Separate agent activity across dev, staging, and production. Each environment has its own action log, budgets, and alerts. The default is <InlineCode>production</InlineCode> when not specified.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (TypeScript)</h3>
+            <Code code={`const ledger = new AgentLedger({
+  apiKey: 'al_...',
+  environment: 'staging',  // 'production' | 'staging' | 'development' | any string
+});`} filename="config.ts" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (Python)</h3>
+            <Code code={`from agentledger import AgentLedger
+
+ledger = AgentLedger(api_key="al_...", environment="staging")`} filename="config.py" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">REST API</h3>
+            <p className="text-white/30 text-[14px] mb-3">All endpoints accept an <InlineCode>environment</InlineCode> query parameter:</p>
+            <Code code={`curl https://your-instance.vercel.app/api/v1/actions?environment=staging \\
+  -H "Authorization: Bearer al_..."`} lang="bash" />
+
+            <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
+              <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Dashboard.</strong> Use the environment selector in the header to switch between environments. All charts, tables, and alerts filter to the selected environment.</p>
+            </div>
+          </section>
+
+          {/* Search & Filtering */}
+          <section id="search" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Search & Filtering</h2>
+            <p className="text-white/30 text-[14px] mb-4">Query the action log with powerful filters. All parameters are optional and can be combined.</p>
+
+            <Table
+              headers={['Parameter', 'Type', 'Description']}
+              rows={[
+                ['agent', 'string', 'Filter by agent name'],
+                ['service', 'string', 'Filter by service (e.g. openai, stripe)'],
+                ['status', 'string', 'Filter by status: success, error, blocked'],
+                ['from', 'ISO 8601', 'Start of time range'],
+                ['to', 'ISO 8601', 'End of time range'],
+                ['trace_id', 'string', 'Filter by trace ID'],
+                ['search', 'string', 'Full-text search across action metadata'],
+                ['cursor', 'string', 'Cursor for pagination (from previous response)'],
+              ]}
+            />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Example: filtered query</h3>
+            <Code code={`curl "https://your-instance.vercel.app/api/v1/actions?agent=support-bot&status=error&from=2026-03-01T00:00:00Z&to=2026-03-30T00:00:00Z" \\
+  -H "Authorization: Bearer al_..."
+
+# Paginate through large result sets with cursor
+curl "https://your-instance.vercel.app/api/v1/actions?agent=support-bot&cursor=eyJpZCI6MTIzfQ" \\
+  -H "Authorization: Bearer al_..."`} lang="bash" />
+          </section>
+
+          {/* Traces */}
+          <section id="traces" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Traces</h2>
+            <p className="text-white/30 text-[14px] mb-4">Group related actions into a single trace to see the full lifecycle of an agent task. Attach a <InlineCode>traceId</InlineCode> to every action in a workflow.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Generate a trace ID</h3>
+            <Code code={`import { AgentLedger } from 'agentledger';
+
+const traceId = AgentLedger.traceId(); // unique trace identifier
+
+await ledger.track({
+  agent: 'research-bot',
+  service: 'tavily',
+  action: 'search',
+  traceId,
+}, async () => {
+  return await tavily.search(query);
+});
+
+await ledger.track({
+  agent: 'research-bot',
+  service: 'openai',
+  action: 'summarize',
+  traceId,  // same traceId links these actions together
+}, async () => {
+  return await openai.chat.completions.create({ ... });
+});`} filename="trace-example.ts" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Retrieve a trace</h3>
+            <Code code={`curl https://your-instance.vercel.app/api/v1/traces/trc_abc123 \\
+  -H "Authorization: Bearer al_..."
+
+# Response:
+# {
+#   "traceId": "trc_abc123",
+#   "actions": [...],
+#   "summary": {
+#     "totalDuration": 3450,
+#     "totalCost": 12,
+#     "parallelGroups": 2
+#   }
+# }`} lang="bash" />
+
+            <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
+              <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Dashboard.</strong> Click any <InlineCode>trace_id</InlineCode> in the actions table to see a waterfall timeline of all actions in the trace.</p>
+            </div>
+          </section>
+
+          {/* Policy Engine */}
+          <section id="policies" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Policy Engine</h2>
+            <p className="text-white/30 text-[14px] mb-4">Define rules that are evaluated before every action. Policies can rate-limit, allowlist, blocklist, cap costs, block sensitive data, or require human approval. Set <InlineCode>agent_name</InlineCode> to target a specific agent, or leave it <InlineCode>null</InlineCode> for org-wide rules. Policies are evaluated in priority order (highest first).</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Rule types</h3>
+            <Table
+              headers={['Type', 'Config Example', 'Description']}
+              rows={[
+                ['rate_limit', '{ max_actions: 100, window_seconds: 3600 }', 'Cap actions per time window'],
+                ['service_allowlist', '{ services: ["openai", "anthropic"] }', 'Only allow listed services'],
+                ['service_blocklist', '{ services: ["stripe"] }', 'Block listed services'],
+                ['cost_limit_per_action', '{ max_cost_cents: 500 }', 'Max cost per single action'],
+                ['payload_regex_block', '{ patterns: ["password", "ssn"], fields: ["input"] }', 'Block actions with sensitive data in payload'],
+                ['require_approval', '{ services: ["stripe"], actions: ["charge"] }', 'Require human approval before execution'],
+              ]}
+            />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Create a policy</h3>
+            <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/policies \\
+  -H "Authorization: Bearer al_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "Rate limit support-bot",
+    "agent_name": "support-bot",
+    "rule_type": "rate_limit",
+    "config": { "max_actions": 100, "window_seconds": 3600 },
+    "priority": 10,
+    "enabled": true
+  }'`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">API endpoints</h3>
+            <Table
+              headers={['Method', 'Endpoint', 'Description']}
+              rows={[
+                ['POST', '/api/v1/policies', 'Create a policy'],
+                ['GET', '/api/v1/policies', 'List all policies'],
+                ['PATCH', '/api/v1/policies/:id', 'Update a policy'],
+                ['DELETE', '/api/v1/policies/:id', 'Delete a policy'],
+              ]}
+            />
+          </section>
+
+          {/* Human-in-the-Loop Approvals */}
+          <section id="approvals" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Human-in-the-Loop Approvals</h2>
+            <p className="text-white/30 text-[14px] mb-4">When a <InlineCode>require_approval</InlineCode> policy matches, the action is paused and an approval request is created. A human approves or denies it from the dashboard, and the agent continues.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">How it works</h3>
+            <div className="space-y-2 text-[14px] text-white/40">
+              <p><strong className="text-white/70">1.</strong> Agent calls <InlineCode>ledger.track()</InlineCode> and a matching policy triggers.</p>
+              <p><strong className="text-white/70">2.</strong> An <InlineCode>ApprovalRequiredError</InlineCode> is thrown with the <InlineCode>approvalId</InlineCode>.</p>
+              <p><strong className="text-white/70">3.</strong> The agent calls <InlineCode>waitForApproval()</InlineCode> to poll until a human decides.</p>
+              <p><strong className="text-white/70">4.</strong> Approvals auto-expire after 30 minutes if no action is taken.</p>
+            </div>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">SDK usage</h3>
+            <Code code={`import { AgentLedger, ApprovalRequiredError } from 'agentledger';
+
+try {
+  await ledger.track({
+    agent: 'billing-bot',
+    service: 'stripe',
+    action: 'charge',
+  }, async () => {
+    return await stripe.charges.create({ amount: 5000, currency: 'usd' });
+  });
+} catch (err) {
+  if (err instanceof ApprovalRequiredError) {
+    // Wait up to 5 minutes for human approval
+    const decision = await ledger.waitForApproval(err.approvalId, {
+      timeout: 300000,
+    });
+
+    if (decision.approved) {
+      // Re-execute the action
+      await stripe.charges.create({ amount: 5000, currency: 'usd' });
+    }
+  }
+}`} filename="approval-example.ts" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">API endpoints</h3>
+            <Table
+              headers={['Method', 'Endpoint', 'Description']}
+              rows={[
+                ['GET', '/api/v1/approvals', 'List pending approvals'],
+                ['PATCH', '/api/v1/approvals/:id', 'Approve or deny (body: { "status": "approved" | "denied" })'],
+              ]}
+            />
+
+            <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
+              <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Dashboard.</strong> The Approvals tab shows all pending requests with approve/deny buttons. Expired approvals are automatically marked as denied.</p>
+            </div>
+          </section>
+
+          {/* Live Streaming (SSE) */}
+          <section id="streaming" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Live Streaming (SSE)</h2>
+            <p className="text-white/30 text-[14px] mb-4">Subscribe to real-time events via Server-Sent Events. Since <InlineCode>EventSource</InlineCode> cannot send headers, authentication is passed as a query parameter.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Event types</h3>
+            <Table
+              headers={['Event', 'Description']}
+              rows={[
+                ['action.new', 'Fired when a new action is logged'],
+                ['alert.new', 'Fired when an anomaly alert is created'],
+                ['heartbeat', 'Sent every 30s to keep the connection alive'],
+              ]}
+            />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Connect with filters</h3>
+            <Code code={`curl -N "https://your-instance.vercel.app/api/v1/stream?key=al_...&events=action.new&agent=my-bot&environment=production"`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">SDK usage</h3>
+            <Code code={`const handle = ledger.stream({
+  events: ['action.new', 'alert.new'],
+  agent: 'my-bot',
+  onAction: (action) => {
+    console.log('New action:', action.service, action.action);
+  },
+  onAlert: (alert) => {
+    console.log('Alert:', alert.message);
+  },
+});
+
+// Close the stream when done
+handle.close();`} filename="stream-example.ts" />
+
+            <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
+              <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Auto-reconnection.</strong> The SDK automatically reconnects with exponential backoff if the connection drops.</p>
+            </div>
+          </section>
+
+          {/* Anomaly Detection */}
+          <section id="anomalies" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Anomaly Detection</h2>
+            <p className="text-white/30 text-[14px] mb-4">AgentLedger computes statistical baselines from the last 7 days of data (updated hourly) and fires alerts when metrics deviate by more than 2 standard deviations. A minimum of 50 actions is required to establish a baseline.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Monitored metrics</h3>
+            <Table
+              headers={['Metric', 'Description']}
+              rows={[
+                ['actions_per_hour', 'Number of actions per hour per agent'],
+                ['cost_per_action', 'Average cost per action'],
+                ['duration_per_action', 'Average duration per action'],
+                ['error_rate', 'Percentage of actions with error status'],
+                ['service_distribution', 'Shift in which services are being called'],
+              ]}
+            />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">View baselines</h3>
+            <Code code={`curl https://your-instance.vercel.app/api/v1/baselines \\
+  -H "Authorization: Bearer al_..."
+
+# Response:
+# {
+#   "agent": "support-bot",
+#   "metrics": {
+#     "actions_per_hour": { "mean": 45.2, "stddev": 8.1 },
+#     "cost_per_action": { "mean": 2.3, "stddev": 0.5 },
+#     "error_rate": { "mean": 0.03, "stddev": 0.01 }
+#   }
+# }`} lang="bash" />
+          </section>
+
+          {/* Evaluations */}
+          <section id="evaluations" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Evaluations</h2>
+            <p className="text-white/30 text-[14px] mb-4">Score agent actions on a 0-100 scale with optional labels and feedback. Use evaluations to track quality over time and identify regressions.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (TypeScript)</h3>
+            <Code code={`await ledger.evaluate(actionId, {
+  score: 85,
+  label: 'correct',
+  feedback: 'Response was accurate but could be more concise',
+});`} filename="evaluate.ts" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (Python)</h3>
+            <Code code={`ledger.evaluate(action_id, score=85, label="correct",
+    feedback="Response was accurate but could be more concise")`} filename="evaluate.py" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">API endpoints</h3>
+            <Table
+              headers={['Method', 'Endpoint', 'Description']}
+              rows={[
+                ['POST', '/api/v1/evaluations', 'Create an evaluation for an action'],
+                ['GET', '/api/v1/evaluations/stats', 'Aggregated evaluation statistics'],
+              ]}
+            />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Stats response</h3>
+            <Code code={`curl https://your-instance.vercel.app/api/v1/evaluations/stats \\
+  -H "Authorization: Bearer al_..."
+
+# Response:
+# {
+#   "avgScore": 82.4,
+#   "byAgent": { "support-bot": 87.1, "billing-bot": 76.3 },
+#   "byLabel": { "correct": 412, "incorrect": 38, "partial": 95 },
+#   "trend": [{ "date": "2026-03-29", "avgScore": 83.1 }, ...]
+# }`} lang="bash" />
+          </section>
+
+          {/* Rollback Hooks */}
+          <section id="rollbacks" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Rollback Hooks</h2>
+            <p className="text-white/30 text-[14px] mb-4">Register compensating action webhooks that fire when an agent is killed or a budget is exceeded. Use rollback hooks to undo partially-completed work.</p>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Triggers</h3>
+            <div className="space-y-2 text-[14px] text-white/40">
+              <p>{'\u2022'} <strong className="text-white/70">Agent killed</strong> — the agent is permanently stopped</p>
+              <p>{'\u2022'} <strong className="text-white/70">Budget exceeded</strong> — a budget limit is hit and actions are blocked</p>
+            </div>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Register a rollback hook</h3>
+            <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/rollback-hooks \\
+  -H "Authorization: Bearer al_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://your-server.com/rollback",
+    "agent_name": "billing-bot",
+    "triggers": ["agent.killed", "budget.exceeded"]
+  }'`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Webhook payload</h3>
+            <p className="text-white/30 text-[14px] mb-3">The webhook receives the trigger reason, agent name, and trace context (last 50 actions). Requests are signed with HMAC-SHA256, the same way as regular webhooks.</p>
+            <Code code={`// POST to your rollback URL:
+// {
+//   "trigger": "agent.killed",
+//   "agent": "billing-bot",
+//   "trace_context": {
+//     "actions": [ ... last 50 actions ... ]
+//   },
+//   "timestamp": "2026-03-30T12:00:00Z"
+// }
+//
+// Headers:
+// X-AgentLedger-Signature: sha256=...`} />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Execution history</h3>
+            <Code code={`curl https://your-instance.vercel.app/api/v1/rollback-hooks/executions \\
+  -H "Authorization: Bearer al_..."`} lang="bash" />
+          </section>
+
+          {/* Python SDK */}
+          <section id="python" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Python SDK</h2>
+            <p className="text-white/30 text-[14px] mb-4">Full-featured Python client with sync and async support.</p>
+
+            <h3 className="text-[16px] font-medium mt-4 mb-3">Installation</h3>
+            <Code code="pip install agentledger" lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Sync client</h3>
+            <Code code={`from agentledger import AgentLedger
+
+ledger = AgentLedger(api_key="al_...")
+
+# Track an action
+result = ledger.track(
+    agent="support-bot",
+    service="openai",
+    action="chat_completion",
+    cost_cents=2,
+    fn=lambda: openai.chat.completions.create(model="gpt-4", messages=messages)
+)
+
+# Pre-flight check
+check = ledger.check(agent="billing-bot", service="stripe", action="charge")
+if not check.allowed:
+    print(f"Blocked: {check.block_reason}")
+
+# Log manually
+ledger.log(
+    agent="data-sync",
+    service="postgres",
+    action="bulk_insert",
+    status="success",
+    duration_ms=1523,
+)
+
+# Agent controls
+ledger.pause_agent("support-bot")
+ledger.resume_agent("support-bot")
+ledger.kill_agent("rogue-bot")`} filename="example.py" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Async client</h3>
+            <Code code={`from agentledger import AsyncAgentLedger
+
+ledger = AsyncAgentLedger(api_key="al_...")
+
+result = await ledger.track(
+    agent="support-bot",
+    service="openai",
+    action="chat_completion",
+    fn=lambda: openai.chat.completions.create(model="gpt-4", messages=messages)
+)`} filename="async_example.py" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">LangChain integration</h3>
+            <Code code={`from agentledger import AgentLedger
+from agentledger.integrations.langchain import AgentLedgerCallbackHandler
+
+ledger = AgentLedger(api_key="al_...")
+handler = AgentLedgerCallbackHandler(ledger, agent="research-bot")
+
+# Pass to any LangChain component
+agent.invoke({"input": "Research AI news"}, config={"callbacks": [handler]})`} filename="langchain_python.py" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">OpenAI Agents integration</h3>
+            <Code code={`from agentledger import AgentLedger
+from agentledger.integrations.openai_agents import with_agent_ledger
+
+ledger = AgentLedger(api_key="al_...")
+
+# Wrap the OpenAI agent runner
+tracked_run = with_agent_ledger(ledger, agent="my-agent")
+result = tracked_run(agent, messages)`} filename="openai_python.py" />
           </section>
 
           {/* Self-Hosting */}

@@ -299,27 +299,32 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
 }
 
 const FEATURES = [
-  { icon: '📡', title: 'Real-Time Action Feed', desc: 'Every API call, email, ticket — logged with timing, cost, and metadata. Live dashboard updates.' },
+  { icon: '📡', title: 'Live Streaming Feed', desc: 'Real-time SSE streaming of every action. Watch your agents work live with sub-second latency.' },
+  { icon: '🛡️', title: 'Policy Engine & Guardrails', desc: 'Define rules: rate limits, service allowlists, cost caps, payload regex blocks. Enforced before execution.' },
+  { icon: '✋', title: 'Human-in-the-Loop', desc: 'Require human approval for high-risk actions. Approve or deny from the dashboard or Slack.' },
   { icon: '💰', title: 'Cost Tracking & Budgets', desc: 'Know what your agents spend. Set daily/weekly/monthly budgets per agent with automatic enforcement.' },
-  { icon: '🔍', title: 'Action Drawer & I/O Logging', desc: 'Click any action to see full input, output, and metadata. Debug agent behavior without adding console.logs.' },
-  { icon: '⏹️', title: 'Kill Switches', desc: 'Pause or permanently kill any agent instantly from the dashboard or API.' },
-  { icon: '🔗', title: 'Traces & Sessions', desc: 'Group related actions into traces. See the full chain: read email → classify → draft → send → log.' },
-  { icon: '🔔', title: 'Slack & Email Alerts', desc: 'Get notified instantly via Slack or email when agents error, budgets exceed, or agents get killed.' },
-  { icon: '🔌', title: '2-Line Integration', desc: 'Wrap any async function with ledger.track(). Works with LangChain, OpenAI, MCP Servers, Express, or plain code.' },
+  { icon: '🔗', title: 'Trace Timeline', desc: 'Waterfall visualization showing how actions flow. See parallel execution, timing, and I/O at each step.' },
+  { icon: '🚨', title: 'Statistical Anomaly Detection', desc: 'ML-powered baselines learn normal behavior. Alerts fire when cost, rate, or duration deviates significantly.' },
+  { icon: '⭐', title: 'Agent Evaluations', desc: 'Score agent actions 0-100. Track quality trends over time. Compare agents by success rate.' },
+  { icon: '🔄', title: 'Rollback Hooks', desc: 'When agents are killed or budgets exceeded, fire compensating webhooks to undo completed actions.' },
+  { icon: '🐍', title: 'Python & TypeScript SDKs', desc: 'Sync and async SDKs for both languages. LangChain, OpenAI, MCP, CrewAI integrations built in.' },
+  { icon: '🌍', title: 'Multi-Environment', desc: 'Separate dev, staging, and production data. Switch environments in the dashboard with one click.' },
+  { icon: '🔍', title: 'Search & Filtering', desc: 'Server-side search across actions. Filter by agent, service, status, date range, and trace ID.' },
   { icon: '🛡️', title: 'Fail-Open by Default', desc: 'If AgentLedger is down, your agents keep running. Never blocks production unless configured.' },
-  { icon: '🚨', title: 'Anomaly Detection', desc: 'Automatic alerts when agents spike in activity, hit new services, or approach budget limits.' },
 ];
 
 const COMPARISON = [
   { feature: 'LLM call tracing', us: false, them: true },
   { feature: 'Real-world action logging', us: true, them: false },
-  { feature: 'Cross-service cost tracking', us: true, them: false },
-  { feature: 'Input/output inspection', us: true, them: true },
-  { feature: 'Multi-step trace grouping', us: true, them: true },
-  { feature: 'Agent kill switches', us: true, them: false },
+  { feature: 'Policy engine & guardrails', us: true, them: false },
+  { feature: 'Human-in-the-loop approvals', us: true, them: false },
+  { feature: 'Statistical anomaly detection', us: true, them: false },
+  { feature: 'Agent evaluations & scoring', us: true, them: false },
+  { feature: 'Trace timeline visualization', us: true, them: true },
   { feature: 'Budget controls & enforcement', us: true, them: false },
-  { feature: 'Slack & email notifications', us: true, them: false },
-  { feature: 'Pre-flight action checks', us: true, them: false },
+  { feature: 'Rollback / compensating actions', us: true, them: false },
+  { feature: 'Live SSE streaming', us: true, them: false },
+  { feature: 'Python & TypeScript SDKs', us: true, them: true },
 ];
 
 const SDK_CODE = `import AgentLedger from 'agentledger';
@@ -352,6 +357,8 @@ const FAQ_ITEMS = [
   { q: 'How is this different from Langfuse or Helicone?', a: 'Those tools trace LLM API calls (tokens, latency, prompts). AgentLedger tracks what happens after the LLM decides to act: the emails sent, tickets created, payments charged, and APIs called.' },
   { q: 'What frameworks do you support?', a: 'LangChain, OpenAI Agents, MCP Servers, and Express out of the box. The core SDK works with any async function in any framework — just wrap it with ledger.track().' },
   { q: 'Where is my data stored?', a: 'On the hosted version, data is stored in Supabase (PostgreSQL) with row-level security. If you self-host, data stays entirely on your infrastructure. We never share or sell your data.' },
+  { q: 'Can I require human approval for agent actions?', a: 'Yes. Create a require_approval policy for specific agents, services, or actions. When triggered, the agent pauses and waits for a human to approve or deny in the dashboard. Approvals auto-expire after 30 minutes.' },
+  { q: 'Do you support Python?', a: 'Yes. We have both Python and TypeScript SDKs with sync and async support. The Python SDK includes integrations for LangChain, CrewAI, and OpenAI Agents.' },
 ];
 
 export default function LandingPage() {
@@ -446,7 +453,7 @@ export default function LandingPage() {
       {/* Social Proof */}
       <section className="border-y border-white/[0.04] px-6 py-5">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[12px] text-white/30 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Any agent framework</p>
+          <p className="text-[12px] text-white/30 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} CrewAI {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Python & TypeScript</p>
         </div>
       </section>
 

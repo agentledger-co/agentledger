@@ -107,8 +107,13 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
     );
   }
 
-  const maxLabelCount = Math.max(...(evalStats.byLabel || []).map(l => l.count), 1);
-  const maxAgentCount = Math.max(...(evalStats.byAgent || []).map(a => a.count), 1);
+  const labelCounts = (evalStats.byLabel || []).map(l => l.count);
+  const agentCounts = (evalStats.byAgent || []).map(a => a.count);
+  const maxLabelCount = labelCounts.length > 0 ? Math.max(...labelCounts) : 1;
+  const maxAgentCount = agentCounts.length > 0 ? Math.max(...agentCounts) : 1;
+  const topAgent = evalStats.byAgent?.length > 0
+    ? [...evalStats.byAgent].sort((a, b) => b.avg_score - a.avg_score)[0]
+    : null;
 
   return (
     <div className="space-y-6">
@@ -133,11 +138,11 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
         </div>
         <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
           <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Top Agent</p>
-          {evalStats.byAgent.length > 0 ? (
+          {topAgent ? (
             <>
-              <p className="text-lg font-semibold text-white/70 truncate">{evalStats.byAgent.sort((a, b) => b.avg_score - a.avg_score)[0].agent_name}</p>
-              <p className={`text-[13px] mt-0.5 ${scoreColor(evalStats.byAgent.sort((a, b) => b.avg_score - a.avg_score)[0].avg_score)}`}>
-                {evalStats.byAgent.sort((a, b) => b.avg_score - a.avg_score)[0].avg_score.toFixed(1)} avg score
+              <p className="text-lg font-semibold text-white/70 truncate">{topAgent.agent_name}</p>
+              <p className={`text-[13px] mt-0.5 ${scoreColor(topAgent.avg_score)}`}>
+                {topAgent.avg_score.toFixed(1)} avg score
               </p>
             </>
           ) : (

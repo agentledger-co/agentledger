@@ -108,7 +108,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Approval request has expired' }, { status: 410 });
   }
 
-  // Update the approval request
+  // Atomic update — only updates if still pending (prevents race condition)
   const { data: updated, error: updateErr } = await supabase
     .from('approval_requests')
     .update({
@@ -117,11 +117,12 @@ export async function PATCH(req: NextRequest) {
       decided_by: decidedBy,
     })
     .eq('id', id)
+    .eq('status', 'pending')
     .select()
     .single();
 
-  if (updateErr) {
-    return NextResponse.json({ error: 'Failed to update approval', detail: updateErr.message }, { status: 500 });
+  if (updateErr || !updated) {
+    return NextResponse.json({ error: 'Approval request already decided or not found' }, { status: 409 });
   }
 
   return NextResponse.json({ approval: updated });

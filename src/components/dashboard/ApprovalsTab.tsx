@@ -104,8 +104,8 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
         fetchApprovals();
         fetchPendingCount();
       } else {
-        const err = await res.json();
-        onToast(err.error || `Failed to ${decision === 'approved' ? 'approve' : 'deny'}`, 'error');
+        const err = await res.json().catch(() => ({}));
+        onToast((err as Record<string, string>).error || `Failed to ${decision === 'approved' ? 'approve' : 'deny'}`, 'error');
       }
     } catch {
       onToast('Failed to process decision', 'error');

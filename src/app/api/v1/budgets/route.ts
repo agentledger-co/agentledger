@@ -24,9 +24,9 @@ export async function GET(req: NextRequest) {
 
   const enriched = (budgets || []).map((b: Record<string, unknown>) => ({
     ...b,
-    agent_name: (b.agents as Record<string, unknown>)?.name || 'unknown',
-    pct_actions: b.max_actions ? ((b.current_actions as number) / (b.max_actions as number)) * 100 : null,
-    pct_cost: b.max_cost_cents ? ((b.current_cost_cents as number) / (b.max_cost_cents as number)) * 100 : null,
+    agent_name: (b.agents as Record<string, unknown> | null)?.name || 'unknown',
+    pct_actions: b.max_actions ? (((b.current_actions as number) ?? 0) / (b.max_actions as number)) * 100 : null,
+    pct_cost: b.max_cost_cents ? (((b.current_cost_cents as number) ?? 0) / (b.max_cost_cents as number)) * 100 : null,
   }));
 
   return NextResponse.json({ budgets: enriched });

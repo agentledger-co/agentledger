@@ -41,14 +41,24 @@ export async function GET(req: NextRequest) {
   // Fetch user emails from auth.users via admin API
   const enriched = await Promise.all(
     (members || []).map(async (m) => {
-      const { data: { user } } = await supabase.auth.admin.getUserById(m.user_id);
-      return {
-        id: m.id,
-        user_id: m.user_id,
-        email: user?.email || 'unknown',
-        role: m.role,
-        created_at: m.created_at,
-      };
+      try {
+        const { data: { user } } = await supabase.auth.admin.getUserById(m.user_id);
+        return {
+          id: m.id,
+          user_id: m.user_id,
+          email: user?.email || 'unknown',
+          role: m.role,
+          created_at: m.created_at,
+        };
+      } catch {
+        return {
+          id: m.id,
+          user_id: m.user_id,
+          email: 'unknown',
+          role: m.role,
+          created_at: m.created_at,
+        };
+      }
     })
   );
 

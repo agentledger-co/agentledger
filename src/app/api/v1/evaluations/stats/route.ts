@@ -46,8 +46,10 @@ export async function GET(req: NextRequest) {
     .in('id', actionIds);
 
   const actionAgentMap: Record<string, string> = {};
-  (actions || []).forEach((a: { id: string; agent_name: string }) => {
-    actionAgentMap[a.id] = a.agent_name;
+  (actions || []).forEach((a: Record<string, unknown>) => {
+    if (a?.id && a?.agent_name) {
+      actionAgentMap[a.id as string] = a.agent_name as string;
+    }
   });
 
   // By agent

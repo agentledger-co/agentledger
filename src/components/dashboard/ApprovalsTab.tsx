@@ -208,7 +208,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
                   </div>
 
                   {/* Collapsible input preview */}
-                  {approval.input && (
+                  {approval.input != null && (
                     <div className="mt-2">
                       <button
                         onClick={() => setExpandedInput(expandedInput === approval.id ? null : approval.id)}

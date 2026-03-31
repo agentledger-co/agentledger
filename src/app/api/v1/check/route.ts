@@ -82,12 +82,13 @@ export async function POST(req: NextRequest) {
   // Policy engine checks
   const service = sanitizeString(body.service) || '';
   const action = sanitizeString(body.action) || '';
-  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action);
+  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action, undefined, undefined, environment);
   if (!policyResult.allowed) {
     if (policyResult.requiresApproval) {
       return NextResponse.json({
         allowed: false,
         requiresApproval: true,
+        approvalId: policyResult.approvalId,
         policyId: policyResult.policyId,
       });
     }

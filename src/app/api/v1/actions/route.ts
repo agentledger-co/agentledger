@@ -7,6 +7,8 @@ import { checkUsageLimits, checkRateLimit } from '@/lib/usage';
 import { reportError } from '@/lib/errors';
 import { sanitizeString, sanitizeMetadata, sanitizePayload, sanitizePositiveInt, validateStatus } from '@/lib/validate';
 import { evaluatePolicies } from '@/lib/policies';
+import { checkAnomalies } from '@/lib/anomalies';
+import { fireRollbacks } from '@/lib/rollbacks';
 
 export async function GET(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -214,11 +216,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Policy engine checks
-  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action, cost_cents, input);
+  const policyResult = await evaluatePolicies(auth.orgId, agent, service, action, cost_cents, input, environment);
   if (!policyResult.allowed) {
     if (policyResult.requiresApproval) {
       return NextResponse.json(
-        { blocked: true, requiresApproval: true, reason: 'Approval required by policy', policyId: policyResult.policyId },
+        { blocked: true, requiresApproval: true, approvalId: policyResult.approvalId, reason: 'Approval required by policy', policyId: policyResult.policyId },
         { status: 403 },
       );
     }
@@ -315,6 +317,9 @@ export async function POST(req: NextRequest) {
             cost: `$${(newCost / 100).toFixed(2)}/${budget.max_cost_cents ? '$' + (budget.max_cost_cents / 100).toFixed(2) : '∞'}`,
           },
         }).catch(() => {});
+
+        // Fire rollback hooks (non-blocking)
+        fireRollbacks(auth.orgId, 'budget_exceeded', agent, trace_id || undefined).catch(() => {});
       }
 
       // Fire budget warning webhook
@@ -337,6 +342,14 @@ export async function POST(req: NextRequest) {
       }
     }
   }
+
+  // Statistical anomaly detection (non-blocking)
+  checkAnomalies(auth.orgId, agent, {
+    service,
+    estimated_cost_cents: cost_cents,
+    duration_ms,
+    status,
+  }).catch(() => {});
 
   // Fire action logged webhook (non-blocking)
   fireWebhooks(auth.orgId, 'action.logged', {

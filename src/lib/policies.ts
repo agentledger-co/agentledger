@@ -5,6 +5,7 @@ export interface PolicyResult {
   blockReason?: string;
   requiresApproval?: boolean;
   policyId?: string;
+  approvalId?: string;
 }
 
 interface Policy {
@@ -62,6 +63,7 @@ export async function evaluatePolicies(
   action: string,
   costCents?: number,
   input?: unknown,
+  environment?: string,
 ): Promise<PolicyResult> {
   const allPolicies = await fetchPolicies(orgId);
 
@@ -75,7 +77,7 @@ export async function evaluatePolicies(
   }
 
   for (const policy of applicable) {
-    const result = await evaluatePolicy(policy, orgId, agent, service, action, costCents, input);
+    const result = await evaluatePolicy(policy, orgId, agent, service, action, costCents, input, environment);
     if (!result.allowed) {
       return result;
     }
@@ -89,9 +91,10 @@ async function evaluatePolicy(
   orgId: string,
   agent: string,
   service: string,
-  _action: string,
+  action: string,
   costCents?: number,
   input?: unknown,
+  environment?: string,
 ): Promise<PolicyResult> {
   switch (policy.rule_type) {
     case 'rate_limit':
@@ -105,10 +108,43 @@ async function evaluatePolicy(
     case 'payload_regex_block':
       return evaluatePayloadRegex(policy, input);
     case 'require_approval':
-      return { allowed: false, requiresApproval: true, policyId: policy.id };
+      return createApprovalRequest(policy, orgId, agent, service, action, input, environment);
     default:
       return { allowed: true };
   }
+}
+
+async function createApprovalRequest(
+  policy: Policy,
+  orgId: string,
+  agent: string,
+  service: string,
+  action: string,
+  input?: unknown,
+  environment?: string,
+): Promise<PolicyResult> {
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase
+    .from('approval_requests')
+    .insert({
+      org_id: orgId,
+      agent_name: agent,
+      service,
+      action,
+      input: input ?? null,
+      policy_id: policy.id,
+      environment: environment || 'production',
+    })
+    .select('id')
+    .single();
+
+  if (error || !data) {
+    // If we can't create the approval row, still block but without an approvalId
+    return { allowed: false, requiresApproval: true, policyId: policy.id };
+  }
+
+  return { allowed: false, requiresApproval: true, policyId: policy.id, approvalId: data.id };
 }
 
 async function evaluateRateLimit(

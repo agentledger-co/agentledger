@@ -50,7 +50,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
       });
       if (res.ok) {
         const data = await res.json();
-        setHooks(data.hooks || data.rollbackHooks || []);
+        setHooks(data.hooks || []);
       }
     } catch {
       // silent

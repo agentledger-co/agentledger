@@ -179,7 +179,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
                   borderRadius: '8px',
                   fontSize: '12px',
                 }}
-                formatter={(value: number) => [value.toFixed(1), 'Avg Score']}
+                formatter={(value: number | undefined) => [(value ?? 0).toFixed(1), 'Avg Score']}
               />
               <Area
                 type="monotone"

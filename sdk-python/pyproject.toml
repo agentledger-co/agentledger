@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentledger"
+name = "agentledger-py"
 version = "0.5.0"
 description = "Track, monitor, and control AI agent actions. The missing observability layer for autonomous agents."
 readme = "README.md"

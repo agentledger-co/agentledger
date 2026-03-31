@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
   const agent = sanitizeString(body.agent);
+  const environment = sanitizeString(body.environment) || 'production';
 
   if (!agent) {
     return NextResponse.json({ error: 'Missing required field: agent' }, { status: 400 });
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
     .select('id, status')
     .eq('org_id', auth.orgId)
     .eq('name', agent)
+    .eq('environment', environment)
     .single();
 
   if (agentData?.status === 'paused') {

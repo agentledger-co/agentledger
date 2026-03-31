@@ -11,13 +11,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
   }
 
   const { name } = await params;
+  const url = new URL(req.url);
+  const environment = url.searchParams.get('environment') || 'production';
   const supabase = createServiceClient();
 
   const { error } = await supabase
     .from('agents')
     .update({ status: 'killed', updated_at: new Date().toISOString() })
     .eq('org_id', auth.orgId)
-    .eq('name', name);
+    .eq('name', name)
+    .eq('environment', environment);
 
   if (error) {
     return NextResponse.json({ error: 'Failed to kill agent', detail: error.message }, { status: 500 });
@@ -29,6 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     .select('id')
     .eq('org_id', auth.orgId)
     .eq('name', name)
+    .eq('environment', environment)
     .single();
 
   if (agent) {

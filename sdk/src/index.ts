@@ -9,6 +9,8 @@ export interface AgentLedgerConfig {
   timeout?: number;
   /** Called when an error occurs communicating with AgentLedger */
   onError?: (error: Error) => void;
+  /** Environment name (e.g. 'production', 'staging', 'development'). Default: 'production' */
+  environment?: string;
 }
 
 export interface TrackOptions {
@@ -57,6 +59,7 @@ export class AgentLedger {
   private baseUrl: string;
   private failOpen: boolean;
   private timeout: number;
+  private environment: string;
   private onError?: (error: Error) => void;
 
   constructor(config: AgentLedgerConfig) {
@@ -67,6 +70,7 @@ export class AgentLedger {
     this.baseUrl = (config.baseUrl || 'https://agentledger.co').replace(/\/$/, '');
     this.failOpen = config.failOpen !== false; // default true
     this.timeout = config.timeout || 5000;
+    this.environment = config.environment || 'production';
     this.onError = config.onError;
   }
 
@@ -146,6 +150,7 @@ export class AgentLedger {
         agent: options.agent,
         service: options.service,
         action: options.action,
+        environment: this.environment,
       }),
     });
 
@@ -168,7 +173,8 @@ export class AgentLedger {
    * Pause an agent. All future actions will be blocked until resumed.
    */
   async pauseAgent(name: string): Promise<void> {
-    const res = await this.fetch(`/api/v1/agents/${encodeURIComponent(name)}/pause`, {
+    const envParam = `?environment=${encodeURIComponent(this.environment)}`;
+    const res = await this.fetch(`/api/v1/agents/${encodeURIComponent(name)}/pause${envParam}`, {
       method: 'POST',
     });
     if (!res.ok) throw new Error(`AgentLedger: Failed to pause agent (${res.status})`);
@@ -178,7 +184,8 @@ export class AgentLedger {
    * Resume a paused agent.
    */
   async resumeAgent(name: string): Promise<void> {
-    const res = await this.fetch(`/api/v1/agents/${encodeURIComponent(name)}/resume`, {
+    const envParam = `?environment=${encodeURIComponent(this.environment)}`;
+    const res = await this.fetch(`/api/v1/agents/${encodeURIComponent(name)}/resume${envParam}`, {
       method: 'POST',
     });
     if (!res.ok) throw new Error(`AgentLedger: Failed to resume agent (${res.status})`);
@@ -188,7 +195,8 @@ export class AgentLedger {
    * Kill an agent permanently. All future actions will be blocked.
    */
   async killAgent(name: string): Promise<void> {
-    const res = await this.fetch(`/api/v1/agents/${encodeURIComponent(name)}/kill`, {
+    const envParam = `?environment=${encodeURIComponent(this.environment)}`;
+    const res = await this.fetch(`/api/v1/agents/${encodeURIComponent(name)}/kill${envParam}`, {
       method: 'POST',
     });
     if (!res.ok) throw new Error(`AgentLedger: Failed to kill agent (${res.status})`);
@@ -212,6 +220,7 @@ export class AgentLedger {
       cost_cents: options.costCents || 0,
       duration_ms: durationMs,
       metadata: options.metadata || {},
+      environment: this.environment,
     };
 
     if (options.traceId) body.trace_id = options.traceId;

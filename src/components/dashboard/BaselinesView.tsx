@@ -157,7 +157,7 @@ function ServiceDistributionBar({ distribution }: { distribution: ServiceDistrib
           <div key={item.service} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${COLORS[i % COLORS.length]} opacity-50`} />
             <span className="text-[11px] text-white/40">{item.service}</span>
-            <span className="text-[11px] text-white/20">{item.percentage.toFixed(1)}%</span>
+            <span className="text-[11px] text-white/50">{item.percentage.toFixed(1)}%</span>
           </div>
         ))}
       </div>
@@ -225,8 +225,8 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-white/70">Baselines for {agentName}</h3>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
-          <p className="text-white/30 text-sm mb-1">No baseline data yet.</p>
-          <p className="text-white/15 text-xs">
+          <p className="text-white/60 text-sm mb-1">No baseline data yet.</p>
+          <p className="text-white/50 text-xs">
             Baselines are computed hourly from the last 7 days of activity. Minimum 50 actions required.
           </p>
         </div>
@@ -254,7 +254,7 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
               <span className="text-2xl font-semibold text-white/90 tabular-nums">
                 {formatMetricValue(metric.metric, metric.baseline)}
               </span>
-              <span className="text-sm text-white/30 tabular-nums">
+              <span className="text-sm text-white/60 tabular-nums">
                 {formatStddev(metric.metric, metric.stddev)}
               </span>
             </div>
@@ -272,7 +272,7 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
             </div>
 
             {/* Sample size */}
-            <p className="text-[11px] text-white/20">
+            <p className="text-[11px] text-white/50">
               Based on {metric.sample_size.toLocaleString()} samples
             </p>
           </div>

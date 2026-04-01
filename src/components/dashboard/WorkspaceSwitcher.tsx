@@ -110,7 +110,7 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
           {current?.name?.charAt(0)?.toUpperCase() || '?'}
         </div>
         <span className="text-white/70 max-w-[120px] truncate">{current?.name || 'Workspace'}</span>
-        <svg className={`w-3 h-3 text-white/30 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className={`w-3 h-3 text-white/60 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -118,7 +118,7 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
       {open && (
         <div className="absolute top-full left-0 mt-1 w-64 bg-[#1a1a1a] border border-white/[0.16] rounded-xl shadow-2xl overflow-hidden z-50">
           <div className="px-3 py-2 border-b border-white/[0.14]">
-            <p className="text-[10px] text-white/30 uppercase tracking-wider font-medium">Workspaces</p>
+            <p className="text-[10px] text-white/60 uppercase tracking-wider font-medium">Workspaces</p>
           </div>
           <div className="py-1 max-h-[300px] overflow-y-auto">
             {workspaces.map(ws => (
@@ -134,7 +134,7 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-[13px] text-white/80 truncate">{ws.name}</p>
-                  <p className="text-[10px] text-white/30">{ws.role} &middot; {ws.plan}</p>
+                  <p className="text-[10px] text-white/60">{ws.role} &middot; {ws.plan}</p>
                 </div>
                 {ws.id === current?.id && (
                   <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

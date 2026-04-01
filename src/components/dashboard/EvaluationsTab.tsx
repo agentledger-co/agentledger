@@ -89,19 +89,19 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading evaluations...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading evaluations...</div>;
 
   if (!evalStats || (evalStats.totalEvaluations === 0 && evaluations.length === 0)) {
     return (
       <div className="space-y-4">
         <div>
           <h3 className="text-sm font-medium text-white/70">Evaluations</h3>
-          <p className="text-xs text-white/30 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
+          <p className="text-xs text-white/60 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x1F4CA;</div>
-          <p className="text-white/30 text-sm font-medium mb-2">No evaluations yet</p>
-          <p className="text-white/15 text-xs">Submit evaluations via the API to track agent quality and performance over time.</p>
+          <p className="text-white/60 text-sm font-medium mb-2">No evaluations yet</p>
+          <p className="text-white/50 text-xs">Submit evaluations via the API to track agent quality and performance over time.</p>
         </div>
       </div>
     );
@@ -119,25 +119,25 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
     <div className="space-y-6">
       <div>
         <h3 className="text-sm font-medium text-white/70">Evaluations</h3>
-        <p className="text-xs text-white/30 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
+        <p className="text-xs text-white/60 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
       </div>
 
       {/* Overview cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
-          <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Average Score</p>
+          <p className="text-[11px] text-white/60 uppercase tracking-wider mb-1">Average Score</p>
           <p className={`text-3xl font-bold ${scoreColor(evalStats.avgScore)}`}>
             {evalStats.avgScore.toFixed(1)}
           </p>
-          <p className="text-[11px] text-white/20 mt-1">out of 100</p>
+          <p className="text-[11px] text-white/50 mt-1">out of 100</p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
-          <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Total Evaluations</p>
+          <p className="text-[11px] text-white/60 uppercase tracking-wider mb-1">Total Evaluations</p>
           <p className="text-3xl font-bold text-white/80">{evalStats.totalEvaluations.toLocaleString()}</p>
-          <p className="text-[11px] text-white/20 mt-1">all time</p>
+          <p className="text-[11px] text-white/50 mt-1">all time</p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
-          <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Top Agent</p>
+          <p className="text-[11px] text-white/60 uppercase tracking-wider mb-1">Top Agent</p>
           {topAgent ? (
             <>
               <p className="text-lg font-semibold text-white/70 truncate">{topAgent.agent_name}</p>
@@ -146,7 +146,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
               </p>
             </>
           ) : (
-            <p className="text-white/20 text-sm">No data</p>
+            <p className="text-white/50 text-sm">No data</p>
           )}
         </div>
       </div>
@@ -206,10 +206,10 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-white/[0.14]">
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Agent</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Avg Score</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Evaluations</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 w-1/3">Score</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Avg Score</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Evaluations</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 w-1/3">Score</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -226,7 +226,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
                           style={{ width: `${agent.avg_score}%` }}
                         />
                       </div>
-                      <span className="text-[11px] text-white/30 w-8 text-right">{Math.round(agent.avg_score)}</span>
+                      <span className="text-[11px] text-white/60 w-8 text-right">{Math.round(agent.avg_score)}</span>
                     </div>
                   </td>
                 </tr>
@@ -272,7 +272,7 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-[13px] text-white/60 font-medium">{evaluation.agent_name}</span>
                       {evaluation.action_id && (
-                        <span className="text-[10px] text-white/20 font-mono">#{evaluation.action_id.slice(0, 8)}</span>
+                        <span className="text-[10px] text-white/50 font-mono">#{evaluation.action_id.slice(0, 8)}</span>
                       )}
                       {evaluation.label && (
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${LABEL_COLORS[evaluation.label.toLowerCase()] || 'bg-white/[0.10] text-white/40 border-white/[0.14]'}`}>
@@ -281,9 +281,9 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
                       )}
                     </div>
                     {evaluation.feedback && (
-                      <p className="text-[12px] text-white/30 line-clamp-2">{evaluation.feedback}</p>
+                      <p className="text-[12px] text-white/60 line-clamp-2">{evaluation.feedback}</p>
                     )}
-                    <div className="flex items-center gap-3 mt-1 text-[11px] text-white/20">
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-white/50">
                       {evaluation.evaluated_by && <span>by {evaluation.evaluated_by}</span>}
                       <span>{timeAgo(evaluation.created_at)}</span>
                     </div>

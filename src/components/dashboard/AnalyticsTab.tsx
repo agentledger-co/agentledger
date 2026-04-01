@@ -52,8 +52,8 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
 
   useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
 
-  if (loading && !data) return <div className="text-white/30 text-center py-16">Loading analytics...</div>;
-  if (!data) return <div className="text-white/30 text-center py-16">No data available</div>;
+  if (loading && !data) return <div className="text-white/60 text-center py-16">Loading analytics...</div>;
+  if (!data) return <div className="text-white/60 text-center py-16">No data available</div>;
 
   const { summary, timeSeries, serviceBreakdown, agentBreakdown } = data;
 
@@ -64,7 +64,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
         <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg">
           {[7, 14, 30, 60, 90].map(d => (
             <button key={d} onClick={() => setDays(d)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${days === d ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${days === d ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/50'}`}>
               {d}d
             </button>
           ))}
@@ -72,7 +72,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
         <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg">
           {(['daily', 'hourly'] as const).map(g => (
             <button key={g} onClick={() => setGranularity(g)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors capitalize ${granularity === g ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors capitalize ${granularity === g ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/50'}`}>
               {g}
             </button>
           ))}
@@ -82,28 +82,28 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
-          <p className="text-[11px] text-white/30 mb-1">Total Actions</p>
+          <p className="text-[11px] text-white/60 mb-1">Total Actions</p>
           <p className="text-xl font-semibold">{summary.totalActions.toLocaleString()}</p>
           <p className={`text-[11px] mt-1 ${summary.actionsTrendPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {trendIndicator(summary.actionsTrendPct)} vs prior period
           </p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
-          <p className="text-[11px] text-white/30 mb-1">Total Cost</p>
+          <p className="text-[11px] text-white/60 mb-1">Total Cost</p>
           <p className="text-xl font-semibold">{formatCost(summary.totalCostCents)}</p>
           <p className={`text-[11px] mt-1 ${summary.costTrendPct <= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
             {trendIndicator(summary.costTrendPct)} vs prior period
           </p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
-          <p className="text-[11px] text-white/30 mb-1">Error Rate</p>
+          <p className="text-[11px] text-white/60 mb-1">Error Rate</p>
           <p className="text-xl font-semibold">{summary.errorRate}%</p>
-          <p className="text-[11px] text-white/20 mt-1">{summary.totalErrors} errors / {summary.totalBlocked} blocked</p>
+          <p className="text-[11px] text-white/50 mt-1">{summary.totalErrors} errors / {summary.totalBlocked} blocked</p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
-          <p className="text-[11px] text-white/30 mb-1">Avg Duration</p>
+          <p className="text-[11px] text-white/60 mb-1">Avg Duration</p>
           <p className="text-xl font-semibold">{summary.avgDurationMs}ms</p>
-          <p className="text-[11px] text-white/20 mt-1">across all actions</p>
+          <p className="text-[11px] text-white/50 mt-1">across all actions</p>
         </div>
       </div>
 
@@ -130,10 +130,10 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
         <table className="w-full text-[13px]">
           <thead>
             <tr className="border-b border-white/[0.14]">
-              <th className="text-left text-[11px] text-white/30 font-medium px-4 py-2">Service</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Actions</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Cost</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Errors</th>
+              <th className="text-left text-[11px] text-white/60 font-medium px-4 py-2">Service</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Actions</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Cost</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Errors</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
@@ -157,11 +157,11 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
         <table className="w-full text-[13px]">
           <thead>
             <tr className="border-b border-white/[0.14]">
-              <th className="text-left text-[11px] text-white/30 font-medium px-4 py-2">Agent</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Actions</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Cost</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Avg Duration</th>
-              <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Errors</th>
+              <th className="text-left text-[11px] text-white/60 font-medium px-4 py-2">Agent</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Actions</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Cost</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Avg Duration</th>
+              <th className="text-right text-[11px] text-white/60 font-medium px-4 py-2">Errors</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">

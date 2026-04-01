@@ -100,7 +100,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
     <div className="space-y-4">
       <div>
         <h3 className="text-sm font-medium text-white/70">Trace Replay</h3>
-        <p className="text-xs text-white/30 mt-0.5">Load a trace ID to step through each action with full input/output inspection.</p>
+        <p className="text-xs text-white/60 mt-0.5">Load a trace ID to step through each action with full input/output inspection.</p>
       </div>
 
       {/* Search bar */}
@@ -116,7 +116,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
         <button
           onClick={loadTrace}
           disabled={loading}
-          className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
         >
           {loading ? 'Loading...' : 'Load'}
         </button>
@@ -147,7 +147,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
             >
               Next
             </button>
-            <span className="text-xs text-white/30 ml-2">
+            <span className="text-xs text-white/60 ml-2">
               Step {currentStep + 1} of {actions.length}
             </span>
           </div>
@@ -163,7 +163,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
                     ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                     : i < currentStep
                     ? 'bg-white/[0.10] text-white/40'
-                    : 'bg-white/[0.06] text-white/20'
+                    : 'bg-white/[0.06] text-white/50'
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${STATUS_COLORS[a.status] || 'bg-white/20'}`} />
@@ -179,9 +179,9 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${STATUS_COLORS[current.status] || 'bg-white/20'}`} />
                   <span className="text-sm font-medium text-white/80">{current.service}</span>
-                  <span className="text-xs text-white/30">{current.action}</span>
+                  <span className="text-xs text-white/60">{current.action}</span>
                 </div>
-                <div className="flex items-center gap-3 text-[11px] text-white/30">
+                <div className="flex items-center gap-3 text-[11px] text-white/60">
                   <span>{current.duration_ms}ms</span>
                   {current.estimated_cost_cents > 0 && (
                     <span>${(current.estimated_cost_cents / 100).toFixed(2)}</span>
@@ -193,7 +193,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
               <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
                 {/* Input */}
                 <div className="p-4">
-                  <p className="text-[11px] text-white/30 font-medium mb-2">Input</p>
+                  <p className="text-[11px] text-white/60 font-medium mb-2">Input</p>
                   <pre className="text-[12px] text-white/50 bg-white/[0.06] rounded-lg p-3 overflow-auto max-h-[300px] font-mono whitespace-pre-wrap">
                     {formatJson(current.input)}
                   </pre>
@@ -201,7 +201,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
 
                 {/* Output */}
                 <div className="p-4">
-                  <p className="text-[11px] text-white/30 font-medium mb-2">Output</p>
+                  <p className="text-[11px] text-white/60 font-medium mb-2">Output</p>
                   <pre className={`text-[12px] bg-white/[0.06] rounded-lg p-3 overflow-auto max-h-[300px] font-mono whitespace-pre-wrap ${
                     current.status === 'error' ? 'text-red-400/70' : 'text-white/50'
                   }`}>
@@ -216,7 +216,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
 
       {loaded && actions.length === 0 && (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
-          <p className="text-white/30 text-sm">No actions found for this trace.</p>
+          <p className="text-white/60 text-sm">No actions found for this trace.</p>
         </div>
       )}
     </div>

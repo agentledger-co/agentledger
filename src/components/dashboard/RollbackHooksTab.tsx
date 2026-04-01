@@ -161,7 +161,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
   }
 
   if (loading) {
-    return <div className="text-white/30 text-center py-16">Loading rollback hooks...</div>;
+    return <div className="text-white/60 text-center py-16">Loading rollback hooks...</div>;
   }
 
   return (
@@ -170,7 +170,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-white/70">Rollback Hooks</h3>
-          <p className="text-xs text-white/30 mt-0.5">Automatically trigger rollback webhooks when actions fail or are blocked.</p>
+          <p className="text-xs text-white/60 mt-0.5">Automatically trigger rollback webhooks when actions fail or are blocked.</p>
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
@@ -185,7 +185,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-white/30 block mb-1">Agent name (optional)</label>
+              <label className="text-xs text-white/60 block mb-1">Agent name (optional)</label>
               <input
                 type="text"
                 value={formAgent}
@@ -195,7 +195,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
               />
             </div>
             <div>
-              <label className="text-xs text-white/30 block mb-1">Service (optional)</label>
+              <label className="text-xs text-white/60 block mb-1">Service (optional)</label>
               <input
                 type="text"
                 value={formService}
@@ -205,7 +205,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
               />
             </div>
             <div>
-              <label className="text-xs text-white/30 block mb-1">Action (optional)</label>
+              <label className="text-xs text-white/60 block mb-1">Action (optional)</label>
               <input
                 type="text"
                 value={formAction}
@@ -216,7 +216,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
             </div>
           </div>
           <div>
-            <label className="text-xs text-white/30 block mb-1">Webhook URL (required, must be https)</label>
+            <label className="text-xs text-white/60 block mb-1">Webhook URL (required, must be https)</label>
             <input
               type="url"
               value={formUrl}
@@ -238,11 +238,11 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
             <button
               onClick={createHook}
               disabled={!formUrl || creating}
-              className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+              className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
             >
               {creating ? 'Creating...' : 'Create'}
             </button>
-            <button onClick={() => { setShowCreate(false); resetForm(); }} className="text-xs text-white/30 hover:text-white/50 px-3 py-2">
+            <button onClick={() => { setShowCreate(false); resetForm(); }} className="text-xs text-white/60 hover:text-white/50 px-3 py-2">
               Cancel
             </button>
           </div>
@@ -253,7 +253,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
       {hooks.length === 0 && !showCreate ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x21A9;</div>
-          <p className="text-white/30 text-sm font-medium mb-2">No rollback hooks configured</p>
+          <p className="text-white/60 text-sm font-medium mb-2">No rollback hooks configured</p>
           <p className="text-white/15 text-xs mb-4">Create hooks to automatically trigger rollback webhooks on failures.</p>
           <button
             onClick={() => setShowCreate(true)}
@@ -268,20 +268,20 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/[0.14]">
-                  <th className="text-[11px] text-white/30 font-medium px-4 py-3">Agent</th>
-                  <th className="text-[11px] text-white/30 font-medium px-4 py-3">Service</th>
-                  <th className="text-[11px] text-white/30 font-medium px-4 py-3">Action</th>
-                  <th className="text-[11px] text-white/30 font-medium px-4 py-3">Webhook URL</th>
-                  <th className="text-[11px] text-white/30 font-medium px-4 py-3">Enabled</th>
-                  <th className="text-[11px] text-white/30 font-medium px-4 py-3 text-right">Actions</th>
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3">Service</th>
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3">Action</th>
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3">Webhook URL</th>
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3">Enabled</th>
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {hooks.map(hook => (
                   <tr key={hook.id} className="border-b border-white/[0.12] last:border-0 hover:bg-white/[0.06] transition-colors">
-                    <td className="px-4 py-3 text-xs text-white/70">{hook.agent_name || <span className="text-white/20">Any</span>}</td>
-                    <td className="px-4 py-3 text-xs text-white/70">{hook.service || <span className="text-white/20">Any</span>}</td>
-                    <td className="px-4 py-3 text-xs text-white/70">{hook.action || <span className="text-white/20">Any</span>}</td>
+                    <td className="px-4 py-3 text-xs text-white/70">{hook.agent_name || <span className="text-white/50">Any</span>}</td>
+                    <td className="px-4 py-3 text-xs text-white/70">{hook.service || <span className="text-white/50">Any</span>}</td>
+                    <td className="px-4 py-3 text-xs text-white/70">{hook.action || <span className="text-white/50">Any</span>}</td>
                     <td className="px-4 py-3">
                       <code className="text-[11px] text-blue-400 font-mono truncate block max-w-[280px]">{hook.webhook_url}</code>
                     </td>
@@ -304,7 +304,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(null)}
-                            className="text-[11px] text-white/30 hover:text-white/50 px-2 py-1"
+                            className="text-[11px] text-white/60 hover:text-white/50 px-2 py-1"
                           >
                             Cancel
                           </button>
@@ -331,7 +331,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
         <h4 className="text-xs font-medium text-white/40 mb-3">Execution History</h4>
         {executions.length === 0 ? (
           <div className="bg-white/[0.06] rounded-xl border border-white/[0.12] p-6 text-center">
-            <p className="text-white/20 text-xs">No rollback executions yet</p>
+            <p className="text-white/50 text-xs">No rollback executions yet</p>
           </div>
         ) : (
           <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
@@ -339,24 +339,24 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-white/[0.14]">
-                    <th className="text-[11px] text-white/30 font-medium px-4 py-3">Trigger Reason</th>
-                    <th className="text-[11px] text-white/30 font-medium px-4 py-3">Agent</th>
-                    <th className="text-[11px] text-white/30 font-medium px-4 py-3">Trace ID</th>
-                    <th className="text-[11px] text-white/30 font-medium px-4 py-3">Status</th>
-                    <th className="text-[11px] text-white/30 font-medium px-4 py-3">Response</th>
-                    <th className="text-[11px] text-white/30 font-medium px-4 py-3 text-right">Time</th>
+                    <th className="text-[11px] text-white/60 font-medium px-4 py-3">Trigger Reason</th>
+                    <th className="text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
+                    <th className="text-[11px] text-white/60 font-medium px-4 py-3">Trace ID</th>
+                    <th className="text-[11px] text-white/60 font-medium px-4 py-3">Status</th>
+                    <th className="text-[11px] text-white/60 font-medium px-4 py-3">Response</th>
+                    <th className="text-[11px] text-white/60 font-medium px-4 py-3 text-right">Time</th>
                   </tr>
                 </thead>
                 <tbody>
                   {executions.map(exec => (
                     <tr key={exec.id} className="border-b border-white/[0.12] last:border-0 hover:bg-white/[0.06] transition-colors">
                       <td className="px-4 py-3 text-xs text-white/70 max-w-[200px] truncate">{exec.trigger_reason}</td>
-                      <td className="px-4 py-3 text-xs text-white/70">{exec.agent_name || <span className="text-white/20">-</span>}</td>
+                      <td className="px-4 py-3 text-xs text-white/70">{exec.agent_name || <span className="text-white/50">-</span>}</td>
                       <td className="px-4 py-3">
                         {exec.trace_id ? (
                           <code className="text-[11px] text-blue-400/60 font-mono">{exec.trace_id.slice(0, 12)}...</code>
                         ) : (
-                          <span className="text-white/20 text-xs">-</span>
+                          <span className="text-white/50 text-xs">-</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -371,7 +371,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                       <td className="px-4 py-3 text-xs text-white/40">
                         {exec.response_status != null ? exec.response_status : '-'}
                       </td>
-                      <td className="px-4 py-3 text-xs text-white/30 text-right">{timeAgo(exec.created_at)}</td>
+                      <td className="px-4 py-3 text-xs text-white/60 text-right">{timeAgo(exec.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>

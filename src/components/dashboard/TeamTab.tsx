@@ -184,7 +184,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
   const inputClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none';
   const selectClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none';
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading team...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading team...</div>;
 
   return (
     <div className="space-y-6">
@@ -221,7 +221,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-sm font-medium text-white/70">Team Members</h3>
-            <p className="text-xs text-white/30 mt-0.5">Manage who has access to your organization.</p>
+            <p className="text-xs text-white/60 mt-0.5">Manage who has access to your organization.</p>
           </div>
         </div>
 
@@ -229,10 +229,10 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-white/[0.14]">
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Email</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Role</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Joined</th>
-                {isManager && <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Actions</th>}
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Email</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Role</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Joined</th>
+                {isManager && <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -257,7 +257,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-white/30 hidden sm:table-cell">{timeAgo(member.created_at)}</td>
+                  <td className="px-4 py-3 text-white/60 hidden sm:table-cell">{timeAgo(member.created_at)}</td>
                   {isManager && (
                     <td className="px-4 py-3 text-right">
                       {member.role !== 'owner' && (
@@ -303,7 +303,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
               <button
                 onClick={sendInvite}
                 disabled={sending || !inviteEmail.trim()}
-                className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+                className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
               >
                 {sending ? 'Sending...' : 'Send Invite'}
               </button>
@@ -320,10 +320,10 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-white/[0.14]">
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Email</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Role</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Expires</th>
-                  {isManager && <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Actions</th>}
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Email</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Role</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Expires</th>
+                  {isManager && <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
@@ -335,7 +335,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
                         {invite.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-white/30 hidden sm:table-cell">{timeAgo(invite.expires_at)}</td>
+                    <td className="px-4 py-3 text-white/60 hidden sm:table-cell">{timeAgo(invite.expires_at)}</td>
                     {isManager && (
                       <td className="px-4 py-3 text-right">
                         <button
@@ -359,17 +359,17 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         <h3 className="text-sm font-medium text-white/70 mb-3">Audit Log</h3>
         {auditLogs.length === 0 ? (
           <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6 text-center">
-            <p className="text-white/30 text-sm">No audit events yet</p>
+            <p className="text-white/60 text-sm">No audit events yet</p>
           </div>
         ) : (
           <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-white/[0.14]">
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Action</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Resource</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden md:table-cell">User</th>
-                  <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Time</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Action</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Resource</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden md:table-cell">User</th>
+                  <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Time</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
@@ -382,10 +382,10 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
                     </td>
                     <td className="px-4 py-2.5 text-white/40">
                       {log.resource_type}
-                      {log.resource_id && <span className="text-white/20 ml-1">({log.resource_id.slice(0, 8)}...)</span>}
+                      {log.resource_id && <span className="text-white/50 ml-1">({log.resource_id.slice(0, 8)}...)</span>}
                     </td>
-                    <td className="px-4 py-2.5 text-white/30 hidden md:table-cell">{log.user_email || '-'}</td>
-                    <td className="px-4 py-2.5 text-white/30 text-right">{timeAgo(log.created_at)}</td>
+                    <td className="px-4 py-2.5 text-white/60 hidden md:table-cell">{log.user_email || '-'}</td>
+                    <td className="px-4 py-2.5 text-white/60 text-right">{timeAgo(log.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

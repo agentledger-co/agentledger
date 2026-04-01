@@ -39,7 +39,7 @@ const STATUS_BADGE: Record<string, string> = {
   pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   approved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   denied: 'bg-red-500/10 text-red-400 border-red-500/20',
-  expired: 'bg-white/[0.10] text-white/30 border-white/[0.14]',
+  expired: 'bg-white/[0.10] text-white/60 border-white/[0.14]',
 };
 
 export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: string, type: 'success' | 'error') => void }) {
@@ -120,7 +120,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
     { value: 'all', label: 'All' },
   ];
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading approvals...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading approvals...</div>;
 
   return (
     <div className="space-y-4">
@@ -134,7 +134,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
               </span>
             )}
           </h3>
-          <p className="text-xs text-white/30 mt-0.5">Review and decide on agent action requests that require manual approval.</p>
+          <p className="text-xs text-white/60 mt-0.5">Review and decide on agent action requests that require manual approval.</p>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
       {approvals.length === 0 ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x2705;</div>
-          <p className="text-white/30 text-sm font-medium mb-2">
+          <p className="text-white/60 text-sm font-medium mb-2">
             {filter === 'pending'
               ? 'No pending approvals'
               : `No ${filter === 'all' ? '' : filter + ' '}approvals found`}
@@ -180,7 +180,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span className="text-[13px] text-white/70 font-medium">{approval.agent_name}</span>
-                    <span className="text-[11px] text-white/20">&#x2192;</span>
+                    <span className="text-[11px] text-white/50">&#x2192;</span>
                     <span className="text-[11px] bg-white/[0.10] text-white/50 px-2 py-0.5 rounded-md">{approval.service}</span>
                     <span className="text-[11px] text-white/40">{approval.action}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${STATUS_BADGE[approval.status] || STATUS_BADGE.pending}`}>

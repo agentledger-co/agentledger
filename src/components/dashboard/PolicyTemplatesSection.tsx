@@ -61,14 +61,14 @@ export default function PolicyTemplatesSection({ apiKey, onToast, onRefresh }: {
     setApplying(null);
   };
 
-  if (loading) return <div className="text-white/30 text-center py-8">Loading templates...</div>;
+  if (loading) return <div className="text-white/60 text-center py-8">Loading templates...</div>;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-sm font-medium text-white/70">Quick Start Templates</h4>
-          <p className="text-xs text-white/30 mt-0.5">Apply pre-built policy sets with one click.</p>
+          <p className="text-xs text-white/60 mt-0.5">Apply pre-built policy sets with one click.</p>
         </div>
         <div>
           <input
@@ -90,8 +90,8 @@ export default function PolicyTemplatesSection({ apiKey, onToast, onRefresh }: {
                 {template.category}
               </span>
             </div>
-            <p className="text-xs text-white/30 mb-3 flex-1">{template.description}</p>
-            <div className="text-[11px] text-white/20 mb-3">
+            <p className="text-xs text-white/60 mb-3 flex-1">{template.description}</p>
+            <div className="text-[11px] text-white/50 mb-3">
               {template.policies.length} rule{template.policies.length !== 1 ? 's' : ''}: {template.policies.map(p => p.rule_type.replace(/_/g, ' ')).join(', ')}
             </div>
             <button

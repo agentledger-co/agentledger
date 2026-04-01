@@ -99,7 +99,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                 <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-red-500/10 text-red-400">has errors</span>
               )}
             </div>
-            <button onClick={onClose} className="text-white/30 hover:text-white/60 text-lg transition-colors">✕</button>
+            <button onClick={onClose} className="text-white/60 hover:text-white/60 text-lg transition-colors">✕</button>
           </div>
 
           {/* Summary stats */}
@@ -136,7 +136,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
         {/* Waterfall chart */}
         <div className="px-6 py-5">
           {/* Time axis */}
-          <div className="flex items-center justify-between text-[10px] text-white/20 mb-2 pl-[180px]">
+          <div className="flex items-center justify-between text-[10px] text-white/50 mb-2 pl-[180px]">
             <span>0ms</span>
             <span>{formatDuration(Math.round(timelineSpan / 4))}</span>
             <span>{formatDuration(Math.round(timelineSpan / 2))}</span>
@@ -168,7 +168,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                         <span className="text-[9px] text-purple-400/50 flex-shrink-0" title="Parallel execution">||</span>
                       )}
                       <span className={`text-[11px] ${color.text} truncate flex-shrink-0`}>{action.service}</span>
-                      <span className="text-[11px] text-white/30 truncate">{action.action}</span>
+                      <span className="text-[11px] text-white/60 truncate">{action.action}</span>
                     </div>
 
                     {/* Bar area */}
@@ -201,7 +201,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                     </div>
 
                     {/* Duration on right */}
-                    <span className="text-[10px] text-white/20 w-14 text-right flex-shrink-0">
+                    <span className="text-[10px] text-white/50 w-14 text-right flex-shrink-0">
                       {action.duration_ms > 0 ? formatDuration(action.duration_ms) : '--'}
                     </span>
                   </div>
@@ -269,13 +269,13 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
           <div className="mt-6 pt-4 border-t border-white/[0.14]">
             <div className="flex items-center gap-3">
               <div className="w-[168px] flex-shrink-0">
-                <span className="text-[11px] text-white/30 font-medium">Total span</span>
+                <span className="text-[11px] text-white/60 font-medium">Total span</span>
               </div>
               <div className="flex-1 relative h-6 bg-white/[0.06] rounded overflow-hidden">
                 <div className="absolute top-1 bottom-1 left-0 rounded bg-purple-500/30" style={{ width: '100%' }} />
                 <span className="absolute top-0.5 left-1 text-[9px] text-white/40 font-mono">{formatDuration(timelineSpan)}</span>
               </div>
-              <span className="text-[10px] text-white/20 w-14 text-right flex-shrink-0">{formatDuration(timelineSpan)}</span>
+              <span className="text-[10px] text-white/50 w-14 text-right flex-shrink-0">{formatDuration(timelineSpan)}</span>
             </div>
 
             {/* Service legend */}
@@ -285,7 +285,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                 return (
                   <div key={svc} className="flex items-center gap-1.5">
                     <div className={`w-2.5 h-2.5 rounded-sm ${c.bar} opacity-70`} />
-                    <span className="text-[10px] text-white/30">{svc}</span>
+                    <span className="text-[10px] text-white/60">{svc}</span>
                   </div>
                 );
               })}
@@ -306,7 +306,7 @@ function CollapsibleJson({ label, data, colorClass }: { label: string; data: unk
         onClick={() => setOpen(!open)}
         className="text-[10px] uppercase text-white/55 mb-1 flex items-center gap-1 hover:text-white/40 transition-colors"
       >
-        <span className="text-white/20 text-[9px]">{open ? '▾' : '▸'}</span>
+        <span className="text-white/50 text-[9px]">{open ? '▾' : '▸'}</span>
         {label}
       </button>
       {open && (

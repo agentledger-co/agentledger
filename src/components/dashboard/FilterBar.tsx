@@ -83,7 +83,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
         {/* Search */}
         <div className="relative flex-1 min-w-[180px]">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -146,7 +146,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
             onChange={e => setFrom(e.target.value)}
             className={`bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 focus:border-blue-500/50 focus:outline-none [color-scheme:dark] ${from ? 'border-blue-500/30' : ''}`}
           />
-          <span className="text-white/20 text-xs">to</span>
+          <span className="text-white/50 text-xs">to</span>
           <input
             type="date"
             value={to}
@@ -159,7 +159,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
         {hasFilters && (
           <button
             onClick={clearAll}
-            className="text-[11px] text-white/30 hover:text-white/60 bg-white/[0.10] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-colors flex items-center gap-1"
+            className="text-[11px] text-white/60 hover:text-white/60 bg-white/[0.10] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-colors flex items-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

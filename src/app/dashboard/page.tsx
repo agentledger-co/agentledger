@@ -669,7 +669,7 @@ function SetupScreen({ onSetup, loading, error }: {
                 value={inputKey}
                 onChange={e => setInputKey(e.target.value)}
                 placeholder="al_..."
-                className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none mb-4"
+                className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none mb-4"
               />
               <button
                 onClick={() => onSetup(inputKey)}
@@ -969,7 +969,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search actions..."
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -1794,7 +1794,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                 <select
                   value={newBudget.agent}
                   onChange={e => setNewBudget({ ...newBudget, agent: e.target.value })}
-                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/60 focus:outline-none"
                 >
                   <option value="">Select agent...</option>
                   {stats.agents.map(a => (
@@ -1807,7 +1807,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                 <select
                   value={newBudget.period}
                   onChange={e => setNewBudget({ ...newBudget, period: e.target.value })}
-                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/60 focus:outline-none"
                 >
                   <option value="hourly">Hourly</option>
                   <option value="daily">Daily</option>
@@ -1822,7 +1822,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                   value={newBudget.maxActions}
                   onChange={e => setNewBudget({ ...newBudget, maxActions: e.target.value })}
                   placeholder="e.g. 100"
-                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
                 />
               </div>
               <div>
@@ -1833,7 +1833,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                   value={newBudget.maxCostDollars}
                   onChange={e => setNewBudget({ ...newBudget, maxCostDollars: e.target.value })}
                   placeholder="e.g. 5.00"
-                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
                 />
               </div>
             </div>
@@ -2079,14 +2079,14 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             value={newUrl}
             onChange={e => setNewUrl(e.target.value)}
             placeholder="https://your-server.com/webhook"
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
           <input
             type="text"
             value={newDesc}
             onChange={e => setNewDesc(e.target.value)}
             placeholder="Description (optional)"
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
           <div>
             <p className="text-xs text-white/60 mb-2">Events (empty = all events)</p>
@@ -2349,7 +2349,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
               value={newKeyName}
               onChange={e => setNewKeyName(e.target.value)}
               placeholder="Key name (e.g., production, staging)"
-              className="flex-1 bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+              className="flex-1 bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
             />
             <button onClick={createKey} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
               Create
@@ -2666,32 +2666,32 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-medium text-white/60 mb-1">Notifications</h3>
-        <p className="text-xs text-white/50">Get alerted via Slack or email when things go wrong.</p>
+        <h3 className="text-sm font-medium text-white/90 mb-1">Notifications</h3>
+        <p className="text-xs text-white/60">Get alerted via Slack, Discord, PagerDuty, or email when things go wrong.</p>
       </div>
 
       {/* Slack */}
-      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5 space-y-4">
+      <div className="bg-white/[0.06] rounded-xl border border-white/[0.16] p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">💬</span>
-            <h4 className="text-sm font-medium">Slack</h4>
-            {slackActive && <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase">active</span>}
+            <h4 className="text-sm font-medium text-white">Slack</h4>
+            {slackActive && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-medium">active</span>}
           </div>
         </div>
         <div>
-          <label className="text-xs text-white/60 block mb-1">Webhook URL</label>
+          <label className="text-xs text-white/80 block mb-1">Webhook URL</label>
           <input
             type="url"
             value={slackUrl}
             onChange={e => setSlackUrl(e.target.value)}
             placeholder="https://hooks.slack.com/services/..."
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
-          <p className="text-[10px] text-white/50 mt-1">Create an incoming webhook in your Slack workspace settings.</p>
+          <p className="text-[11px] text-white/50 mt-1.5">Create an incoming webhook in your Slack workspace settings.</p>
         </div>
         <div>
-          <label className="text-xs text-white/60 block mb-2">Events</label>
+          <label className="text-xs text-white/80 block mb-2">Events</label>
           <div className="flex flex-wrap gap-2">
             {ALL_EVENTS.map(e => (
               <button
@@ -2699,8 +2699,8 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
                 onClick={() => toggleEvent(slackEvents, setSlackEvents, e.key)}
                 className={`text-[11px] px-2.5 py-1 rounded-lg transition-colors ${
                   slackEvents.includes(e.key)
-                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
-                    : 'bg-white/[0.08] text-white/60 border border-white/[0.12] hover:border-white/[0.16]'
+                    ? 'bg-blue-500/25 text-blue-300 border border-blue-500/30'
+                    : 'bg-white/[0.10] text-white/70 border border-white/[0.16] hover:border-white/[0.24]'
                 }`}
                 title={e.desc}
               >
@@ -2712,33 +2712,33 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
         <button
           onClick={() => saveChannel('slack')}
           disabled={!slackUrl || saving}
-          className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
+          className="text-xs bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium border border-blue-500/25"
         >
           {saving ? 'Saving...' : slackActive ? 'Update Slack' : 'Enable Slack'}
         </button>
       </div>
 
       {/* Email */}
-      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5 space-y-4">
+      <div className="bg-white/[0.06] rounded-xl border border-white/[0.16] p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">📧</span>
-            <h4 className="text-sm font-medium">Email</h4>
-            {emailActive && <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase">active</span>}
+            <h4 className="text-sm font-medium text-white">Email</h4>
+            {emailActive && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-medium">active</span>}
           </div>
         </div>
         <div>
-          <label className="text-xs text-white/60 block mb-1">Email Address</label>
+          <label className="text-xs text-white/80 block mb-1">Email Address</label>
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="alerts@yourcompany.com"
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
         </div>
         <div>
-          <label className="text-xs text-white/60 block mb-2">Events</label>
+          <label className="text-xs text-white/80 block mb-2">Events</label>
           <div className="flex flex-wrap gap-2">
             {ALL_EVENTS.map(e => (
               <button
@@ -2746,8 +2746,8 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
                 onClick={() => toggleEvent(emailEvents, setEmailEvents, e.key)}
                 className={`text-[11px] px-2.5 py-1 rounded-lg transition-colors ${
                   emailEvents.includes(e.key)
-                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
-                    : 'bg-white/[0.08] text-white/60 border border-white/[0.12] hover:border-white/[0.16]'
+                    ? 'bg-blue-500/25 text-blue-300 border border-blue-500/30'
+                    : 'bg-white/[0.10] text-white/70 border border-white/[0.16] hover:border-white/[0.24]'
                 }`}
                 title={e.desc}
               >
@@ -2759,7 +2759,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
         <button
           onClick={() => saveChannel('email')}
           disabled={!email || saving}
-          className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
+          className="text-xs bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium border border-blue-500/25"
         >
           {saving ? 'Saving...' : emailActive ? 'Update Email' : 'Enable Email'}
         </button>

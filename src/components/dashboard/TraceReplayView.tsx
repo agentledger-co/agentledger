@@ -111,7 +111,7 @@ export default function TraceReplayView({ apiKey, onToast }: TraceReplayViewProp
           onChange={e => setTraceId(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && loadTrace()}
           placeholder="Enter trace ID (e.g. tr_abc123)"
-          className="flex-1 bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+          className="flex-1 bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
         />
         <button
           onClick={loadTrace}

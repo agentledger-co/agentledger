@@ -191,7 +191,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                 value={formAgent}
                 onChange={e => setFormAgent(e.target.value)}
                 placeholder="Any agent"
-                className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
             <div>
@@ -201,7 +201,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                 value={formService}
                 onChange={e => setFormService(e.target.value)}
                 placeholder="Any service"
-                className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
             <div>
@@ -211,7 +211,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                 value={formAction}
                 onChange={e => setFormAction(e.target.value)}
                 placeholder="Any action"
-                className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
               value={formUrl}
               onChange={e => setFormUrl(e.target.value)}
               placeholder="https://your-server.com/rollback"
-              className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
+              className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
             />
           </div>
           <div className="flex items-center gap-2">

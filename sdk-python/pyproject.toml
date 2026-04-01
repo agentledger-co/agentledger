@@ -34,6 +34,6 @@ openai = ["openai>=1.0"]
 
 [project.urls]
 Homepage = "https://agentledger.co"
-Repository = "https://github.com/miken1988/agentledger"
+Repository = "https://github.com/agentledger-co/agentledger"
 Documentation = "https://agentledger.co/docs"
 Changelog = "https://agentledger.co/changelog"

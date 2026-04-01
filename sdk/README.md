@@ -166,7 +166,7 @@ const server = wrapMCPServer(mcpServer, {
 ## Self-Hosting
 
 ```bash
-git clone https://github.com/miken1988/agentledger.git
+git clone https://github.com/agentledger-co/agentledger.git
 cd agentledger
 cp .env.example .env.local  # Add your Supabase credentials
 npm install && npm run dev

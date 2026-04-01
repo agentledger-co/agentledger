@@ -79,6 +79,7 @@ const NAV = [
   { id: 'express', label: 'Express / Generic' },
   { id: 'rest-api', label: 'REST API' },
   { id: 'webhooks', label: 'Webhooks' },
+  { id: 'notifications', label: 'Notifications (Slack, Discord, PagerDuty)' },
   { id: 'api-keys', label: 'API Key Management' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'budgets', label: 'Budgets & Alerts' },
@@ -615,6 +616,7 @@ await trackedSendEmail(to, subject, body);`} />
                 ['budget.exceeded', 'A budget limit is reached'],
                 ['budget.warning', 'A budget crosses 75% usage'],
                 ['alert.created', 'Any anomaly alert is created'],
+                ['batch.logged', 'A batch of actions is logged'],
               ]}
             />
 
@@ -674,6 +676,73 @@ app.post('/webhook', (req, res) => {
             <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
               <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Auto-disable.</strong> Webhooks are automatically disabled after 10 consecutive delivery failures. Re-enable them from the dashboard or API.</p>
             </div>
+          </section>
+
+          {/* Notification Channels */}
+          <section id="notifications" className="mb-20">
+            <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Notification Channels</h2>
+            <p className="text-white/30 text-[14px] mb-4">Get alerted through Slack, Discord, or PagerDuty when budgets are exceeded, agents go rogue, or anomalies are detected. Configure multiple channels per org.</p>
+
+            <h3 className="text-[16px] font-medium mt-4 mb-3">Supported channels</h3>
+            <Table
+              headers={['Channel', 'Config Required', 'Use Case']}
+              rows={[
+                ['email', 'Email address', 'General notifications'],
+                ['slack', 'Webhook URL', 'Team chat alerts'],
+                ['discord', 'Webhook URL', 'Team chat alerts'],
+                ['pagerduty', 'Routing key', 'On-call incident escalation'],
+              ]}
+            />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Slack</h3>
+            <p className="text-white/30 text-[14px] mb-3">Create a Slack Incoming Webhook and pass the URL:</p>
+            <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/notifications \\
+  -H "Authorization: Bearer al_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "channel": "slack",
+    "config": {
+      "webhook_url": "https://hooks.slack.com/services/T.../B.../xxx"
+    },
+    "events": ["budget.exceeded", "alert.created"]
+  }'`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Discord</h3>
+            <p className="text-white/30 text-[14px] mb-3">Create a Discord channel webhook (Server Settings &rarr; Integrations &rarr; Webhooks) and pass the URL:</p>
+            <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/notifications \\
+  -H "Authorization: Bearer al_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "channel": "discord",
+    "config": {
+      "webhook_url": "https://discord.com/api/webhooks/123456/abcdef..."
+    },
+    "events": ["budget.exceeded", "agent.killed"]
+  }'`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">PagerDuty</h3>
+            <p className="text-white/30 text-[14px] mb-3">Create a PagerDuty service integration (Events API v2) and pass the routing key. Alerts map to PagerDuty severity levels automatically:</p>
+            <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/notifications \\
+  -H "Authorization: Bearer al_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "channel": "pagerduty",
+    "config": {
+      "routing_key": "your-pagerduty-integration-key"
+    },
+    "events": ["budget.exceeded", "agent.killed", "alert.created"]
+  }'
+
+// PagerDuty severity mapping:
+//   budget.exceeded, agent.killed → critical
+//   alert.created               → warning
+//   budget.warning              → info`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">List active channels</h3>
+            <Code code={`curl https://your-instance.vercel.app/api/v1/notifications \\
+  -H "Authorization: Bearer al_..."
+
+// Returns all configured channels with their events and status`} lang="bash" />
           </section>
 
           {/* API Key Management */}

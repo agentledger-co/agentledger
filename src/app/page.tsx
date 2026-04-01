@@ -319,6 +319,7 @@ const COMPARISON = [
   { feature: 'Budget controls & enforcement', us: true, them: false },
   { feature: 'Batch logging & data export', us: true, them: false },
   { feature: 'CLI tool (npx agentledger)', us: true, them: false },
+  { feature: 'Slack, Discord & PagerDuty alerts', us: true, them: false },
   { feature: 'Live SSE streaming', us: true, them: false },
   { feature: 'Python & TypeScript SDKs', us: true, them: true },
   { feature: '8 framework integrations', us: true, them: true },
@@ -578,9 +579,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: 'Free', price: '$0', period: 'forever', features: ['5,000 actions/mo', '5 agents', '7-day data retention', 'Action drawer & I/O', 'Slack & email alerts', 'Community support'], cta: 'Get Started', hl: true },
-              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Email support'], cta: 'Join Waitlist', hl: false },
-              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
+              { name: 'Free', price: '$0', period: 'forever', features: ['5,000 actions/mo', '5 agents', '7-day data retention', 'Action drawer & I/O', 'Slack, Discord & email alerts', 'Community support'], cta: 'Get Started', hl: true },
+              { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Slack, Discord & PagerDuty', 'Email support'], cta: 'Join Waitlist', hl: false },
+              { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Slack, Discord & PagerDuty', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
               <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]'}`}>
                 {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Available Now</div>}

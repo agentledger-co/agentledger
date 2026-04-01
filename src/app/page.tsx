@@ -302,15 +302,9 @@ const FEATURES = [
   { icon: '📡', title: 'Live Streaming Feed', desc: 'Real-time SSE streaming of every action. Watch your agents work live with sub-second latency.' },
   { icon: '🛡️', title: 'Policy Engine & Guardrails', desc: 'Define rules: rate limits, service allowlists, cost caps, payload regex blocks. Enforced before execution.' },
   { icon: '✋', title: 'Human-in-the-Loop', desc: 'Require human approval for high-risk actions. Approve or deny from the dashboard or Slack.' },
-  { icon: '💰', title: 'Cost Tracking & Budgets', desc: 'Know what your agents spend. Set daily/weekly/monthly budgets per agent with automatic enforcement.' },
   { icon: '🔗', title: 'Trace Timeline', desc: 'Waterfall visualization showing how actions flow. See parallel execution, timing, and I/O at each step.' },
   { icon: '🚨', title: 'Statistical Anomaly Detection', desc: 'ML-powered baselines learn normal behavior. Alerts fire when cost, rate, or duration deviates significantly.' },
-  { icon: '⭐', title: 'Agent Evaluations', desc: 'Score agent actions 0-100. Track quality trends over time. Compare agents by success rate.' },
-  { icon: '🔄', title: 'Rollback Hooks', desc: 'When agents are killed or budgets exceeded, fire compensating webhooks to undo completed actions.' },
   { icon: '🐍', title: 'Python & TypeScript SDKs', desc: 'Sync and async SDKs for both languages. LangChain, OpenAI, MCP, CrewAI integrations built in.' },
-  { icon: '🌍', title: 'Multi-Environment', desc: 'Separate dev, staging, and production data. Switch environments in the dashboard with one click.' },
-  { icon: '🔍', title: 'Search & Filtering', desc: 'Server-side search across actions. Filter by agent, service, status, date range, and trace ID.' },
-  { icon: '🛡️', title: 'Fail-Open by Default', desc: 'If AgentLedger is down, your agents keep running. Never blocks production unless configured.' },
 ];
 
 const COMPARISON = [
@@ -365,6 +359,7 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stars, setStars] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch('https://api.github.com/repos/agentledger-co/agentledger')
@@ -434,9 +429,15 @@ export default function LandingPage() {
               <a href="#demo" className="bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/80 font-medium px-6 py-3 rounded-xl transition-all text-[14px] border border-white/[0.08]">
                 See live demo
               </a>
-              <div className="flex items-center bg-white/[0.04] rounded-xl border border-white/[0.08] px-4 py-2.5">
+              <button
+                onClick={() => { navigator.clipboard.writeText('npm i agentledger'); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                className="flex items-center gap-2 bg-white/[0.04] rounded-xl border border-white/[0.08] px-4 py-2.5 hover:bg-white/[0.06] transition-colors group"
+              >
                 <code className="text-[13px] text-blue-400/80 font-mono">npm i agentledger</code>
-              </div>
+                <span className="text-[11px] text-white/20 group-hover:text-white/40 transition-colors">
+                  {copied ? '✓' : '⎘'}
+                </span>
+              </button>
             </div>
             {stars !== null && (
               <a href="https://github.com/agentledger-co/agentledger" target="_blank" rel="noopener noreferrer"
@@ -479,10 +480,10 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(f => (
-              <div key={f.title} className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-7 hover:border-blue-500/20 hover:bg-white/[0.03] transition-all duration-300 group">
-                <div className="text-2xl mb-4">{f.icon}</div>
-                <h3 className="font-semibold mb-2 text-[15px] group-hover:text-blue-400 transition-colors">{f.title}</h3>
-                <p className="text-[13px] text-white/45 leading-relaxed">{f.desc}</p>
+              <div key={f.title} className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-8 hover:border-blue-500/20 hover:bg-white/[0.03] transition-all duration-300 group">
+                <div className="text-3xl mb-5">{f.icon}</div>
+                <h3 className="font-semibold mb-3 text-[16px] group-hover:text-blue-400 transition-colors">{f.title}</h3>
+                <p className="text-[14px] text-white/45 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>

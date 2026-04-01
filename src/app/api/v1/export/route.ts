@@ -42,7 +42,7 @@ function actionsToCsv(actions: Record<string, unknown>[]): string {
 export async function GET(request: NextRequest) {
   try {
     const auth = await authenticateApiKey(request);
-    if (!auth.success) {
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -66,8 +66,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const fromDate = new Date(sanitizeString(fromParam));
-    const toDate = new Date(sanitizeString(toParam));
+    const fromDate = new Date(sanitizeString(fromParam) ?? fromParam);
+    const toDate = new Date(sanitizeString(toParam) ?? toParam);
 
     if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
       return NextResponse.json(
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('action_logs')
       .select('*')
-      .eq('org_id', auth.org_id)
+      .eq('org_id', auth.orgId)
       .gte('created_at', fromDate.toISOString())
       .lte('created_at', toDate.toISOString())
       .order('created_at', { ascending: true })

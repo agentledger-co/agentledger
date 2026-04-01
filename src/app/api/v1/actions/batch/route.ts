@@ -45,20 +45,26 @@ export async function POST(req: NextRequest) {
   try {
     // Authenticate
     const auth = await authenticateApiKey(req);
-    if ('error' in auth) {
-      return NextResponse.json({ error: auth.error }, { status: 401 });
-    }
-
-    // Rate limit check (once for the batch)
-    const rateLimit = await checkRateLimit(auth.orgId);
-    if ('error' in rateLimit) {
-      return NextResponse.json({ error: rateLimit.error }, { status: 429 });
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Usage limit check (once for the batch)
-    const usageLimit = await checkUsageLimits(auth.orgId);
-    if ('error' in usageLimit) {
-      return NextResponse.json({ error: usageLimit.error }, { status: 403 });
+    const usageCheck = await checkUsageLimits(auth.orgId);
+    if (!usageCheck.allowed) {
+      return NextResponse.json(
+        { error: usageCheck.reason, usage: usageCheck.usage },
+        { status: 403 }
+      );
+    }
+
+    // Rate limit check (once for the batch)
+    const rateCheck = checkRateLimit(auth.orgId, usageCheck.plan);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please slow down.', retryAfter: rateCheck.retryAfter },
+        { status: 429 }
+      );
     }
 
     // Parse request body
@@ -115,10 +121,10 @@ export async function POST(req: NextRequest) {
       // Sanitize inputs
       const processed: ProcessedAction = {
         org_id: auth.orgId,
-        agent: sanitizeString(raw.agent!),
+        agent: sanitizeString(raw.agent!) ?? raw.agent!,
         service: raw.service ? sanitizeString(raw.service) : null,
-        action: sanitizeString(raw.action!),
-        status: sanitizeString(raw.status!),
+        action: sanitizeString(raw.action!) ?? raw.action!,
+        status: sanitizeString(raw.status!) ?? raw.status!,
         cost_cents: raw.cost_cents != null ? sanitizePositiveInt(raw.cost_cents) : null,
         duration_ms: raw.duration_ms != null ? sanitizePositiveInt(raw.duration_ms) : null,
         metadata: raw.metadata ? sanitizeMetadata(raw.metadata) : null,

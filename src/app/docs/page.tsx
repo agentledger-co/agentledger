@@ -312,16 +312,40 @@ const result = await ledger.track({
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Core SDK</h2>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3"><InlineCode>ledger.track(options, fn)</InlineCode></h3>
-            <p className="text-white/30 text-[14px] mb-3">Wraps an async function with logging and pre-flight budget checks. This is the main method you'll use.</p>
-            <Code code={`const { result, allowed, durationMs, actionId } = await ledger.track({
-  agent: 'support-bot',       // Agent name
-  service: 'sendgrid',        // Service being called
-  action: 'send_email',       // Action being performed
-  costCents: 1,               // Optional: estimated cost
-  metadata: { to: 'user@' },  // Optional: custom metadata
-}, async () => {
-  return await sendEmail(to, subject, body);
-});`} filename="track.ts" />
+            <p className="text-white/30 text-[14px] mb-3">Wraps an async function with logging and pre-flight budget checks. This is the main method you&apos;ll use.</p>
+            <Code code={`try {
+  const { result, allowed, durationMs, actionId } = await ledger.track({
+    agent: 'support-bot',       // Agent name
+    service: 'sendgrid',        // Service being called
+    action: 'send_email',       // Action being performed
+    costCents: 1,               // Optional: estimated cost in cents
+    metadata: { to: 'user@' },  // Optional: custom key-value metadata
+    input: { to, subject },     // Optional: captured as action input for debugging
+    output: undefined,          // Optional: explicit output value to log
+    captureOutput: true,        // Optional: auto-capture return value of fn
+  }, async () => {
+    return await sendEmail(to, subject, body);
+  });
+  console.log('Action logged:', actionId, 'took', durationMs, 'ms');
+} catch (e) {
+  // Thrown when: policy blocked the action, agent is paused/killed,
+  // budget exceeded, or the wrapped fn itself threw
+  console.error('Action failed:', e.message);
+}`} filename="track.ts" />
+            <Table
+              headers={['Option', 'Type', 'Description']}
+              rows={[
+                ['agent', 'string', 'Name of the agent performing the action (required)'],
+                ['service', 'string', 'Service being called, e.g. "openai", "stripe" (required)'],
+                ['action', 'string', 'Action being performed, e.g. "send_email" (required)'],
+                ['costCents', 'number', 'Estimated cost in cents'],
+                ['metadata', 'Record<string, unknown>', 'Custom key-value pairs logged with the action'],
+                ['traceId', 'string', 'Trace ID to group related actions (see Traces)'],
+                ['input', 'any', 'Input data (e.g. prompt, request body) stored for debugging'],
+                ['output', 'any', 'Explicit output value to log. Overrides captureOutput'],
+                ['captureOutput', 'boolean', 'Auto-capture fn return value as output (default: false)'],
+              ]}
+            />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3"><InlineCode>ledger.check(options)</InlineCode></h3>
             <p className="text-white/30 text-[14px] mb-3">Pre-flight check without executing the action. Useful before expensive operations.</p>
@@ -549,6 +573,16 @@ await trackedSendEmail(to, subject, body);`} />
     "metadata": { "channel": "#support" }
   }'`} lang="bash" />
 
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Error responses</h3>
+            <Code code={`// 401 Unauthorized — missing or invalid API key
+{ "error": "Invalid API key" }
+
+// 403 Forbidden — action blocked by policy
+{ "error": "Action blocked", "reason": "Policy: Rate limit exceeded (15/10 in 3600s)" }
+
+// 429 Too Many Requests — API rate limiting
+{ "error": "Rate limit exceeded", "retryAfter": 30 }`} />
+
             <h3 className="text-[16px] font-medium mt-8 mb-3">Example: Pre-flight check</h3>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/check \\
   -H "Authorization: Bearer al_your_key_here" \\
@@ -596,6 +630,25 @@ await trackedSendEmail(to, subject, body);`} />
 
 // Response includes a signing secret (shown only once):
 // { "id": "...", "secret": "whsec_...", "url": "...", "events": [...] }`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Webhook payload</h3>
+            <p className="text-white/30 text-[14px] mb-3">Every webhook delivery sends a JSON body with the event type, timestamp, and event-specific data:</p>
+            <Code code={`{
+  "event": "action.logged",
+  "timestamp": "2026-03-31T14:22:00.000Z",
+  "data": {
+    "id": "act_8f3a2b1c",
+    "agent_name": "support-bot",
+    "service": "slack",
+    "action": "send_message",
+    "status": "success",
+    "cost_cents": 0,
+    "duration_ms": 150,
+    "environment": "production",
+    "metadata": { "channel": "#support" },
+    "created_at": "2026-03-31T14:22:00.000Z"
+  }
+}`} />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Verify signatures</h3>
             <Code code={`// Every webhook request includes X-AgentLedger-Signature header
@@ -698,6 +751,7 @@ curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
             <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
               <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Automatic budget resets</strong> require enabling pg_cron in your Supabase project. See the migration file for the cron schedule SQL.</p>
             </div>
+            <p className="text-white/20 text-[13px] mt-3">See also: <a href="#policies" className="text-blue-400/60 hover:text-blue-400 hover:underline">Policy Engine</a> for rate limiting and cost-per-action caps.</p>
           </section>
 
           {/* Environments */}
@@ -712,9 +766,9 @@ curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
 });`} filename="config.ts" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (Python)</h3>
-            <Code code={`from agentledger import AgentLedger
+            <Code code={`from agentledger import AgentLedger, AgentLedgerConfig
 
-ledger = AgentLedger(api_key="al_...", environment="staging")`} filename="config.py" />
+ledger = AgentLedger(AgentLedgerConfig(api_key="al_...", environment="staging"))`} filename="config.py" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">REST API</h3>
             <p className="text-white/30 text-[14px] mb-3">All endpoints accept an <InlineCode>environment</InlineCode> query parameter:</p>
@@ -760,9 +814,10 @@ curl "https://your-instance.vercel.app/api/v1/actions?agent=support-bot&cursor=e
             <p className="text-white/30 text-[14px] mb-4">Group related actions into a single trace to see the full lifecycle of an agent task. Attach a <InlineCode>traceId</InlineCode> to every action in a workflow.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Generate a trace ID</h3>
+            <p className="text-white/30 text-[14px] mb-3">Trace IDs use the format <InlineCode>{'tr_{base36_timestamp}_{random_8chars}'}</InlineCode> (e.g. <InlineCode>tr_lq8k2m1_a7f3b9x2</InlineCode>).</p>
             <Code code={`import { AgentLedger } from 'agentledger';
 
-const traceId = AgentLedger.traceId(); // unique trace identifier
+const traceId = AgentLedger.traceId(); // e.g. "tr_lq8k2m1_a7f3b9x2"
 
 await ledger.track({
   agent: 'research-bot',
@@ -783,12 +838,12 @@ await ledger.track({
 });`} filename="trace-example.ts" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Retrieve a trace</h3>
-            <Code code={`curl https://your-instance.vercel.app/api/v1/traces/trc_abc123 \\
+            <Code code={`curl https://your-instance.vercel.app/api/v1/traces/tr_lq8k2m1_a7f3b9x2 \\
   -H "Authorization: Bearer al_..."
 
 # Response:
 # {
-#   "traceId": "trc_abc123",
+#   "traceId": "tr_lq8k2m1_a7f3b9x2",
 #   "actions": [...],
 #   "summary": {
 #     "totalDuration": 3450,
@@ -800,6 +855,7 @@ await ledger.track({
             <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
               <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Dashboard.</strong> Click any <InlineCode>trace_id</InlineCode> in the actions table to see a waterfall timeline of all actions in the trace.</p>
             </div>
+            <p className="text-white/20 text-[13px] mt-3">See also: <a href="#search" className="text-blue-400/60 hover:text-blue-400 hover:underline">Search & Filtering</a> to query actions by trace ID.</p>
           </section>
 
           {/* Policy Engine */}
@@ -833,6 +889,38 @@ await ledger.track({
     "enabled": true
   }'`} lang="bash" />
 
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Regex example for sensitive data blocking</h3>
+            <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/policies \\
+  -H "Authorization: Bearer al_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "Block SSN and passwords in payloads",
+    "rule_type": "payload_regex_block",
+    "config": {
+      "patterns": ["\\\\b\\\\d{3}-\\\\d{2}-\\\\d{4}\\\\b", "password"],
+      "fields": ["input", "output"]
+    },
+    "priority": 20,
+    "enabled": true
+  }'`} lang="bash" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Policy evaluation</h3>
+            <div className="space-y-2 text-[14px] text-white/40">
+              <p>{'\u2022'} <strong className="text-white/70">Priority order:</strong> Higher priority number = evaluated first. If multiple policies match, the first blocking one wins.</p>
+              <p>{'\u2022'} <strong className="text-white/70">Org-wide vs per-agent:</strong> Set <InlineCode>agent_name</InlineCode> to target a specific agent, or leave it <InlineCode>null</InlineCode> for org-wide rules.</p>
+            </div>
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Block response</h3>
+            <p className="text-white/30 text-[14px] mb-3">When a policy blocks an action, <InlineCode>check()</InlineCode> and <InlineCode>track()</InlineCode> return:</p>
+            <Code code={`// Pre-flight check response when blocked:
+{
+  "allowed": false,
+  "blockReason": "Policy: Rate limit exceeded (15/10 in 3600s)"
+}
+
+// track() throws an error with this message:
+// "AgentLedger: Action blocked - Policy: Rate limit exceeded (15/10 in 3600s)"`} />
+
             <h3 className="text-[16px] font-medium mt-8 mb-3">API endpoints</h3>
             <Table
               headers={['Method', 'Endpoint', 'Description']}
@@ -843,6 +931,7 @@ await ledger.track({
                 ['DELETE', '/api/v1/policies/:id', 'Delete a policy'],
               ]}
             />
+            <p className="text-white/20 text-[13px] mt-3">See also: <a href="#approvals" className="text-blue-400/60 hover:text-blue-400 hover:underline">Approvals</a> for policies that require human approval before execution.</p>
           </section>
 
           {/* Human-in-the-Loop Approvals */}
@@ -862,24 +951,33 @@ await ledger.track({
             <Code code={`import { AgentLedger, ApprovalRequiredError } from 'agentledger';
 
 try {
-  await ledger.track({
+  const result = await ledger.track({
     agent: 'billing-bot',
     service: 'stripe',
     action: 'charge',
+    costCents: 5000,
   }, async () => {
     return await stripe.charges.create({ amount: 5000, currency: 'usd' });
   });
 } catch (err) {
   if (err instanceof ApprovalRequiredError) {
+    console.log('Waiting for human approval:', err.approvalId);
+
     // Wait up to 5 minutes for human approval
     const decision = await ledger.waitForApproval(err.approvalId, {
-      timeout: 300000,
+      timeout: 300000, // 5 minutes in ms
     });
 
-    if (decision.approved) {
-      // Re-execute the action
+    if (decision === 'approved') {
+      // Re-execute the action now that it's approved
       await stripe.charges.create({ amount: 5000, currency: 'usd' });
+    } else {
+      // decision is 'denied' or 'expired' (auto-expires after 30 min)
+      console.log('Action denied or expired:', decision);
     }
+  } else {
+    // Other errors: policy block, budget exceeded, network error, etc.
+    console.error('Action failed:', err.message);
   }
 }`} filename="approval-example.ts" />
 
@@ -1010,6 +1108,10 @@ handle.close();`} filename="stream-example.ts" />
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Rollback Hooks</h2>
             <p className="text-white/30 text-[14px] mb-4">Register compensating action webhooks that fire when an agent is killed or a budget is exceeded. Use rollback hooks to undo partially-completed work.</p>
 
+            <div className="bg-amber-500/[0.04] border border-amber-500/10 rounded-xl p-4 mb-6">
+              <p className="text-[13px] text-amber-400/70"><strong className="text-amber-400">Timing.</strong> Rollback hooks fire AFTER the agent is killed or budget is exceeded, not before. They receive the completed actions from the trace as context so your compensating logic knows what to undo.</p>
+            </div>
+
             <h3 className="text-[16px] font-medium mt-8 mb-3">Triggers</h3>
             <div className="space-y-2 text-[14px] text-white/40">
               <p>{'\u2022'} <strong className="text-white/70">Agent killed</strong> — the agent is permanently stopped</p>
@@ -1027,19 +1129,26 @@ handle.close();`} filename="stream-example.ts" />
   }'`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Webhook payload</h3>
-            <p className="text-white/30 text-[14px] mb-3">The webhook receives the trigger reason, agent name, and trace context (last 50 actions). Requests are signed with HMAC-SHA256, the same way as regular webhooks.</p>
-            <Code code={`// POST to your rollback URL:
-// {
-//   "trigger": "agent.killed",
-//   "agent": "billing-bot",
-//   "trace_context": {
-//     "actions": [ ... last 50 actions ... ]
-//   },
-//   "timestamp": "2026-03-30T12:00:00Z"
-// }
-//
-// Headers:
-// X-AgentLedger-Signature: sha256=...`} />
+            <p className="text-white/30 text-[14px] mb-3">The webhook receives the trigger reason, agent name, and the last 50 completed actions as context. Signed with HMAC-SHA256 (same as regular webhooks).</p>
+            <Code code={`// POST to your rollback URL
+// Header: X-AgentLedger-Signature: sha256=...
+{
+  "trigger": "agent.killed",
+  "agent": "billing-bot",
+  "trace_context": {
+    "actions": [
+      {
+        "id": "act_1a2b3c",
+        "service": "stripe",
+        "action": "charge",
+        "status": "success",
+        "cost_cents": 5000,
+        "created_at": "2026-03-30T11:58:00Z"
+      }
+    ]
+  },
+  "timestamp": "2026-03-30T12:00:00Z"
+}`} />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Execution history</h3>
             <Code code={`curl https://your-instance.vercel.app/api/v1/rollback-hooks/executions \\
@@ -1055,65 +1164,72 @@ handle.close();`} filename="stream-example.ts" />
             <Code code="pip install agentledger-py" lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Sync client</h3>
-            <Code code={`from agentledger import AgentLedger
+            <Code code={`from agentledger import AgentLedger, AgentLedgerConfig, TrackOptions
 
-ledger = AgentLedger(api_key="al_...")
+ledger = AgentLedger(AgentLedgerConfig(api_key="al_..."))
 
 # Track an action
 result = ledger.track(
-    agent="support-bot",
-    service="openai",
-    action="chat_completion",
-    cost_cents=2,
-    fn=lambda: openai.chat.completions.create(model="gpt-4", messages=messages)
+    TrackOptions(agent="support-bot", service="openai", action="chat_completion", cost_cents=2),
+    lambda: openai.chat.completions.create(model="gpt-4", messages=messages),
 )
+print(result.result, result.duration_ms, result.action_id)
 
 # Pre-flight check
-check = ledger.check(agent="billing-bot", service="stripe", action="charge")
+check = ledger.check(TrackOptions(agent="billing-bot", service="stripe", action="charge"))
 if not check.allowed:
     print(f"Blocked: {check.block_reason}")
 
 # Log manually
-ledger.log(
-    agent="data-sync",
-    service="postgres",
-    action="bulk_insert",
-    status="success",
-    duration_ms=1523,
-)
+ledger.log(TrackOptions(agent="data-sync", service="postgres", action="bulk_insert"),
+    status="success", duration_ms=1523)
 
 # Agent controls
 ledger.pause_agent("support-bot")
 ledger.resume_agent("support-bot")
-ledger.kill_agent("rogue-bot")`} filename="example.py" />
+ledger.kill_agent("rogue-bot")
+
+# Evaluations
+ledger.evaluate(result.action_id, score=85, label="correct",
+    feedback="Accurate response")`} filename="example.py" />
+
+            <h3 className="text-[16px] font-medium mt-8 mb-3">Configuration options</h3>
+            <Code code={`from agentledger import AgentLedger, AgentLedgerConfig
+
+ledger = AgentLedger(AgentLedgerConfig(
+    api_key="al_...",
+    base_url="https://your-instance.vercel.app",  # default: https://agentledger.co
+    fail_open=True,         # default: True
+    timeout=5.0,            # seconds, default: 5.0
+    environment="staging",  # default: "production"
+    on_error=lambda e: print(f"AgentLedger error: {e}"),
+))`} filename="config.py" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Async client</h3>
-            <Code code={`from agentledger import AsyncAgentLedger
+            <Code code={`from agentledger import AsyncAgentLedger, AgentLedgerConfig, TrackOptions
 
-ledger = AsyncAgentLedger(api_key="al_...")
+ledger = AsyncAgentLedger(AgentLedgerConfig(api_key="al_..."))
 
 result = await ledger.track(
-    agent="support-bot",
-    service="openai",
-    action="chat_completion",
-    fn=lambda: openai.chat.completions.create(model="gpt-4", messages=messages)
+    TrackOptions(agent="support-bot", service="openai", action="chat_completion"),
+    lambda: openai.chat.completions.create(model="gpt-4", messages=messages),
 )`} filename="async_example.py" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">LangChain integration</h3>
-            <Code code={`from agentledger import AgentLedger
+            <Code code={`from agentledger import AgentLedger, AgentLedgerConfig
 from agentledger.integrations.langchain import AgentLedgerCallbackHandler
 
-ledger = AgentLedger(api_key="al_...")
+ledger = AgentLedger(AgentLedgerConfig(api_key="al_..."))
 handler = AgentLedgerCallbackHandler(ledger, agent="research-bot")
 
 # Pass to any LangChain component
 agent.invoke({"input": "Research AI news"}, config={"callbacks": [handler]})`} filename="langchain_python.py" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">OpenAI Agents integration</h3>
-            <Code code={`from agentledger import AgentLedger
+            <Code code={`from agentledger import AgentLedger, AgentLedgerConfig
 from agentledger.integrations.openai_agents import with_agent_ledger
 
-ledger = AgentLedger(api_key="al_...")
+ledger = AgentLedger(AgentLedgerConfig(api_key="al_..."))
 
 # Wrap the OpenAI agent runner
 tracked_run = with_agent_ledger(ledger, agent="my-agent")

@@ -64,7 +64,7 @@ export default function ForecastTab({ apiKey }: { apiKey: string }) {
 
   if (loading && !data) return <div className="text-white/30 text-center py-16">Generating forecast...</div>;
   if (!data || data.agents.length === 0) return (
-    <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
+    <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
       <p className="text-white/30 text-sm">No forecast data available. Agent cost history is needed to generate projections.</p>
     </div>
   );
@@ -77,7 +77,7 @@ export default function ForecastTab({ apiKey }: { apiKey: string }) {
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-xs text-white/30">History:</span>
-          <div className="flex gap-1 bg-white/[0.03] p-1 rounded-lg">
+          <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg">
             {[14, 30, 60, 90].map(d => (
               <button key={d} onClick={() => setDaysBack(d)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${daysBack === d ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
@@ -88,7 +88,7 @@ export default function ForecastTab({ apiKey }: { apiKey: string }) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-white/30">Forecast:</span>
-          <div className="flex gap-1 bg-white/[0.03] p-1 rounded-lg">
+          <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg">
             {[7, 14, 30, 60].map(d => (
               <button key={d} onClick={() => setForecastDays(d)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${forecastDays === d ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
@@ -101,15 +101,15 @@ export default function ForecastTab({ apiKey }: { apiKey: string }) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Projected Cost ({forecastDays}d)</p>
           <p className="text-xl font-semibold">{formatCost(data.totalProjectedCostCents)}</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Daily Average</p>
           <p className="text-xl font-semibold">{formatCost(data.totalDailyAverageCents)}</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Budget Warnings</p>
           <p className={`text-xl font-semibold ${warnings.length > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>{warnings.length}</p>
           <p className="text-[11px] text-white/20 mt-1">{warnings.length > 0 ? 'agents may exceed budget' : 'all within budget'}</p>
@@ -133,13 +133,13 @@ export default function ForecastTab({ apiKey }: { apiKey: string }) {
       )}
 
       {/* Agent forecast table */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/[0.06]">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.14]">
           <h3 className="text-sm font-medium text-white/50">Agent Forecasts</h3>
         </div>
         <table className="w-full text-[13px]">
           <thead>
-            <tr className="border-b border-white/[0.06]">
+            <tr className="border-b border-white/[0.14]">
               <th className="text-left text-[11px] text-white/30 font-medium px-4 py-2">Agent</th>
               <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Daily Avg</th>
               <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Projected ({forecastDays}d)</th>
@@ -150,7 +150,7 @@ export default function ForecastTab({ apiKey }: { apiKey: string }) {
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
             {data.agents.map(agent => (
-              <tr key={agent.agent} className="hover:bg-white/[0.02]">
+              <tr key={agent.agent} className="hover:bg-white/[0.06]">
                 <td className="px-4 py-2 text-white/70">{agent.agent}</td>
                 <td className="px-4 py-2 text-right text-white/50">{formatCost(agent.dailyAverageCostCents)}</td>
                 <td className="px-4 py-2 text-right text-white/50">{formatCost(agent.projectedCostCents)}</td>

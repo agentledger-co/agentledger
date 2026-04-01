@@ -86,11 +86,11 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
       <div
-        className="relative w-full max-w-3xl bg-[#111] border-l border-white/[0.06] h-full overflow-y-auto shadow-2xl"
+        className="relative w-full max-w-3xl bg-[#111] border-l border-white/[0.14] h-full overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-[#111] border-b border-white/[0.06] px-6 py-4 z-10">
+        <div className="sticky top-0 bg-[#111] border-b border-white/[0.14] px-6 py-4 z-10">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <span className="text-purple-400 text-sm">⟐</span>
@@ -105,28 +105,28 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
           {/* Summary stats */}
           <div className="flex flex-wrap gap-4 text-xs">
             <div>
-              <span className="text-white/25">Trace</span>
+              <span className="text-white/55">Trace</span>
               <span className="ml-1.5 font-mono text-purple-400/70 text-[11px]">{traceId.length > 24 ? traceId.slice(0, 12) + '...' + traceId.slice(-8) : traceId}</span>
             </div>
             <div>
-              <span className="text-white/25">Duration</span>
+              <span className="text-white/55">Duration</span>
               <span className="ml-1.5 text-white/60">{formatDuration(timelineSpan)}</span>
             </div>
             <div>
-              <span className="text-white/25">Cost</span>
+              <span className="text-white/55">Cost</span>
               <span className="ml-1.5 text-white/60">{summary.totalCost > 0 ? formatCost(summary.totalCost) : '--'}</span>
             </div>
             <div>
-              <span className="text-white/25">Actions</span>
+              <span className="text-white/55">Actions</span>
               <span className="ml-1.5 text-white/60">{summary.actionCount}</span>
             </div>
             <div>
-              <span className="text-white/25">Services</span>
+              <span className="text-white/55">Services</span>
               <span className="ml-1.5 text-white/60">{summary.services.join(', ')}</span>
             </div>
             {summary.parallelGroups.length > 0 && (
               <div>
-                <span className="text-white/25">Parallel groups</span>
+                <span className="text-white/55">Parallel groups</span>
                 <span className="ml-1.5 text-white/60">{summary.parallelGroups.length}</span>
               </div>
             )}
@@ -157,7 +157,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                 <div key={action.id}>
                   <div
                     className={`flex items-center gap-3 rounded-lg px-2 py-1.5 cursor-pointer transition-colors ${
-                      isExpanded ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
+                      isExpanded ? 'bg-white/[0.10]' : 'hover:bg-white/[0.06]'
                     }`}
                     onClick={() => setExpandedAction(isExpanded ? null : action.id)}
                   >
@@ -172,11 +172,11 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                     </div>
 
                     {/* Bar area */}
-                    <div className="flex-1 relative h-6 bg-white/[0.02] rounded overflow-hidden">
+                    <div className="flex-1 relative h-6 bg-white/[0.06] rounded overflow-hidden">
                       {/* Gridlines */}
                       <div className="absolute inset-0 flex">
                         {[25, 50, 75].map(pct => (
-                          <div key={pct} className="absolute top-0 bottom-0 w-px bg-white/[0.03]" style={{ left: `${pct}%` }} />
+                          <div key={pct} className="absolute top-0 bottom-0 w-px bg-white/[0.08]" style={{ left: `${pct}%` }} />
                         ))}
                       </div>
 
@@ -208,41 +208,41 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
 
                   {/* Expanded detail panel */}
                   {isExpanded && (
-                    <div className="ml-[180px] mr-14 mt-1 mb-3 bg-white/[0.02] rounded-lg border border-white/[0.06] p-4 space-y-4">
+                    <div className="ml-[180px] mr-14 mt-1 mb-3 bg-white/[0.06] rounded-lg border border-white/[0.14] p-4 space-y-4">
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Agent</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Agent</p>
                           <p className="text-xs font-mono text-white/70">{action.agent_name}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Service</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Service</p>
                           <p className={`text-xs ${color.text}`}>{action.service}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Action</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Action</p>
                           <p className="text-xs text-white/60">{action.action}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Status</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Status</p>
                           <p className={`text-xs font-medium ${
                             action.status === 'success' || action.status === 'allowed' ? 'text-emerald-400' :
                             action.status === 'error' ? 'text-red-400' : 'text-amber-400'
                           }`}>{action.status}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Duration</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Duration</p>
                           <p className="text-xs text-white/60">{action.duration_ms > 0 ? formatDuration(action.duration_ms) : '--'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Cost</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Cost</p>
                           <p className="text-xs text-white/60">{action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '--'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Offset</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Offset</p>
                           <p className="text-xs text-white/40 font-mono">+{formatDuration(action.offsetMs)}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-white/25 mb-0.5">Timestamp</p>
+                          <p className="text-[10px] uppercase text-white/55 mb-0.5">Timestamp</p>
                           <p className="text-xs text-white/40">{new Date(action.created_at).toLocaleString()}</p>
                         </div>
                       </div>
@@ -266,12 +266,12 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
           </div>
 
           {/* Summary bar at bottom */}
-          <div className="mt-6 pt-4 border-t border-white/[0.06]">
+          <div className="mt-6 pt-4 border-t border-white/[0.14]">
             <div className="flex items-center gap-3">
               <div className="w-[168px] flex-shrink-0">
                 <span className="text-[11px] text-white/30 font-medium">Total span</span>
               </div>
-              <div className="flex-1 relative h-6 bg-white/[0.02] rounded overflow-hidden">
+              <div className="flex-1 relative h-6 bg-white/[0.06] rounded overflow-hidden">
                 <div className="absolute top-1 bottom-1 left-0 rounded bg-purple-500/30" style={{ width: '100%' }} />
                 <span className="absolute top-0.5 left-1 text-[9px] text-white/40 font-mono">{formatDuration(timelineSpan)}</span>
               </div>
@@ -304,7 +304,7 @@ function CollapsibleJson({ label, data, colorClass }: { label: string; data: unk
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="text-[10px] uppercase text-white/25 mb-1 flex items-center gap-1 hover:text-white/40 transition-colors"
+        className="text-[10px] uppercase text-white/55 mb-1 flex items-center gap-1 hover:text-white/40 transition-colors"
       >
         <span className="text-white/20 text-[9px]">{open ? '▾' : '▸'}</span>
         {label}

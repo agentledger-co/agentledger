@@ -61,7 +61,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 bg-white/[0.03] p-1 rounded-lg">
+        <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg">
           {[7, 14, 30, 60, 90].map(d => (
             <button key={d} onClick={() => setDays(d)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${days === d ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
@@ -69,7 +69,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
             </button>
           ))}
         </div>
-        <div className="flex gap-1 bg-white/[0.03] p-1 rounded-lg">
+        <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg">
           {(['daily', 'hourly'] as const).map(g => (
             <button key={g} onClick={() => setGranularity(g)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors capitalize ${granularity === g ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
@@ -81,26 +81,26 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Total Actions</p>
           <p className="text-xl font-semibold">{summary.totalActions.toLocaleString()}</p>
           <p className={`text-[11px] mt-1 ${summary.actionsTrendPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {trendIndicator(summary.actionsTrendPct)} vs prior period
           </p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Total Cost</p>
           <p className="text-xl font-semibold">{formatCost(summary.totalCostCents)}</p>
           <p className={`text-[11px] mt-1 ${summary.costTrendPct <= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
             {trendIndicator(summary.costTrendPct)} vs prior period
           </p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Error Rate</p>
           <p className="text-xl font-semibold">{summary.errorRate}%</p>
           <p className="text-[11px] text-white/20 mt-1">{summary.totalErrors} errors / {summary.totalBlocked} blocked</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
           <p className="text-[11px] text-white/30 mb-1">Avg Duration</p>
           <p className="text-xl font-semibold">{summary.avgDurationMs}ms</p>
           <p className="text-[11px] text-white/20 mt-1">across all actions</p>
@@ -108,7 +108,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
       </div>
 
       {/* Time series chart */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
         <h3 className="text-sm font-medium text-white/50 mb-4">Actions Over Time</h3>
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={timeSeries}>
@@ -123,13 +123,13 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
       </div>
 
       {/* Service breakdown */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/[0.06]">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.14]">
           <h3 className="text-sm font-medium text-white/50">Service Breakdown</h3>
         </div>
         <table className="w-full text-[13px]">
           <thead>
-            <tr className="border-b border-white/[0.06]">
+            <tr className="border-b border-white/[0.14]">
               <th className="text-left text-[11px] text-white/30 font-medium px-4 py-2">Service</th>
               <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Actions</th>
               <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Cost</th>
@@ -138,7 +138,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
             {serviceBreakdown.map(s => (
-              <tr key={s.service} className="hover:bg-white/[0.02]">
+              <tr key={s.service} className="hover:bg-white/[0.06]">
                 <td className="px-4 py-2 text-white/70">{s.service}</td>
                 <td className="px-4 py-2 text-right text-white/50">{s.actions.toLocaleString()}</td>
                 <td className="px-4 py-2 text-right text-white/50">{formatCost(s.cost)}</td>
@@ -150,13 +150,13 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
       </div>
 
       {/* Agent breakdown */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
-        <div className="px-4 py-3 border-b border-white/[0.06]">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/[0.14]">
           <h3 className="text-sm font-medium text-white/50">Agent Breakdown</h3>
         </div>
         <table className="w-full text-[13px]">
           <thead>
-            <tr className="border-b border-white/[0.06]">
+            <tr className="border-b border-white/[0.14]">
               <th className="text-left text-[11px] text-white/30 font-medium px-4 py-2">Agent</th>
               <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Actions</th>
               <th className="text-right text-[11px] text-white/30 font-medium px-4 py-2">Cost</th>
@@ -166,7 +166,7 @@ export default function AnalyticsTab({ apiKey }: { apiKey: string }) {
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
             {agentBreakdown.map(a => (
-              <tr key={a.agent} className="hover:bg-white/[0.02]">
+              <tr key={a.agent} className="hover:bg-white/[0.06]">
                 <td className="px-4 py-2 text-white/70">{a.agent}</td>
                 <td className="px-4 py-2 text-right text-white/50">{a.actions.toLocaleString()}</td>
                 <td className="px-4 py-2 text-right text-white/50">{formatCost(a.costCents)}</td>

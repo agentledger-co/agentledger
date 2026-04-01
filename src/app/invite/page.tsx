@@ -73,7 +73,7 @@ export default function InvitePage() {
             >
               Accept Invitation
             </button>
-            <Link href="/login" className="block text-[13px] text-white/25 hover:text-white/40 mt-4 transition-colors">
+            <Link href="/login" className="block text-[13px] text-white/55 hover:text-white/40 mt-4 transition-colors">
               Need to sign in first?
             </Link>
           </>
@@ -118,7 +118,7 @@ export default function InvitePage() {
             </Link>
             <Link
               href={`/signup?redirect=${encodeURIComponent(`/invite?token=${token}`)}`}
-              className="block text-[13px] text-white/25 hover:text-white/40 mt-4 transition-colors"
+              className="block text-[13px] text-white/55 hover:text-white/40 mt-4 transition-colors"
             >
               Don&apos;t have an account? Sign up
             </Link>
@@ -132,7 +132,7 @@ export default function InvitePage() {
             </div>
             <h1 className="text-2xl font-bold mb-3">Invite error</h1>
             <p className="text-red-400/70 text-[15px] mb-8">{error}</p>
-            <Link href="/" className="text-[13px] text-white/25 hover:text-white/40 transition-colors">
+            <Link href="/" className="text-[13px] text-white/55 hover:text-white/40 transition-colors">
               Go to AgentLedger →
             </Link>
           </>

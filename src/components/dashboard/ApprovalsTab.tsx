@@ -39,7 +39,7 @@ const STATUS_BADGE: Record<string, string> = {
   pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   approved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   denied: 'bg-red-500/10 text-red-400 border-red-500/20',
-  expired: 'bg-white/[0.04] text-white/30 border-white/[0.06]',
+  expired: 'bg-white/[0.10] text-white/30 border-white/[0.14]',
 };
 
 export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: string, type: 'success' | 'error') => void }) {
@@ -139,7 +139,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
       </div>
 
       {/* Status filter tabs */}
-      <div className="flex gap-1 bg-white/[0.03] p-1 rounded-lg w-fit">
+      <div className="flex gap-1 bg-white/[0.08] p-1 rounded-lg w-fit">
         {FILTERS.map(f => (
           <button
             key={f.value}
@@ -159,7 +159,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
       </div>
 
       {approvals.length === 0 ? (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x2705;</div>
           <p className="text-white/30 text-sm font-medium mb-2">
             {filter === 'pending'
@@ -175,20 +175,20 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
       ) : (
         <div className="space-y-2">
           {approvals.map(approval => (
-            <div key={approval.id} className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+            <div key={approval.id} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span className="text-[13px] text-white/70 font-medium">{approval.agent_name}</span>
                     <span className="text-[11px] text-white/20">&#x2192;</span>
-                    <span className="text-[11px] bg-white/[0.04] text-white/50 px-2 py-0.5 rounded-md">{approval.service}</span>
+                    <span className="text-[11px] bg-white/[0.10] text-white/50 px-2 py-0.5 rounded-md">{approval.service}</span>
                     <span className="text-[11px] text-white/40">{approval.action}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${STATUS_BADGE[approval.status] || STATUS_BADGE.pending}`}>
                       {approval.status}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 text-[11px] text-white/25">
+                  <div className="flex items-center gap-3 text-[11px] text-white/55">
                     <span>Requested {timeAgo(approval.created_at)}</span>
                     {approval.status === 'pending' && approval.expires_at && (
                       <span className={`${

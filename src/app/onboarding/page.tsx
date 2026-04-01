@@ -118,7 +118,7 @@ export default function OnboardingPage() {
                   ? 'bg-blue-500 border-blue-500 text-white'
                   : s === step
                   ? 'border-blue-500 text-blue-400'
-                  : 'border-white/10 text-white/20'
+                  : 'border-white/[0.16] text-white/50'
               }`}>
                 {s < step ? CHECK : s}
               </div>
@@ -132,22 +132,22 @@ export default function OnboardingPage() {
           <div>
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold mb-2">Name your workspace</h1>
-              <p className="text-white/30 text-[14px]">This is where your agent data lives. You can change it later.</p>
+              <p className="text-white/60 text-[14px]">This is where your agent data lives. You can change it later.</p>
             </div>
 
-            <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-6">
+            <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6">
               <input
                 type="text"
                 value={orgName}
                 onChange={e => setOrgName(e.target.value)}
                 placeholder="Acme Corp"
                 autoFocus
-                className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-4 py-3 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none mb-4"
+                className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-4 py-3 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none mb-4"
               />
               <button
                 onClick={handleCreateOrg}
                 disabled={loading}
-                className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-blue-500/20 text-[14px]"
+                className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-blue-500/20 text-[14px]"
               >
                 {loading ? 'Creating...' : 'Create workspace'}
               </button>
@@ -161,16 +161,16 @@ export default function OnboardingPage() {
           <div>
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold mb-2">Your API Key</h1>
-              <p className="text-white/30 text-[14px]">Copy this key — you won&apos;t see it again. Use it in your agent code.</p>
+              <p className="text-white/60 text-[14px]">Copy this key — you won&apos;t see it again. Use it in your agent code.</p>
             </div>
 
             {/* API Key display */}
-            <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4 mb-6">
+            <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 mb-6">
               <div className="flex items-center justify-between">
                 <code className="text-[13px] text-blue-400 font-mono break-all">{apiKey}</code>
                 <button
                   onClick={() => copy(apiKey, 'key')}
-                  className="ml-3 text-[12px] text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+                  className="ml-3 text-[12px] text-white/60 hover:text-white/60 transition-colors flex-shrink-0"
                 >
                   {copied === 'key' ? 'Copied!' : 'Copy'}
                 </button>
@@ -187,14 +187,14 @@ export default function OnboardingPage() {
             {/* Test it */}
             <div className="mb-6">
               <h3 className="text-[15px] font-medium mb-3">Test your connection</h3>
-              <p className="text-white/30 text-[13px] mb-3">Run this in your terminal, or click the button below:</p>
+              <p className="text-white/60 text-[13px] mb-3">Run this in your terminal, or click the button below:</p>
 
-              <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.06] overflow-hidden mb-4">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06]">
-                  <span className="text-[11px] text-white/20 font-mono">terminal</span>
+              <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.14] overflow-hidden mb-4">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.14]">
+                  <span className="text-[11px] text-white/50 font-mono">terminal</span>
                   <button
                     onClick={() => copy(curlCommand, 'curl')}
-                    className="text-[11px] text-white/20 hover:text-white/50 transition-colors"
+                    className="text-[11px] text-white/50 hover:text-white/50 transition-colors"
                   >
                     {copied === 'curl' ? 'Copied!' : 'Copy'}
                   </button>
@@ -212,7 +212,7 @@ export default function OnboardingPage() {
                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                     : testResult === 'error'
                     ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    : 'bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.06] text-white'
+                    : 'bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.14] text-white'
                 }`}
               >
                 {testResult === 'loading' ? 'Sending test event...' :
@@ -224,7 +224,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={() => setStep(3)}
-              className="w-full text-[13px] text-white/20 hover:text-white/40 transition-colors text-center"
+              className="w-full text-[13px] text-white/50 hover:text-white/40 transition-colors text-center"
             >
               Skip test, go to dashboard →
             </button>
@@ -238,18 +238,18 @@ export default function OnboardingPage() {
               {CHECK}
             </div>
             <h1 className="text-2xl font-bold mb-2">You&apos;re all set!</h1>
-            <p className="text-white/30 text-[14px] mb-8 max-w-sm mx-auto">
+            <p className="text-white/60 text-[14px] mb-8 max-w-sm mx-auto">
               Your workspace is ready. Install the SDK in your agent code and every action will show up in your dashboard.
             </p>
 
             {/* Quick install */}
-            <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.06] p-4 mb-6 text-left">
+            <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.14] p-4 mb-6 text-left">
               <code className="text-[13px] text-emerald-400/70 font-mono">npm install agentledger</code>
             </div>
 
             {/* Quick start snippet */}
-            <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.06] p-4 mb-6 text-left">
-              <p className="text-[11px] text-white/20 mb-2 font-medium uppercase tracking-wider">Quick start</p>
+            <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.14] p-4 mb-6 text-left">
+              <p className="text-[11px] text-white/50 mb-2 font-medium uppercase tracking-wider">Quick start</p>
               <pre className="text-[12px] text-blue-400/70 font-mono whitespace-pre leading-relaxed">{`import AgentLedger from 'agentledger';
 
 const ledger = new AgentLedger({
@@ -264,8 +264,8 @@ await ledger.track({
             </div>
 
             {/* What's next checklist */}
-            <div className="bg-white/[0.02] rounded-xl border border-white/[0.06] p-4 mb-6 text-left">
-              <p className="text-[11px] text-white/20 mb-3 font-medium uppercase tracking-wider">What&apos;s next</p>
+            <div className="bg-white/[0.06] rounded-xl border border-white/[0.14] p-4 mb-6 text-left">
+              <p className="text-[11px] text-white/50 mb-3 font-medium uppercase tracking-wider">What&apos;s next</p>
               <div className="space-y-2.5">
                 {[
                   { label: 'Track your first real action', link: '/docs#core-sdk' },
@@ -273,7 +273,7 @@ await ledger.track({
                   { label: 'Configure Slack or email alerts', link: '/docs#webhooks' },
                 ].map(item => (
                   <a key={item.label} href={item.link} className="flex items-center gap-2.5 text-[13px] text-white/40 hover:text-white/70 transition-colors group">
-                    <div className="w-4 h-4 rounded border border-white/10 group-hover:border-blue-400/30 flex items-center justify-center flex-shrink-0">
+                    <div className="w-4 h-4 rounded border border-white/[0.16] group-hover:border-blue-400/30 flex items-center justify-center flex-shrink-0">
                       <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-blue-400/30" />
                     </div>
                     {item.label}
@@ -290,7 +290,7 @@ await ledger.track({
                 { label: 'MCP', href: '/docs#mcp' },
                 { label: 'Express', href: '/docs#express' },
               ].map(fw => (
-                <a key={fw.label} href={fw.href} className="text-[11px] text-white/25 hover:text-blue-400/60 border border-white/[0.06] hover:border-blue-400/20 px-3 py-1.5 rounded-lg transition-colors">
+                <a key={fw.label} href={fw.href} className="text-[11px] text-white/55 hover:text-blue-400/60 border border-white/[0.14] hover:border-blue-400/20 px-3 py-1.5 rounded-lg transition-colors">
                   {fw.label}
                 </a>
               ))}

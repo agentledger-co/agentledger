@@ -18,12 +18,12 @@ function Code({ code, lang = 'typescript', filename }: { code: string; lang?: st
 
   const highlighted = lang === 'sql'
     ? escaped.split('\n').map(line => {
-        if (line.trimStart().startsWith('--')) return `<span class="text-white/20">${line}</span>`;
+        if (line.trimStart().startsWith('--')) return `<span class="text-white/50">${line}</span>`;
         return line.replace(/\b(CREATE|TABLE|ALTER|ADD|COLUMN|INSERT|INTO|VALUES|SELECT|FROM|WHERE|UPDATE|SET|DELETE|DROP|INDEX|ON|IF|NOT|EXISTS|NULL|DEFAULT|PRIMARY|KEY|REFERENCES|UNIQUE|CONSTRAINT|ENABLE|ROW|LEVEL|SECURITY)\b/gi, '<span class="text-violet-400">$1</span>');
       }).join('\n')
     : lang === 'bash'
     ? escaped.split('\n').map(line => {
-        if (line.trimStart().startsWith('#')) return `<span class="text-white/20">${line}</span>`;
+        if (line.trimStart().startsWith('#')) return `<span class="text-white/50">${line}</span>`;
         return line
           .replace(/^(\s*)(npm|npx|git|cd|cp|curl|mkdir|vercel)\b/g, '$1<span class="text-violet-400">$2</span>')
           .replace(/(\| )(npm|npx|git|cd|cp|curl|mkdir|vercel)\b/g, '$1<span class="text-violet-400">$2</span>');
@@ -31,7 +31,7 @@ function Code({ code, lang = 'typescript', filename }: { code: string; lang?: st
     : (() => {
         // Process TypeScript line-by-line to avoid cross-regex corruption
         return escaped.split('\n').map(line => {
-          if (line.trimStart().startsWith('//')) return `<span class="text-white/20">${line}</span>`;
+          if (line.trimStart().startsWith('//')) return `<span class="text-white/50">${line}</span>`;
           return line
             .replace(/('[@\w/.*#:!{} -]+'|"[@\w/.*#:!{} -]+")/g, '<span class="text-emerald-400">$1</span>')
             .replace(/\b(import|from|const|await|return|async|new|export|interface|type|function|if|else|for|of|throw|try|catch)\b/g, '<span class="text-violet-400">$1</span>')
@@ -41,17 +41,17 @@ function Code({ code, lang = 'typescript', filename }: { code: string; lang?: st
 
   return (
     <div className="relative group my-4">
-      <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.06] overflow-hidden">
+      <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.14] overflow-hidden">
         {filename && (
-          <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06]">
-            <span className="text-[11px] text-white/20 font-mono">{filename}</span>
-            <button onClick={copy} className="text-[11px] text-white/20 hover:text-white/50 transition-colors">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.14]">
+            <span className="text-[11px] text-white/50 font-mono">{filename}</span>
+            <button onClick={copy} className="text-[11px] text-white/50 hover:text-white/50 transition-colors">
               {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
         )}
         {!filename && (
-          <button onClick={copy} className="absolute top-3 right-3 text-[11px] text-white/20 hover:text-white/50 transition-colors opacity-0 group-hover:opacity-100">
+          <button onClick={copy} className="absolute top-3 right-3 text-[11px] text-white/50 hover:text-white/50 transition-colors opacity-0 group-hover:opacity-100">
             {copied ? 'Copied!' : 'Copy'}
           </button>
         )}
@@ -64,7 +64,7 @@ function Code({ code, lang = 'typescript', filename }: { code: string; lang?: st
 }
 
 function InlineCode({ children }: { children: string }) {
-  return <code className="bg-white/[0.06] text-blue-400 px-1.5 py-0.5 rounded text-[13px] font-mono">{children}</code>;
+  return <code className="bg-white/[0.12] text-blue-400 px-1.5 py-0.5 rounded text-[13px] font-mono">{children}</code>;
 }
 
 // ==================== NAV SECTIONS ====================
@@ -99,13 +99,13 @@ const NAV = [
 // ==================== TABLE ====================
 function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <div className="my-4 overflow-x-auto rounded-xl border border-white/[0.06]">
+    <div className="my-4 overflow-x-auto rounded-xl border border-white/[0.14]">
       <table className="w-full text-[13px]">
-        <thead><tr className="border-b border-white/[0.06]">
+        <thead><tr className="border-b border-white/[0.14]">
           {headers.map(h => <th key={h} className="px-4 py-2.5 text-left text-white/40 font-medium">{h}</th>)}
         </tr></thead>
         <tbody className="divide-y divide-white/[0.04]">
-          {rows.map((row, i) => <tr key={i} className="hover:bg-white/[0.015]">
+          {rows.map((row, i) => <tr key={i} className="hover:bg-white/[0.06]">
             {row.map((cell, j) => <td key={j} className="px-4 py-2.5 text-white/60">{j === 0 ? <code className="text-blue-400/70 font-mono text-[12px]">{cell}</code> : cell}</td>)}
           </tr>)}
         </tbody>
@@ -139,7 +139,7 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
       {/* Nav */}
-      <nav className="border-b border-white/[0.06] px-6 py-4 sticky top-0 bg-[#08080a]/80 backdrop-blur-2xl z-50">
+      <nav className="border-b border-white/[0.14] px-6 py-4 sticky top-0 bg-[#08080a]/80 backdrop-blur-2xl z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -148,11 +148,11 @@ export default function DocsPage() {
               </div>
               <span className="text-lg font-semibold tracking-tight">AgentLedger</span>
             </Link>
-            <span className="text-white/15 text-[13px]">/</span>
+            <span className="text-white/50 text-[13px]">/</span>
             <span className="text-white/40 text-[13px]">Docs</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-[13px] text-white/30 hover:text-white/70 transition-colors">Home</Link>
+            <Link href="/" className="text-[13px] text-white/60 hover:text-white/70 transition-colors">Home</Link>
             <Link href="/dashboard" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20">
               Dashboard
             </Link>
@@ -161,11 +161,11 @@ export default function DocsPage() {
       </nav>
 
       {/* Mobile section nav */}
-      <div className="lg:hidden border-b border-white/[0.06] px-6 py-3 sticky top-[57px] bg-[#08080a]/90 backdrop-blur-xl z-40">
+      <div className="lg:hidden border-b border-white/[0.14] px-6 py-3 sticky top-[57px] bg-[#08080a]/90 backdrop-blur-xl z-40">
         <button onClick={() => setMobileNavOpen(!mobileNavOpen)} className="flex items-center justify-between w-full text-left">
           <span className="text-[13px] text-white/60">{NAV.find(n => n.id === activeSection)?.label || 'Navigate'}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-            className={`text-white/30 transition-transform ${mobileNavOpen ? 'rotate-180' : ''}`}>
+            className={`text-white/60 transition-transform ${mobileNavOpen ? 'rotate-180' : ''}`}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
@@ -175,7 +175,7 @@ export default function DocsPage() {
               <a key={item.id} href={`#${item.id}`}
                 onClick={() => { setActiveSection(item.id); setMobileNavOpen(false); }}
                 className={`block px-3 py-1.5 rounded-lg text-[13px] transition-colors ${
-                  activeSection === item.id ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-white/30 hover:text-white/60'
+                  activeSection === item.id ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-white/60 hover:text-white/60'
                 }`}>
                 {item.label}
               </a>
@@ -186,7 +186,7 @@ export default function DocsPage() {
 
       <div className="max-w-7xl mx-auto flex">
         {/* Sidebar */}
-        <aside className="w-56 flex-shrink-0 border-r border-white/[0.06] py-8 pr-6 pl-6 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto hidden lg:block">
+        <aside className="w-56 flex-shrink-0 border-r border-white/[0.14] py-8 pr-6 pl-6 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto hidden lg:block">
           <nav className="space-y-1">
             {NAV.map(item => (
               <a
@@ -196,7 +196,7 @@ export default function DocsPage() {
                 className={`block px-3 py-1.5 rounded-lg text-[13px] transition-colors ${
                   activeSection === item.id
                     ? 'bg-blue-500/10 text-blue-400 font-medium'
-                    : 'text-white/30 hover:text-white/60 hover:bg-white/[0.03]'
+                    : 'text-white/60 hover:text-white/60 hover:bg-white/[0.08]'
                 }`}
               >
                 {item.label}
@@ -223,7 +223,7 @@ export default function DocsPage() {
                   <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 text-[11px] font-bold flex items-center justify-center border border-blue-500/20">1</div>
                   <h3 className="text-[15px] font-medium">Set up the database</h3>
                 </div>
-                <p className="text-white/30 text-[14px] mb-2 ml-9">Create a <a href="https://supabase.com" className="text-blue-400 hover:underline" target="_blank" rel="noopener">Supabase</a> project and run the migration in the SQL Editor.</p>
+                <p className="text-white/60 text-[14px] mb-2 ml-9">Create a <a href="https://supabase.com" className="text-blue-400 hover:underline" target="_blank" rel="noopener">Supabase</a> project and run the migration in the SQL Editor.</p>
                 <div className="ml-9">
                   <Code code="-- Paste the contents of supabase/migrations/001_initial_schema.sql\n-- into Supabase Dashboard > SQL Editor > New Query > Run" lang="sql" />
                 </div>
@@ -234,7 +234,7 @@ export default function DocsPage() {
                   <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 text-[11px] font-bold flex items-center justify-center border border-blue-500/20">2</div>
                   <h3 className="text-[15px] font-medium">Deploy the dashboard</h3>
                 </div>
-                <p className="text-white/30 text-[14px] mb-2 ml-9">Deploy to Vercel with one click, or run locally:</p>
+                <p className="text-white/60 text-[14px] mb-2 ml-9">Deploy to Vercel with one click, or run locally:</p>
                 <div className="ml-9">
                   <Code code={`git clone https://github.com/agentledger-co/agentledger.git
 cd agentledger
@@ -278,7 +278,7 @@ const result = await ledger.track({
           <section id="installation" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Installation</h2>
             <Code code="npm install agentledger" lang="bash" />
-            <p className="text-white/30 text-[14px] mt-3">The SDK has zero external dependencies and works in Node.js 18+. It also works in Bun and Deno.</p>
+            <p className="text-white/60 text-[14px] mt-3">The SDK has zero external dependencies and works in Node.js 18+. It also works in Bun and Deno.</p>
           </section>
 
           {/* Configuration */}
@@ -313,7 +313,7 @@ const result = await ledger.track({
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Core SDK</h2>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3"><InlineCode>ledger.track(options, fn)</InlineCode></h3>
-            <p className="text-white/30 text-[14px] mb-3">Wraps an async function with logging and pre-flight budget checks. This is the main method you&apos;ll use.</p>
+            <p className="text-white/60 text-[14px] mb-3">Wraps an async function with logging and pre-flight budget checks. This is the main method you&apos;ll use.</p>
             <Code code={`try {
   const { result, allowed, durationMs, actionId } = await ledger.track({
     agent: 'support-bot',       // Agent name
@@ -349,7 +349,7 @@ const result = await ledger.track({
             />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3"><InlineCode>ledger.check(options)</InlineCode></h3>
-            <p className="text-white/30 text-[14px] mb-3">Pre-flight check without executing the action. Useful before expensive operations.</p>
+            <p className="text-white/60 text-[14px] mb-3">Pre-flight check without executing the action. Useful before expensive operations.</p>
             <Code code={`const { allowed, blockReason, remainingBudget } = await ledger.check({
   agent: 'billing-agent',
   service: 'stripe',
@@ -361,7 +361,7 @@ if (!allowed) {
 }`} filename="check.ts" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3"><InlineCode>ledger.log(options)</InlineCode></h3>
-            <p className="text-white/30 text-[14px] mb-3">Log an action manually when you want full control over timing.</p>
+            <p className="text-white/60 text-[14px] mb-3">Log an action manually when you want full control over timing.</p>
             <Code code={`await ledger.log({
   agent: 'data-sync',
   service: 'postgres',
@@ -380,7 +380,7 @@ await ledger.killAgent('rogue-bot');     // Permanently kills the agent`} />
           {/* LangChain */}
           <section id="langchain" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">LangChain Integration</h2>
-            <p className="text-white/30 text-[14px] mb-4">Drop-in callback handler that auto-tracks tool calls, LLM completions, and chain runs.</p>
+            <p className="text-white/60 text-[14px] mb-4">Drop-in callback handler that auto-tracks tool calls, LLM completions, and chain runs.</p>
             <Code code="npm install agentledger langchain @langchain/core" lang="bash" />
             <Code code={`import { AgentLedger } from 'agentledger';
 import { AgentLedgerCallbackHandler } from 'agentledger/integrations/langchain';
@@ -410,13 +410,13 @@ await agent.invoke(
   { callbacks: [handler] }
 );`} filename="langchain-example.ts" />
 
-            <p className="text-white/30 text-[14px] mt-4">The <InlineCode>serviceMap</InlineCode> lets you control how LangChain tool names map to AgentLedger services. If a tool isn't in the map, its name is used as the service with "invoke" as the action.</p>
+            <p className="text-white/60 text-[14px] mt-4">The <InlineCode>serviceMap</InlineCode> lets you control how LangChain tool names map to AgentLedger services. If a tool isn't in the map, its name is used as the service with "invoke" as the action.</p>
           </section>
 
           {/* OpenAI */}
           <section id="openai" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">OpenAI Agents Integration</h2>
-            <p className="text-white/30 text-[14px] mb-4">Wrap tool handlers so every function call from OpenAI is tracked.</p>
+            <p className="text-white/60 text-[14px] mb-4">Wrap tool handlers so every function call from OpenAI is tracked.</p>
 
             <Code code={`import { AgentLedger } from 'agentledger';
 import { createToolExecutor } from 'agentledger/integrations/openai';
@@ -466,7 +466,7 @@ await trackedSendEmail(to, subject, body);`} />
           {/* MCP */}
           <section id="mcp" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">MCP Server Integration</h2>
-            <p className="text-white/30 text-[14px] mb-4">One line to track every tool invocation in your MCP server.</p>
+            <p className="text-white/60 text-[14px] mb-4">One line to track every tool invocation in your MCP server.</p>
 
             <Code code={`import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AgentLedger } from 'agentledger';
@@ -526,7 +526,7 @@ app.use('/api/agent', agentLedgerMiddleware(ledger, {
 }));`} filename="express-example.ts" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Wrap any function</h3>
-            <p className="text-white/30 text-[14px] mb-3">Works with any framework — no Express required.</p>
+            <p className="text-white/60 text-[14px] mb-3">Works with any framework — no Express required.</p>
             <Code code={`import { trackFunction } from 'agentledger/integrations/express';
 
 const trackedSendEmail = trackFunction(ledger, {
@@ -542,7 +542,7 @@ await trackedSendEmail(to, subject, body);`} />
           {/* REST API */}
           <section id="rest-api" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">REST API</h2>
-            <p className="text-white/30 text-[14px] mb-4">All endpoints require an <InlineCode>Authorization: Bearer al_...</InlineCode> header.</p>
+            <p className="text-white/60 text-[14px] mb-4">All endpoints require an <InlineCode>Authorization: Bearer al_...</InlineCode> header.</p>
 
             <Table
               headers={['Method', 'Endpoint', 'Description']}
@@ -603,7 +603,7 @@ await trackedSendEmail(to, subject, body);`} />
           {/* Webhooks */}
           <section id="webhooks" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Webhooks</h2>
-            <p className="text-white/30 text-[14px] mb-4">Get real-time HTTP notifications when events occur. Webhooks are signed with HMAC-SHA256 so you can verify authenticity.</p>
+            <p className="text-white/60 text-[14px] mb-4">Get real-time HTTP notifications when events occur. Webhooks are signed with HMAC-SHA256 so you can verify authenticity.</p>
 
             <h3 className="text-[16px] font-medium mt-4 mb-3">Events</h3>
             <Table
@@ -634,7 +634,7 @@ await trackedSendEmail(to, subject, body);`} />
 // { "id": "...", "secret": "whsec_...", "url": "...", "events": [...] }`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Webhook payload</h3>
-            <p className="text-white/30 text-[14px] mb-3">Every webhook delivery sends a JSON body with the event type, timestamp, and event-specific data:</p>
+            <p className="text-white/60 text-[14px] mb-3">Every webhook delivery sends a JSON body with the event type, timestamp, and event-specific data:</p>
             <Code code={`{
   "event": "action.logged",
   "timestamp": "2026-03-31T14:22:00.000Z",
@@ -681,7 +681,7 @@ app.post('/webhook', (req, res) => {
           {/* Notification Channels */}
           <section id="notifications" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Notification Channels</h2>
-            <p className="text-white/30 text-[14px] mb-4">Get alerted through Slack, Discord, or PagerDuty when budgets are exceeded, agents go rogue, or anomalies are detected. Configure multiple channels per org.</p>
+            <p className="text-white/60 text-[14px] mb-4">Get alerted through Slack, Discord, or PagerDuty when budgets are exceeded, agents go rogue, or anomalies are detected. Configure multiple channels per org.</p>
 
             <h3 className="text-[16px] font-medium mt-4 mb-3">Supported channels</h3>
             <Table
@@ -695,7 +695,7 @@ app.post('/webhook', (req, res) => {
             />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Slack</h3>
-            <p className="text-white/30 text-[14px] mb-3">Create a Slack Incoming Webhook and pass the URL:</p>
+            <p className="text-white/60 text-[14px] mb-3">Create a Slack Incoming Webhook and pass the URL:</p>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/notifications \\
   -H "Authorization: Bearer al_..." \\
   -H "Content-Type: application/json" \\
@@ -708,7 +708,7 @@ app.post('/webhook', (req, res) => {
   }'`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Discord</h3>
-            <p className="text-white/30 text-[14px] mb-3">Create a Discord channel webhook (Server Settings &rarr; Integrations &rarr; Webhooks) and pass the URL:</p>
+            <p className="text-white/60 text-[14px] mb-3">Create a Discord channel webhook (Server Settings &rarr; Integrations &rarr; Webhooks) and pass the URL:</p>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/notifications \\
   -H "Authorization: Bearer al_..." \\
   -H "Content-Type: application/json" \\
@@ -721,7 +721,7 @@ app.post('/webhook', (req, res) => {
   }'`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">PagerDuty</h3>
-            <p className="text-white/30 text-[14px] mb-3">Create a PagerDuty service integration (Events API v2) and pass the routing key. Alerts map to PagerDuty severity levels automatically:</p>
+            <p className="text-white/60 text-[14px] mb-3">Create a PagerDuty service integration (Events API v2) and pass the routing key. Alerts map to PagerDuty severity levels automatically:</p>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/notifications \\
   -H "Authorization: Bearer al_..." \\
   -H "Content-Type: application/json" \\
@@ -748,7 +748,7 @@ app.post('/webhook', (req, res) => {
           {/* API Key Management */}
           <section id="api-keys" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">API Key Management</h2>
-            <p className="text-white/30 text-[14px] mb-4">Create up to 5 active API keys per organization. Rotate and revoke keys without downtime.</p>
+            <p className="text-white/60 text-[14px] mb-4">Create up to 5 active API keys per organization. Rotate and revoke keys without downtime.</p>
 
             <h3 className="text-[16px] font-medium mt-4 mb-3">Create a new key</h3>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/keys/create \\
@@ -760,7 +760,7 @@ app.post('/webhook', (req, res) => {
 // { "id": "...", "key": "al_...", "name": "production" }`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Rotate a key</h3>
-            <p className="text-white/30 text-[14px] mb-3">Atomically revokes an old key and creates a new one with the same name.</p>
+            <p className="text-white/60 text-[14px] mb-3">Atomically revokes an old key and creates a new one with the same name.</p>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/keys/rotate \\
   -H "Authorization: Bearer al_current_key" \\
   -H "Content-Type: application/json" \\
@@ -780,7 +780,7 @@ app.post('/webhook', (req, res) => {
           {/* Dashboard */}
           <section id="dashboard" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Dashboard</h2>
-            <p className="text-white/30 text-[14px] mb-4">The dashboard provides a real-time view of all your agent activity.</p>
+            <p className="text-white/60 text-[14px] mb-4">The dashboard provides a real-time view of all your agent activity.</p>
 
             <div className="space-y-4 text-[14px] text-white/40">
               <p><strong className="text-white/70">Overview</strong> — total actions, costs, active agents, error rate, 24h activity chart, and service breakdown.</p>
@@ -794,7 +794,7 @@ app.post('/webhook', (req, res) => {
           {/* Budgets */}
           <section id="budgets" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Budgets & Alerts</h2>
-            <p className="text-white/30 text-[14px] mb-4">Set spending and action limits per agent. When a budget is exceeded, all future actions are blocked until the budget resets.</p>
+            <p className="text-white/60 text-[14px] mb-4">Set spending and action limits per agent. When a budget is exceeded, all future actions are blocked until the budget resets.</p>
 
             <Code code={`// Create a budget via the API
 curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
@@ -807,7 +807,7 @@ curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
     "max_cost_cents": 5000
   }'`} lang="bash" />
 
-            <p className="text-white/30 text-[14px] mt-4">Budget counters reset automatically:</p>
+            <p className="text-white/60 text-[14px] mt-4">Budget counters reset automatically:</p>
             <Table
               headers={['Period', 'Resets At']}
               rows={[
@@ -820,13 +820,13 @@ curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
             <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
               <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Automatic budget resets</strong> require enabling pg_cron in your Supabase project. See the migration file for the cron schedule SQL.</p>
             </div>
-            <p className="text-white/20 text-[13px] mt-3">See also: <a href="#policies" className="text-blue-400/60 hover:text-blue-400 hover:underline">Policy Engine</a> for rate limiting and cost-per-action caps.</p>
+            <p className="text-white/50 text-[13px] mt-3">See also: <a href="#policies" className="text-blue-400/60 hover:text-blue-400 hover:underline">Policy Engine</a> for rate limiting and cost-per-action caps.</p>
           </section>
 
           {/* Environments */}
           <section id="environments" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Environments</h2>
-            <p className="text-white/30 text-[14px] mb-4">Separate agent activity across dev, staging, and production. Each environment has its own action log, budgets, and alerts. The default is <InlineCode>production</InlineCode> when not specified.</p>
+            <p className="text-white/60 text-[14px] mb-4">Separate agent activity across dev, staging, and production. Each environment has its own action log, budgets, and alerts. The default is <InlineCode>production</InlineCode> when not specified.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (TypeScript)</h3>
             <Code code={`const ledger = new AgentLedger({
@@ -840,7 +840,7 @@ curl -X POST https://your-instance.vercel.app/api/v1/budgets \\
 ledger = AgentLedger(AgentLedgerConfig(api_key="al_...", environment="staging"))`} filename="config.py" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">REST API</h3>
-            <p className="text-white/30 text-[14px] mb-3">All endpoints accept an <InlineCode>environment</InlineCode> query parameter:</p>
+            <p className="text-white/60 text-[14px] mb-3">All endpoints accept an <InlineCode>environment</InlineCode> query parameter:</p>
             <Code code={`curl https://your-instance.vercel.app/api/v1/actions?environment=staging \\
   -H "Authorization: Bearer al_..."`} lang="bash" />
 
@@ -852,7 +852,7 @@ ledger = AgentLedger(AgentLedgerConfig(api_key="al_...", environment="staging"))
           {/* Search & Filtering */}
           <section id="search" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Search & Filtering</h2>
-            <p className="text-white/30 text-[14px] mb-4">Query the action log with powerful filters. All parameters are optional and can be combined.</p>
+            <p className="text-white/60 text-[14px] mb-4">Query the action log with powerful filters. All parameters are optional and can be combined.</p>
 
             <Table
               headers={['Parameter', 'Type', 'Description']}
@@ -880,10 +880,10 @@ curl "https://your-instance.vercel.app/api/v1/actions?agent=support-bot&cursor=e
           {/* Traces */}
           <section id="traces" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Traces</h2>
-            <p className="text-white/30 text-[14px] mb-4">Group related actions into a single trace to see the full lifecycle of an agent task. Attach a <InlineCode>traceId</InlineCode> to every action in a workflow.</p>
+            <p className="text-white/60 text-[14px] mb-4">Group related actions into a single trace to see the full lifecycle of an agent task. Attach a <InlineCode>traceId</InlineCode> to every action in a workflow.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Generate a trace ID</h3>
-            <p className="text-white/30 text-[14px] mb-3">Trace IDs use the format <InlineCode>{'tr_{base36_timestamp}_{random_8chars}'}</InlineCode> (e.g. <InlineCode>tr_lq8k2m1_a7f3b9x2</InlineCode>).</p>
+            <p className="text-white/60 text-[14px] mb-3">Trace IDs use the format <InlineCode>{'tr_{base36_timestamp}_{random_8chars}'}</InlineCode> (e.g. <InlineCode>tr_lq8k2m1_a7f3b9x2</InlineCode>).</p>
             <Code code={`import { AgentLedger } from 'agentledger';
 
 const traceId = AgentLedger.traceId(); // e.g. "tr_lq8k2m1_a7f3b9x2"
@@ -924,13 +924,13 @@ await ledger.track({
             <div className="bg-blue-500/[0.04] border border-blue-500/10 rounded-xl p-4 mt-4">
               <p className="text-[13px] text-blue-400/70"><strong className="text-blue-400">Dashboard.</strong> Click any <InlineCode>trace_id</InlineCode> in the actions table to see a waterfall timeline of all actions in the trace.</p>
             </div>
-            <p className="text-white/20 text-[13px] mt-3">See also: <a href="#search" className="text-blue-400/60 hover:text-blue-400 hover:underline">Search & Filtering</a> to query actions by trace ID.</p>
+            <p className="text-white/50 text-[13px] mt-3">See also: <a href="#search" className="text-blue-400/60 hover:text-blue-400 hover:underline">Search & Filtering</a> to query actions by trace ID.</p>
           </section>
 
           {/* Policy Engine */}
           <section id="policies" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Policy Engine</h2>
-            <p className="text-white/30 text-[14px] mb-4">Define rules that are evaluated before every action. Policies can rate-limit, allowlist, blocklist, cap costs, block sensitive data, or require human approval. Set <InlineCode>agent_name</InlineCode> to target a specific agent, or leave it <InlineCode>null</InlineCode> for org-wide rules. Policies are evaluated in priority order (highest first).</p>
+            <p className="text-white/60 text-[14px] mb-4">Define rules that are evaluated before every action. Policies can rate-limit, allowlist, blocklist, cap costs, block sensitive data, or require human approval. Set <InlineCode>agent_name</InlineCode> to target a specific agent, or leave it <InlineCode>null</InlineCode> for org-wide rules. Policies are evaluated in priority order (highest first).</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Rule types</h3>
             <Table
@@ -980,7 +980,7 @@ await ledger.track({
             </div>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Block response</h3>
-            <p className="text-white/30 text-[14px] mb-3">When a policy blocks an action, <InlineCode>check()</InlineCode> and <InlineCode>track()</InlineCode> return:</p>
+            <p className="text-white/60 text-[14px] mb-3">When a policy blocks an action, <InlineCode>check()</InlineCode> and <InlineCode>track()</InlineCode> return:</p>
             <Code code={`// Pre-flight check response when blocked:
 {
   "allowed": false,
@@ -1000,13 +1000,13 @@ await ledger.track({
                 ['DELETE', '/api/v1/policies/:id', 'Delete a policy'],
               ]}
             />
-            <p className="text-white/20 text-[13px] mt-3">See also: <a href="#approvals" className="text-blue-400/60 hover:text-blue-400 hover:underline">Approvals</a> for policies that require human approval before execution.</p>
+            <p className="text-white/50 text-[13px] mt-3">See also: <a href="#approvals" className="text-blue-400/60 hover:text-blue-400 hover:underline">Approvals</a> for policies that require human approval before execution.</p>
           </section>
 
           {/* Human-in-the-Loop Approvals */}
           <section id="approvals" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Human-in-the-Loop Approvals</h2>
-            <p className="text-white/30 text-[14px] mb-4">When a <InlineCode>require_approval</InlineCode> policy matches, the action is paused and an approval request is created. A human approves or denies it from the dashboard, and the agent continues.</p>
+            <p className="text-white/60 text-[14px] mb-4">When a <InlineCode>require_approval</InlineCode> policy matches, the action is paused and an approval request is created. A human approves or denies it from the dashboard, and the agent continues.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">How it works</h3>
             <div className="space-y-2 text-[14px] text-white/40">
@@ -1067,7 +1067,7 @@ try {
           {/* Live Streaming (SSE) */}
           <section id="streaming" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Live Streaming (SSE)</h2>
-            <p className="text-white/30 text-[14px] mb-4">Subscribe to real-time events via Server-Sent Events. Since <InlineCode>EventSource</InlineCode> cannot send headers, authentication is passed as a query parameter.</p>
+            <p className="text-white/60 text-[14px] mb-4">Subscribe to real-time events via Server-Sent Events. Since <InlineCode>EventSource</InlineCode> cannot send headers, authentication is passed as a query parameter.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Event types</h3>
             <Table
@@ -1105,7 +1105,7 @@ handle.close();`} filename="stream-example.ts" />
           {/* Anomaly Detection */}
           <section id="anomalies" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Anomaly Detection</h2>
-            <p className="text-white/30 text-[14px] mb-4">AgentLedger computes statistical baselines from the last 7 days of data (updated hourly) and fires alerts when metrics deviate by more than 2 standard deviations. A minimum of 50 actions is required to establish a baseline.</p>
+            <p className="text-white/60 text-[14px] mb-4">AgentLedger computes statistical baselines from the last 7 days of data (updated hourly) and fires alerts when metrics deviate by more than 2 standard deviations. A minimum of 50 actions is required to establish a baseline.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Monitored metrics</h3>
             <Table
@@ -1137,7 +1137,7 @@ handle.close();`} filename="stream-example.ts" />
           {/* Evaluations */}
           <section id="evaluations" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Evaluations</h2>
-            <p className="text-white/30 text-[14px] mb-4">Score agent actions on a 0-100 scale with optional labels and feedback. Use evaluations to track quality over time and identify regressions.</p>
+            <p className="text-white/60 text-[14px] mb-4">Score agent actions on a 0-100 scale with optional labels and feedback. Use evaluations to track quality over time and identify regressions.</p>
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">SDK (TypeScript)</h3>
             <Code code={`await ledger.evaluate(actionId, {
@@ -1175,7 +1175,7 @@ handle.close();`} filename="stream-example.ts" />
           {/* Rollback Hooks */}
           <section id="rollbacks" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Rollback Hooks</h2>
-            <p className="text-white/30 text-[14px] mb-4">Register compensating action webhooks that fire when an agent is killed or a budget is exceeded. Use rollback hooks to undo partially-completed work.</p>
+            <p className="text-white/60 text-[14px] mb-4">Register compensating action webhooks that fire when an agent is killed or a budget is exceeded. Use rollback hooks to undo partially-completed work.</p>
 
             <div className="bg-amber-500/[0.04] border border-amber-500/10 rounded-xl p-4 mb-6">
               <p className="text-[13px] text-amber-400/70"><strong className="text-amber-400">Timing.</strong> Rollback hooks fire AFTER the agent is killed or budget is exceeded, not before. They receive the completed actions from the trace as context so your compensating logic knows what to undo.</p>
@@ -1198,7 +1198,7 @@ handle.close();`} filename="stream-example.ts" />
   }'`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Webhook payload</h3>
-            <p className="text-white/30 text-[14px] mb-3">The webhook receives the trigger reason, agent name, and the last 50 completed actions as context. Signed with HMAC-SHA256 (same as regular webhooks).</p>
+            <p className="text-white/60 text-[14px] mb-3">The webhook receives the trigger reason, agent name, and the last 50 completed actions as context. Signed with HMAC-SHA256 (same as regular webhooks).</p>
             <Code code={`// POST to your rollback URL
 // Header: X-AgentLedger-Signature: sha256=...
 {
@@ -1227,7 +1227,7 @@ handle.close();`} filename="stream-example.ts" />
           {/* Python SDK */}
           <section id="python" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">Python SDK</h2>
-            <p className="text-white/30 text-[14px] mb-4">Full-featured Python client with sync and async support.</p>
+            <p className="text-white/60 text-[14px] mb-4">Full-featured Python client with sync and async support.</p>
 
             <h3 className="text-[16px] font-medium mt-4 mb-3">Installation</h3>
             <Code code="pip install agentledger-py" lang="bash" />
@@ -1327,7 +1327,7 @@ result = tracked_run(agent, messages)`} filename="openai_python.py" />
             />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Deploy to Vercel</h3>
-            <p className="text-white/30 text-[14px] mb-3">The fastest way. Click the deploy button in the README, or:</p>
+            <p className="text-white/60 text-[14px] mb-3">The fastest way. Click the deploy button in the README, or:</p>
             <Code code={`vercel deploy --prod`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Run locally</h3>
@@ -1342,7 +1342,7 @@ npm run dev
 
           {/* Footer */}
           <footer className="border-t border-white/[0.04] pt-8 mt-20">
-            <div className="flex items-center justify-between text-[12px] text-white/15">
+            <div className="flex items-center justify-between text-[12px] text-white/50">
               <p>{'\u00a9'} 2026 AgentLedger. MIT License.</p>
               <div className="flex gap-4">
                 <a href="https://github.com/agentledger-co/agentledger" className="hover:text-white/40 transition-colors">GitHub</a>

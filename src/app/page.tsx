@@ -154,7 +154,7 @@ function LiveDemo() {
   return (
     <div className="relative group">
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-blue-500/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="relative bg-[#0c0c0c] rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl shadow-black/50">
+      <div className="relative bg-[#0c0c0c] rounded-2xl border border-white/[0.16] overflow-hidden shadow-2xl shadow-black/50">
         {/* Alert banner */}
         <div className={`overflow-hidden transition-all duration-500 ${alert.show ? 'max-h-12' : 'max-h-0'}`}>
           <div className="px-5 py-2.5 bg-amber-500/10 border-b border-amber-500/20 flex items-center gap-2.5">
@@ -164,13 +164,13 @@ function LiveDemo() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex items-center gap-0 px-5 border-b border-white/[0.06]">
+        <div className="flex items-center gap-0 px-5 border-b border-white/[0.14]">
           {TABS.map(t => (
             <button key={t} onClick={() => handleTabClick(t)}
-              className={`px-4 py-3 text-[11px] font-medium tracking-wide uppercase transition-all relative ${tab === t ? 'text-white/70' : 'text-white/20 hover:text-white/40'}`}>
+              className={`px-4 py-3 text-[11px] font-medium tracking-wide uppercase transition-all relative ${tab === t ? 'text-white/70' : 'text-white/50 hover:text-white/40'}`}>
               {t === 'feed' ? 'Live Feed' : t === 'agents' ? 'Agents' : 'Budgets'}
               {tab === t && (
-                <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full overflow-hidden bg-white/[0.06]">
+                <div className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full overflow-hidden bg-white/[0.12]">
                   {autoCycle ? (
                     <div className="h-full bg-blue-500 rounded-full transition-none" style={{ width: `${progress}%` }} />
                   ) : (
@@ -183,7 +183,7 @@ function LiveDemo() {
           <div className="flex-1" />
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] text-white/15 font-mono">live</span>
+            <span className="text-[10px] text-white/50 font-mono">live</span>
           </div>
         </div>
 
@@ -191,18 +191,18 @@ function LiveDemo() {
         {tab === 'feed' && (
           <div className="divide-y divide-white/[0.04]">
             {actions.map((a, i) => (
-              <div key={a.id} className={`px-5 py-2.5 flex items-center gap-3 text-[12px] transition-all duration-300 hover:bg-white/[0.02] ${i === 0 ? 'animate-fade-in bg-white/[0.015]' : ''}`}>
+              <div key={a.id} className={`px-5 py-2.5 flex items-center gap-3 text-[12px] transition-all duration-300 hover:bg-white/[0.06] ${i === 0 ? 'animate-fade-in bg-white/[0.06]' : ''}`}>
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.status === 'success' ? 'bg-emerald-400' : a.status === 'error' ? 'bg-red-400' : 'bg-amber-400'}`} />
-                <span className="text-white/30 font-mono w-[60px] flex-shrink-0 tabular-nums">{a.time}</span>
+                <span className="text-white/60 font-mono w-[60px] flex-shrink-0 tabular-nums">{a.time}</span>
                 <span className="text-white/70 font-medium w-28 flex-shrink-0 truncate">{a.agent}</span>
-                <span className="text-white/15">{'\u2192'}</span>
+                <span className="text-white/50">{'\u2192'}</span>
                 <span className={`font-medium w-16 flex-shrink-0 ${SERVICE_COLORS[a.service] || 'text-white/50'}`}>{a.service}</span>
-                <span className="text-white/30 flex-1 truncate">{a.action}</span>
-                <span className="text-white/15 w-14 text-right font-mono tabular-nums">{a.duration}ms</span>
+                <span className="text-white/60 flex-1 truncate">{a.action}</span>
+                <span className="text-white/50 w-14 text-right font-mono tabular-nums">{a.duration}ms</span>
                 {a.cost > 0 && <span className="text-blue-400/70 w-12 text-right font-mono tabular-nums">${(a.cost / 100).toFixed(2)}</span>}
               </div>
             ))}
-            {actions.length === 0 && <div className="px-5 py-8 text-center text-[12px] text-white/30">Waiting for actions...</div>}
+            {actions.length === 0 && <div className="px-5 py-8 text-center text-[12px] text-white/60">Waiting for actions...</div>}
           </div>
         )}
 
@@ -218,11 +218,11 @@ function LiveDemo() {
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${a.status === 'active' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-amber-400/10 text-amber-400'}`}>{a.status}</span>
                   </div>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[11px] text-white/20">{a.actions.toLocaleString()} actions</span>
-                    <span className="text-[11px] text-white/20">{'\u00b7'}</span>
+                    <span className="text-[11px] text-white/50">{a.actions.toLocaleString()} actions</span>
+                    <span className="text-[11px] text-white/50">{'\u00b7'}</span>
                     <span className="text-[11px] text-blue-400/50">${(a.cost / 100).toFixed(2)} spent</span>
-                    <span className="text-[11px] text-white/20">{'\u00b7'}</span>
-                    <span className="text-[11px] text-white/15">{a.lastActive}</span>
+                    <span className="text-[11px] text-white/50">{'\u00b7'}</span>
+                    <span className="text-[11px] text-white/50">{a.lastActive}</span>
                   </div>
                 </div>
                 <button onClick={() => toggleAgent(a.name)}
@@ -240,29 +240,29 @@ function LiveDemo() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[12px] text-white/50">{budget.label}</span>
-                <span className="text-[12px] font-mono text-white/30">${budget.used.toFixed(0)} / ${budget.limit}</span>
+                <span className="text-[12px] font-mono text-white/60">${budget.used.toFixed(0)} / ${budget.limit}</span>
               </div>
-              <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="h-2.5 bg-white/[0.10] rounded-full overflow-hidden">
                 <div className={`h-full rounded-full transition-all duration-1000 ${budget.used / budget.limit > 0.85 ? 'bg-amber-500' : budget.used / budget.limit > 0.7 ? 'bg-blue-400' : 'bg-emerald-400'}`}
                   style={{ width: `${Math.min((budget.used / budget.limit) * 100, 100)}%` }} />
               </div>
-              <p className="text-[11px] text-white/15 mt-1.5">Auto-pauses agent when limit is reached</p>
+              <p className="text-[11px] text-white/50 mt-1.5">Auto-pauses agent when limit is reached</p>
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[12px] text-white/50">support-bot {'\u00b7'} monthly actions</span>
-                <span className="text-[12px] font-mono text-white/30">847 / 2,000</span>
+                <span className="text-[12px] font-mono text-white/60">847 / 2,000</span>
               </div>
-              <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="h-2.5 bg-white/[0.10] rounded-full overflow-hidden">
                 <div className="h-full rounded-full bg-blue-400 transition-all duration-1000" style={{ width: '42%' }} />
               </div>
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[12px] text-white/50">data-sync {'\u00b7'} daily actions</span>
-                <span className="text-[12px] font-mono text-white/30">0 / 500</span>
+                <span className="text-[12px] font-mono text-white/60">0 / 500</span>
               </div>
-              <div className="h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="h-2.5 bg-white/[0.10] rounded-full overflow-hidden">
                 <div className="h-full rounded-full bg-white/10 transition-all duration-1000" style={{ width: '0%' }} />
               </div>
               <p className="text-[11px] text-amber-400/40 mt-1.5">{'\u23f8'} Agent paused</p>
@@ -278,17 +278,17 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
   const highlighted = code
     .replace(/(import|from|const|await|return|async|new)/g, '<span class="text-violet-400">$1</span>')
     .replace(/('[@\w/.-]+')/g, '<span class="text-emerald-400">$1</span>')
-    .replace(/(\/\/[^\n]*)/g, '<span class="text-white/20">$1</span>')
+    .replace(/(\/\/[^\n]*)/g, '<span class="text-white/50">$1</span>')
     .replace(/(AgentLedger|ledger)/g, '<span class="text-blue-400">$1</span>');
   return (
     <div className="relative group">
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="relative bg-[#0c0c0c] rounded-2xl border border-white/[0.08] overflow-hidden shadow-2xl shadow-black/50">
-        <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.06]">
+      <div className="relative bg-[#0c0c0c] rounded-2xl border border-white/[0.16] overflow-hidden shadow-2xl shadow-black/50">
+        <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/[0.14]">
           <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
           <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
           <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-          <span className="text-[11px] text-white/20 ml-3 font-mono">{filename}</span>
+          <span className="text-[11px] text-white/50 ml-3 font-mono">{filename}</span>
         </div>
         <pre className="p-6 text-[13px] leading-[1.8] overflow-x-auto">
           <code dangerouslySetInnerHTML={{ __html: highlighted }} />
@@ -375,7 +375,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
       {/* Nav */}
-      <nav className="border-b border-white/[0.06] px-6 py-4 sticky top-0 bg-[#08080a]/80 backdrop-blur-2xl z-50">
+      <nav className="border-b border-white/[0.14] px-6 py-4 sticky top-0 bg-[#08080a]/80 backdrop-blur-2xl z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 logo-heartbeat-glow">
@@ -400,7 +400,7 @@ export default function LandingPage() {
         </div>
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-2 border-t border-white/[0.06] pt-4 flex flex-col gap-3">
+          <div className="md:hidden mt-4 pb-2 border-t border-white/[0.14] pt-4 flex flex-col gap-3">
             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Features</a>
             <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Live Demo</a>
             <Link href="/docs" onClick={() => setMobileMenuOpen(false)} className="text-[14px] text-white/60 hover:text-white/90 transition-colors">Docs</Link>
@@ -430,15 +430,15 @@ export default function LandingPage() {
               <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-6 py-3 rounded-xl transition-all text-[14px] shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
                 Start Free {'\u2192'}
               </Link>
-              <a href="#demo" className="bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/80 font-medium px-6 py-3 rounded-xl transition-all text-[14px] border border-white/[0.08]">
+              <a href="#demo" className="bg-white/[0.10] hover:bg-white/[0.08] text-white/60 hover:text-white/80 font-medium px-6 py-3 rounded-xl transition-all text-[14px] border border-white/[0.16]">
                 See live demo
               </a>
               <button
                 onClick={() => { navigator.clipboard.writeText('npm i agentledger'); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                className="flex items-center gap-2 bg-white/[0.04] rounded-xl border border-white/[0.08] px-4 py-2.5 hover:bg-white/[0.06] transition-colors group"
+                className="flex items-center gap-2 bg-white/[0.10] rounded-xl border border-white/[0.16] px-4 py-2.5 hover:bg-white/[0.12] transition-colors group"
               >
                 <code className="text-[13px] text-blue-400/80 font-mono">npm i agentledger</code>
-                <span className="text-[11px] text-white/20 group-hover:text-white/40 transition-colors">
+                <span className="text-[11px] text-white/50 group-hover:text-white/40 transition-colors">
                   {copied ? '✓' : '⎘'}
                 </span>
               </button>
@@ -458,7 +458,7 @@ export default function LandingPage() {
       {/* Social Proof */}
       <section className="border-y border-white/[0.04] px-6 py-5">
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[12px] text-white/30 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} CrewAI {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Python & TypeScript</p>
+          <p className="text-[12px] text-white/60 tracking-wider">Works with LangChain {'\u00b7'} OpenAI Agents {'\u00b7'} CrewAI {'\u00b7'} MCP Servers {'\u00b7'} Express {'\u00b7'} Python & TypeScript</p>
         </div>
       </section>
 
@@ -484,7 +484,7 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(f => (
-              <div key={f.title} className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-8 hover:border-blue-500/20 hover:bg-white/[0.03] transition-all duration-300 group">
+              <div key={f.title} className="bg-white/[0.06] rounded-2xl border border-white/[0.14] p-8 hover:border-blue-500/20 hover:bg-white/[0.08] transition-all duration-300 group">
                 <div className="text-3xl mb-5">{f.icon}</div>
                 <h3 className="font-semibold mb-3 text-[16px] group-hover:text-blue-400 transition-colors">{f.title}</h3>
                 <p className="text-[14px] text-white/45 leading-relaxed">{f.desc}</p>
@@ -511,7 +511,7 @@ export default function LandingPage() {
               <div key={s.step} className="text-center">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 font-bold text-[14px] flex items-center justify-center mx-auto mb-5 border border-blue-500/20">{s.step}</div>
                 <h3 className="font-semibold mb-4 text-[15px]">{s.title}</h3>
-                <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.06] p-5">
+                <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.14] p-5">
                   <code className="text-[12px] text-blue-400/70 font-mono whitespace-pre leading-relaxed">{s.code}</code>
                 </div>
               </div>
@@ -528,16 +528,16 @@ export default function LandingPage() {
             <h2 className="text-[32px] font-bold mb-4 tracking-tight">Not another LLM tracer</h2>
             <p className="text-white/50 text-[15px]">Helicone and Langfuse track LLM calls. We track what happens <em className="text-white/50 not-italic">after</em>.</p>
           </div>
-          <div className="bg-white/[0.02] rounded-2xl border border-white/[0.06] overflow-hidden">
+          <div className="bg-white/[0.06] rounded-2xl border border-white/[0.14] overflow-hidden">
             <table className="w-full">
-              <thead><tr className="border-b border-white/[0.06]">
+              <thead><tr className="border-b border-white/[0.14]">
                 <th className="px-6 py-4 text-left text-[12px] font-medium text-white/45">Feature</th>
                 <th className="px-6 py-4 text-center text-[12px] font-medium text-blue-400">AgentLedger</th>
                 <th className="px-6 py-4 text-center text-[12px] font-medium text-white/45">LLM Tracers</th>
               </tr></thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {COMPARISON.map(c => (
-                  <tr key={c.feature} className="hover:bg-white/[0.015] transition-colors">
+                  <tr key={c.feature} className="hover:bg-white/[0.06] transition-colors">
                     <td className="px-6 py-3.5 text-[13px] text-white/60">{c.feature}</td>
                     <td className="px-6 py-3.5 text-center text-[14px]">{c.us ? '\u2705' : '\u2014'}</td>
                     <td className="px-6 py-3.5 text-center text-[14px]">{c.them ? '\u2705' : '\u2014'}</td>
@@ -583,7 +583,7 @@ export default function LandingPage() {
               { name: 'Pro', price: '$29', period: '/month', features: ['50,000 actions/mo', 'Unlimited agents', '90-day data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Slack, Discord & PagerDuty', 'Email support'], cta: 'Join Waitlist', hl: false },
               { name: 'Team', price: '$99', period: '/month', features: ['500,000 actions/mo', 'Unlimited agents', '1-year data retention', 'Traces & sessions', 'Budget controls', 'Webhooks', 'Slack, Discord & PagerDuty', 'SSO (coming soon)', 'Priority support'], cta: 'Join Waitlist', hl: false },
             ].map(plan => (
-              <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.1]'}`}>
+              <div key={plan.name} className={`rounded-2xl border p-7 transition-all duration-300 ${plan.hl ? 'bg-blue-500/[0.04] border-blue-500/20 relative shadow-lg shadow-blue-500/5' : 'bg-white/[0.06] border-white/[0.14] hover:border-white/[0.1]'}`}>
                 {plan.hl && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-blue-500/30">Available Now</div>}
                 <h3 className="font-semibold text-[17px] mb-1">{plan.name}</h3>
                 <div className="flex items-baseline gap-1 mb-7">
@@ -594,18 +594,18 @@ export default function LandingPage() {
                   {plan.features.map(f => <li key={f} className="flex items-center gap-2.5 text-[13px] text-white/60"><span className="text-blue-400/60 text-[11px]">{'\u2713'}</span> {f}</li>)}
                 </ul>
                 {plan.cta === 'Join Waitlist' ? (
-                  <a href="mailto:hello@agentledger.co?subject=Waitlist: AgentLedger Pro/Team" className="block text-center py-2.5 rounded-xl text-[13px] font-medium bg-white/[0.04] hover:bg-white/[0.08] text-white/50 border border-white/[0.08] transition-all">
+                  <a href="mailto:hello@agentledger.co?subject=Waitlist: AgentLedger Pro/Team" className="block text-center py-2.5 rounded-xl text-[13px] font-medium bg-white/[0.10] hover:bg-white/[0.08] text-white/50 border border-white/[0.16] transition-all">
                     {plan.cta} {'\u2192'}
                   </a>
                 ) : (
-                  <Link href="/signup" className={`block text-center py-2.5 rounded-xl text-[13px] font-medium transition-all ${plan.hl ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25' : 'bg-white/[0.04] hover:bg-white/[0.08] text-white/50 border border-white/[0.08]'}`}>
+                  <Link href="/signup" className={`block text-center py-2.5 rounded-xl text-[13px] font-medium transition-all ${plan.hl ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25' : 'bg-white/[0.10] hover:bg-white/[0.08] text-white/50 border border-white/[0.16]'}`}>
                     {plan.cta}
                   </Link>
                 )}
               </div>
             ))}
           </div>
-          <p className="text-center text-[12px] text-white/25 mt-6 max-w-lg mx-auto">
+          <p className="text-center text-[12px] text-white/55 mt-6 max-w-lg mx-auto">
             Free tier includes 5,000 actions/month with 7-day data retention. Usage beyond plan limits is rate-limited.
             We reserve the right to enforce fair use policies to maintain service quality for all users.
           </p>
@@ -621,14 +621,14 @@ export default function LandingPage() {
           </div>
           <div className="space-y-2">
             {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="border border-white/[0.06] rounded-xl overflow-hidden">
+              <div key={i} className="border border-white/[0.14] rounded-xl overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.06] transition-colors"
                 >
                   <span className="text-[14px] font-medium text-white/80">{item.q}</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                    className={`text-white/30 flex-shrink-0 ml-4 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>
+                    className={`text-white/60 flex-shrink-0 ml-4 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                 </button>
@@ -665,12 +665,12 @@ export default function LandingPage() {
             <span className="text-[13px] text-white/35">AgentLedger</span>
           </div>
           <div className="flex items-center gap-4 md:gap-6 flex-wrap justify-center">
-            <a href="https://github.com/agentledger-co/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">GitHub</a>
-            <Link href="/docs" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Docs</Link>
-            <Link href="/changelog" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Changelog</Link>
-            <Link href="/terms" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Terms</Link>
-            <Link href="/privacy" className="text-[12px] text-white/30 hover:text-white/50 transition-colors">Privacy</Link>
-            <p className="text-[12px] text-white/30">{'\u00a9'} 2026 AgentLedger. All rights reserved.</p>
+            <a href="https://github.com/agentledger-co/agentledger" target="_blank" rel="noopener noreferrer" className="text-[12px] text-white/60 hover:text-white/50 transition-colors">GitHub</a>
+            <Link href="/docs" className="text-[12px] text-white/60 hover:text-white/50 transition-colors">Docs</Link>
+            <Link href="/changelog" className="text-[12px] text-white/60 hover:text-white/50 transition-colors">Changelog</Link>
+            <Link href="/terms" className="text-[12px] text-white/60 hover:text-white/50 transition-colors">Terms</Link>
+            <Link href="/privacy" className="text-[12px] text-white/60 hover:text-white/50 transition-colors">Privacy</Link>
+            <p className="text-[12px] text-white/60">{'\u00a9'} 2026 AgentLedger. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -79,7 +79,7 @@ function RangeBar({ baseline, stddev }: { baseline: number; stddev: number }) {
   if (totalRange <= 0 || stddev <= 0) {
     // No meaningful range to display
     return (
-      <div className="w-full h-2 rounded-full bg-white/[0.04] overflow-hidden">
+      <div className="w-full h-2 rounded-full bg-white/[0.10] overflow-hidden">
         <div className="h-full bg-emerald-400/30 rounded-full" style={{ width: '100%' }} />
       </div>
     );
@@ -94,7 +94,7 @@ function RangeBar({ baseline, stddev }: { baseline: number; stddev: number }) {
   const anomalyRightStart = pct(baseline + 2 * stddev);
 
   return (
-    <div className="relative w-full h-2 rounded-full bg-white/[0.04] overflow-hidden">
+    <div className="relative w-full h-2 rounded-full bg-white/[0.10] overflow-hidden">
       {/* Red zones (anomaly) */}
       <div
         className="absolute top-0 h-full bg-red-400/25 rounded-l-full"
@@ -141,7 +141,7 @@ function ServiceDistributionBar({ distribution }: { distribution: ServiceDistrib
   return (
     <div className="space-y-2">
       {/* Stacked bar */}
-      <div className="w-full h-3 rounded-full bg-white/[0.04] overflow-hidden flex">
+      <div className="w-full h-3 rounded-full bg-white/[0.10] overflow-hidden flex">
         {sorted.map((item, i) => (
           <div
             key={item.service}
@@ -198,10 +198,10 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
         <h3 className="text-sm font-medium text-white/70">Baselines for {agentName}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-              <div className="h-3 w-24 bg-white/[0.04] rounded animate-pulse mb-3" />
-              <div className="h-7 w-16 bg-white/[0.06] rounded animate-pulse mb-2" />
-              <div className="h-2.5 w-32 bg-white/[0.03] rounded animate-pulse" />
+            <div key={i} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
+              <div className="h-3 w-24 bg-white/[0.10] rounded animate-pulse mb-3" />
+              <div className="h-7 w-16 bg-white/[0.12] rounded animate-pulse mb-2" />
+              <div className="h-2.5 w-32 bg-white/[0.08] rounded animate-pulse" />
             </div>
           ))}
         </div>
@@ -224,7 +224,7 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-white/70">Baselines for {agentName}</h3>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <p className="text-white/30 text-sm mb-1">No baseline data yet.</p>
           <p className="text-white/15 text-xs">
             Baselines are computed hourly from the last 7 days of activity. Minimum 50 actions required.
@@ -242,7 +242,7 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
         {data.metrics.map(metric => (
           <div
             key={metric.metric}
-            className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-3"
+            className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5 space-y-3"
           >
             {/* Metric name */}
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
@@ -280,7 +280,7 @@ export default function BaselinesView({ apiKey, agentName }: BaselinesViewProps)
 
         {/* Service Distribution card */}
         {data.service_distribution && data.service_distribution.length > 0 && (
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-3 md:col-span-2">
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5 space-y-3 md:col-span-2">
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
               Service Distribution
             </p>

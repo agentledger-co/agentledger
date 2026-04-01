@@ -7,14 +7,14 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
-      <nav className="border-b border-white/[0.06] px-6 py-4">
+      <nav className="border-b border-white/[0.14] px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center logo-heartbeat-glow"><svg className="logo-heartbeat" width="20" height="20" viewBox="0 0 48 48" fill="none"><path d="M8 26H14L17 20L21 32L25 14L29 28L32 22H40" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
             <span className="text-lg font-semibold tracking-tight">AgentLedger</span>
           </Link>
-          <span className="text-white/15 text-[13px]">/</span>
+          <span className="text-white/50 text-[13px]">/</span>
           <span className="text-white/40 text-[13px]">Privacy Policy</span>
           </div>
           <Link href="/signup" className="text-[13px] text-blue-400 hover:text-blue-300 transition-colors">Sign up</Link>
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-[32px] font-bold mb-2 tracking-tight">Privacy Policy</h1>
-        <p className="text-white/30 text-[14px] mb-10">Last updated: February 16, 2026</p>
+        <p className="text-white/60 text-[14px] mb-10">Last updated: February 16, 2026</p>
 
         <div className="prose prose-invert prose-sm max-w-none space-y-8 text-white/50 text-[14px] leading-relaxed">
 
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
             <h2 className="text-[18px] font-semibold text-white/80 mb-3">13. Contact</h2>
             <p>For privacy-related inquiries or to exercise your data rights:</p>
             <p className="mt-2 text-blue-400">privacy@agentledger.co</p>
-            <p className="mt-2 text-white/30">AgentLedger<br />Dublin, Ireland</p>
+            <p className="mt-2 text-white/60">AgentLedger<br />Dublin, Ireland</p>
           </section>
 
         </div>

@@ -76,14 +76,14 @@ export default function PolicyTemplatesSection({ apiKey, onToast, onRefresh }: {
             value={agentFilter}
             onChange={e => setAgentFilter(e.target.value)}
             placeholder="Agent name (empty = all)"
-            className="bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-1.5 text-[12px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none w-48"
+            className="bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-1.5 text-[12px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none w-48"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {templates.map(template => (
-          <div key={template.id} className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4 flex flex-col">
+          <div key={template.id} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 flex flex-col">
             <div className="flex items-start justify-between mb-2">
               <h5 className="text-sm font-medium text-white/80">{template.name}</h5>
               <span className={`text-[10px] px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[template.category] || ''}`}>

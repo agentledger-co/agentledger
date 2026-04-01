@@ -669,7 +669,7 @@ function SetupScreen({ onSetup, loading, error }: {
                 value={inputKey}
                 onChange={e => setInputKey(e.target.value)}
                 placeholder="al_..."
-                className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none mb-4"
+                className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none mb-4"
               />
               <button
                 onClick={() => onSetup(inputKey)}
@@ -889,7 +889,7 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
               <div className="text-2xl mb-3 opacity-30">📡</div>
               <p className="text-white/60 text-sm font-medium mb-2">No actions yet</p>
               <p className="text-white/50 text-xs mb-4 max-w-sm mx-auto">Send a test action to see it appear here in real-time:</p>
-              <div className="bg-black/30 rounded-lg p-3 max-w-md mx-auto mb-4">
+              <div className="bg-white/[0.08] rounded-lg p-3 max-w-md mx-auto mb-4">
                 <code className="text-[11px] text-blue-400/70 font-mono whitespace-pre-wrap break-all">
                   {`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/actions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
@@ -969,7 +969,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search actions..."
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -1144,7 +1144,7 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
           <div className="text-2xl mb-3 opacity-30">🤖</div>
           <p className="text-white/60 text-sm font-medium mb-2">No agents registered yet</p>
           <p className="text-white/50 text-xs mb-4">Agents are auto-registered when they first log an action. Use the SDK to get started:</p>
-          <div className="bg-black/30 rounded-lg p-3 max-w-sm mx-auto mb-3">
+          <div className="bg-white/[0.08] rounded-lg p-3 max-w-sm mx-auto mb-3">
             <code className="text-[11px] text-blue-400/70 font-mono">await ledger.track({'{'} agent: &apos;my-bot&apos;, service: &apos;slack&apos;, action: &apos;send&apos; {'}'}, fn)</code>
           </div>
           <a href="/docs#core-sdk" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">View integration guide →</a>
@@ -1794,7 +1794,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                 <select
                   value={newBudget.agent}
                   onChange={e => setNewBudget({ ...newBudget, agent: e.target.value })}
-                  className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
                 >
                   <option value="">Select agent...</option>
                   {stats.agents.map(a => (
@@ -1807,7 +1807,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                 <select
                   value={newBudget.period}
                   onChange={e => setNewBudget({ ...newBudget, period: e.target.value })}
-                  className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
                 >
                   <option value="hourly">Hourly</option>
                   <option value="daily">Daily</option>
@@ -1822,7 +1822,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                   value={newBudget.maxActions}
                   onChange={e => setNewBudget({ ...newBudget, maxActions: e.target.value })}
                   placeholder="e.g. 100"
-                  className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
                 />
               </div>
               <div>
@@ -1833,7 +1833,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                   value={newBudget.maxCostDollars}
                   onChange={e => setNewBudget({ ...newBudget, maxCostDollars: e.target.value })}
                   placeholder="e.g. 5.00"
-                  className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
                 />
               </div>
             </div>
@@ -2043,7 +2043,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
           <div className="bg-[#1a1a1a] border border-blue-500/20 rounded-xl p-6 max-w-md mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold mb-2">Webhook Secret</h3>
             <p className="text-sm text-white/40 mb-4">Save this secret now — you won&apos;t see it again. Use it to verify webhook signatures.</p>
-            <div className="bg-black/50 rounded-lg p-3 mb-4 flex items-center justify-between gap-2">
+            <div className="bg-white/[0.08] rounded-lg p-3 mb-4 flex items-center justify-between gap-2">
               <code className="text-[13px] text-blue-400 font-mono break-all">{shownSecret}</code>
               <button
                 onClick={() => { navigator.clipboard.writeText(shownSecret); onToast('Secret copied', 'info'); }}
@@ -2079,14 +2079,14 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             value={newUrl}
             onChange={e => setNewUrl(e.target.value)}
             placeholder="https://your-server.com/webhook"
-            className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
           />
           <input
             type="text"
             value={newDesc}
             onChange={e => setNewDesc(e.target.value)}
             placeholder="Description (optional)"
-            className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
           />
           <div>
             <p className="text-xs text-white/60 mb-2">Events (empty = all events)</p>
@@ -2349,7 +2349,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
               value={newKeyName}
               onChange={e => setNewKeyName(e.target.value)}
               placeholder="Key name (e.g., production, staging)"
-              className="flex-1 bg-black/50 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+              className="flex-1 bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
             />
             <button onClick={createKey} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
               Create
@@ -2686,7 +2686,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
             value={slackUrl}
             onChange={e => setSlackUrl(e.target.value)}
             placeholder="https://hooks.slack.com/services/..."
-            className="w-full bg-black/30 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/15 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
           />
           <p className="text-[10px] text-white/50 mt-1">Create an incoming webhook in your Slack workspace settings.</p>
         </div>
@@ -2734,7 +2734,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="alerts@yourcompany.com"
-            className="w-full bg-black/30 border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/15 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-sm text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
           />
         </div>
         <div>

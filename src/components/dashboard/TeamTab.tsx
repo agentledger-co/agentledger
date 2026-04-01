@@ -181,7 +181,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
     }
   };
 
-  const inputClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none';
+  const inputClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/40 focus:border-blue-500/50 focus:outline-none';
   const selectClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none';
 
   if (loading) return <div className="text-white/60 text-center py-16">Loading team...</div>;

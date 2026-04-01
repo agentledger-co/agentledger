@@ -272,7 +272,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
     config: Record<string, string>,
     setConfig: (cfg: Record<string, string>) => void
   ) => {
-    const inputClass = 'w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none';
+    const inputClass = 'w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/40 focus:border-blue-500/50 focus:outline-none';
 
     switch (ruleType) {
       case 'rate_limit':
@@ -425,7 +425,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
                 value={editAgent}
                 onChange={e => setEditAgent(e.target.value)}
                 placeholder="All agents"
-                className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
             <div>
@@ -485,7 +485,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
               value={newAgent}
               onChange={e => setNewAgent(e.target.value)}
               placeholder="All agents"
-              className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+              className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
             />
           </div>
           <div>

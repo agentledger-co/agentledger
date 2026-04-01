@@ -96,7 +96,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search actions..."
-            className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg pl-9 pr-3 py-2 text-[13px] text-white/80 placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg pl-9 pr-3 py-2 text-[13px] text-white/80 placeholder-white/40 focus:border-blue-500/50 focus:outline-none"
           />
         </div>
 

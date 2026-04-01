@@ -106,7 +106,7 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               placeholder="you@company.com"
               required
-              className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none transition-colors"
+              className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none transition-colors"
             />
           </div>
 
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Password"
                 required
-                className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none transition-colors"
+                className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none transition-colors"
               />
             </div>
           )}

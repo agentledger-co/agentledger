@@ -102,7 +102,7 @@ export default function SignupPage() {
             onChange={e => setEmail(e.target.value)}
             placeholder="you@company.com"
             required
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none transition-colors"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none transition-colors"
           />
           <input
             type="password"
@@ -111,7 +111,7 @@ export default function SignupPage() {
             placeholder="Password (min 6 characters)"
             required
             minLength={6}
-            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none transition-colors"
+            className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-2.5 text-[14px] text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none transition-colors"
           />
 
           {error && <p className="text-red-400 text-[13px]">{error}</p>}

@@ -142,7 +142,7 @@ export default function OnboardingPage() {
                 onChange={e => setOrgName(e.target.value)}
                 placeholder="Acme Corp"
                 autoFocus
-                className="w-full bg-black/50 border border-white/[0.14] rounded-lg px-4 py-3 text-[14px] text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none mb-4"
+                className="w-full bg-white/[0.08] border border-white/[0.14] rounded-lg px-4 py-3 text-[14px] text-white placeholder-white/40 focus:border-blue-500/50 focus:outline-none mb-4"
               />
               <button
                 onClick={handleCreateOrg}

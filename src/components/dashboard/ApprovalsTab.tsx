@@ -217,7 +217,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
                         {expandedInput === approval.id ? 'Hide input' : 'Show input'}
                       </button>
                       {expandedInput === approval.id && (
-                        <pre className="mt-1.5 bg-black/30 rounded-lg p-3 text-[11px] text-white/40 font-mono overflow-x-auto max-h-48 overflow-y-auto">
+                        <pre className="mt-1.5 bg-white/[0.08] rounded-lg p-3 text-[11px] text-white/40 font-mono overflow-x-auto max-h-48 overflow-y-auto">
                           {JSON.stringify(approval.input, null, 2)}
                         </pre>
                       )}

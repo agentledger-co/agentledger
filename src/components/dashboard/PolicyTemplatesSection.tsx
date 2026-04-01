@@ -76,7 +76,7 @@ export default function PolicyTemplatesSection({ apiKey, onToast, onRefresh }: {
             value={agentFilter}
             onChange={e => setAgentFilter(e.target.value)}
             placeholder="Agent name (empty = all)"
-            className="bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-1.5 text-[12px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none w-48"
+            className="bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-1.5 text-[12px] placeholder-white/40 focus:border-blue-500/50 focus:outline-none w-48"
           />
         </div>
       </div>

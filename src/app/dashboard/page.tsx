@@ -12,6 +12,9 @@ import EvaluationsTab from '@/components/dashboard/EvaluationsTab';
 import RollbackHooksTab from '@/components/dashboard/RollbackHooksTab';
 import TeamTab from '@/components/dashboard/TeamTab';
 import EnvironmentSelector from '@/components/dashboard/EnvironmentSelector';
+import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
+import ForecastTab from '@/components/dashboard/ForecastTab';
+import PolicyTemplatesSection from '@/components/dashboard/PolicyTemplatesSection';
 
 interface Agent {
   id: string;
@@ -504,7 +507,10 @@ export default function DashboardPage() {
               ))}
             </div>
             {subTab === 'policies' ? (
-              <PoliciesTab apiKey={apiKey} onToast={addToast} />
+              <div className="space-y-8">
+                <PolicyTemplatesSection apiKey={apiKey} onToast={addToast} onRefresh={fetchData} />
+                <PoliciesTab apiKey={apiKey} onToast={addToast} />
+              </div>
             ) : subTab === 'approvals' ? (
               <ApprovalsTab apiKey={apiKey} onToast={addToast} />
             ) : (
@@ -514,7 +520,7 @@ export default function DashboardPage() {
         ) : tab === 'insights' ? (
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
-              {['alerts', 'evaluations'].map(st => (
+              {['alerts', 'evaluations', 'analytics', 'forecast'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
@@ -530,8 +536,12 @@ export default function DashboardPage() {
             </div>
             {subTab === 'alerts' ? (
               <AlertsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} onAcknowledge={acknowledgeAlert} />
-            ) : (
+            ) : subTab === 'evaluations' ? (
               <EvaluationsTab apiKey={apiKey} onToast={addToast} />
+            ) : subTab === 'analytics' ? (
+              <AnalyticsTab apiKey={apiKey} />
+            ) : (
+              <ForecastTab apiKey={apiKey} />
             )}
           </div>
         ) : tab === 'settings' ? (

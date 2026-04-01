@@ -571,6 +571,174 @@ export class AgentLedger {
     return `tr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
   }
 
+  /**
+   * Log multiple actions in a single request. Ideal for batch imports or high-throughput agents.
+   * Max 100 actions per call.
+   *
+   * @example
+   * await ledger.logBatch([
+   *   { agent: 'bot', service: 'openai', action: 'completion', costCents: 5 },
+   *   { agent: 'bot', service: 'slack', action: 'send_message', costCents: 0 },
+   * ]);
+   */
+  async logBatch(
+    actions: (TrackOptions & { status?: string; durationMs?: number })[]
+  ): Promise<{ count: number; ids: string[]; errors?: { index: number; error: string }[] }> {
+    const payload = actions.map(a => ({
+      agent: a.agent,
+      service: a.service,
+      action: a.action,
+      status: a.status || 'success',
+      cost_cents: a.costCents || 0,
+      duration_ms: a.durationMs || 0,
+      metadata: a.metadata || {},
+      trace_id: a.traceId,
+      input: a.input !== undefined ? this.truncate(a.input, 50000) : undefined,
+      output: a.output !== undefined ? this.truncate(a.output, 50000) : undefined,
+      environment: this.environment,
+    }));
+
+    const res = await this.fetch('/api/v1/actions/batch', {
+      method: 'POST',
+      body: JSON.stringify({ actions: payload }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`AgentLedger: Batch log failed (${res.status})`);
+    }
+
+    return res.json() as Promise<{ count: number; ids: string[]; errors?: { index: number; error: string }[] }>;
+  }
+
+  /**
+   * Export action logs as JSON or CSV.
+   *
+   * @example
+   * const data = await ledger.export({ from: '2025-01-01', to: '2025-01-31', format: 'json' });
+   */
+  async export(options: {
+    from: string;
+    to: string;
+    format?: 'json' | 'csv';
+    agent?: string;
+    service?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<{ actions: unknown[]; count: number } | string> {
+    const params = new URLSearchParams({
+      from: options.from,
+      to: options.to,
+      format: options.format || 'json',
+    });
+    if (options.agent) params.set('agent', options.agent);
+    if (options.service) params.set('service', options.service);
+    if (options.status) params.set('status', options.status);
+    if (options.limit) params.set('limit', String(options.limit));
+
+    const res = await this.fetch(`/api/v1/export?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`AgentLedger: Export failed (${res.status})`);
+    }
+
+    if (options.format === 'csv') {
+      return res.text();
+    }
+    return res.json() as Promise<{ actions: unknown[]; count: number }>;
+  }
+
+  /**
+   * Get cost forecasts for all agents.
+   *
+   * @example
+   * const forecast = await ledger.forecast({ daysBack: 30, forecastDays: 30 });
+   * console.log(forecast.totalProjectedCostCents);
+   */
+  async forecast(options?: {
+    daysBack?: number;
+    forecastDays?: number;
+  }): Promise<Record<string, unknown>> {
+    const params = new URLSearchParams();
+    if (options?.daysBack) params.set('days_back', String(options.daysBack));
+    if (options?.forecastDays) params.set('forecast_days', String(options.forecastDays));
+    params.set('environment', this.environment);
+
+    const res = await this.fetch(`/api/v1/forecast?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`AgentLedger: Forecast failed (${res.status})`);
+    }
+
+    const data = await res.json() as { forecast: Record<string, unknown> };
+    return data.forecast;
+  }
+
+  /**
+   * Get advanced analytics with multi-day trends.
+   *
+   * @example
+   * const analytics = await ledger.analytics({ days: 30, granularity: 'daily' });
+   */
+  async analytics(options?: {
+    days?: number;
+    granularity?: 'daily' | 'hourly';
+    agent?: string;
+    service?: string;
+  }): Promise<Record<string, unknown>> {
+    const params = new URLSearchParams();
+    if (options?.days) params.set('days', String(options.days));
+    if (options?.granularity) params.set('granularity', options.granularity);
+    if (options?.agent) params.set('agent', options.agent);
+    if (options?.service) params.set('service', options.service);
+    params.set('environment', this.environment);
+
+    const res = await this.fetch(`/api/v1/analytics?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`AgentLedger: Analytics failed (${res.status})`);
+    }
+
+    return res.json() as Promise<Record<string, unknown>>;
+  }
+
+  /**
+   * List available policy templates or apply one.
+   *
+   * @example
+   * const { templates } = await ledger.policyTemplates();
+   * await ledger.applyPolicyTemplate('conservative', 'my-agent');
+   */
+  async policyTemplates(category?: string): Promise<{ templates: Record<string, unknown>[] }> {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+
+    const res = await this.fetch(`/api/v1/policies/templates?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`AgentLedger: Failed to fetch templates (${res.status})`);
+    }
+
+    return res.json() as Promise<{ templates: Record<string, unknown>[] }>;
+  }
+
+  /**
+   * Apply a policy template to create policies.
+   */
+  async applyPolicyTemplate(
+    templateId: string,
+    agentName?: string
+  ): Promise<{ policiesCreated: number; policies: Record<string, unknown>[] }> {
+    const body: Record<string, unknown> = { template_id: templateId };
+    if (agentName) body.agent_name = agentName;
+
+    const res = await this.fetch('/api/v1/policies/templates', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      throw new Error(`AgentLedger: Failed to apply template (${res.status})`);
+    }
+
+    return res.json() as Promise<{ policiesCreated: number; policies: Record<string, unknown>[] }>;
+  }
+
   // Internal: fetch with timeout and auth
   private async fetch(path: string, init: RequestInit = {}): Promise<Response> {
     const controller = new AbortController();

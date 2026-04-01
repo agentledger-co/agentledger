@@ -530,7 +530,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x1F6E1;</div>
           <p className="text-white/60 text-sm font-medium mb-2">No policies configured</p>
-          <p className="text-white/15 text-xs mb-4">Policies let you enforce rate limits, restrict services, cap costs, and require approvals for agent actions.</p>
+          <p className="text-white/50 text-xs mb-4">Policies let you enforce rate limits, restrict services, cap costs, and require approvals for agent actions.</p>
           <button onClick={() => setShowCreate(true)} className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20">
             Create your first policy
           </button>

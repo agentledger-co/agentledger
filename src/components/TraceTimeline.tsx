@@ -257,7 +257,7 @@ export default function TraceTimeline({ traceId, actions, summary, onClose }: Tr
                         <CollapsibleJson label="Output" data={action.output} colorClass="text-blue-300/70" />
                       )}
 
-                      <p className="text-[10px] font-mono text-white/15 break-all">ID: {action.id}</p>
+                      <p className="text-[10px] font-mono text-white/50 break-all">ID: {action.id}</p>
                     </div>
                   )}
                 </div>

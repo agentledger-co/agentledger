@@ -166,7 +166,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
               ? 'No pending approvals'
               : `No ${filter === 'all' ? '' : filter + ' '}approvals found`}
           </p>
-          <p className="text-white/15 text-xs">
+          <p className="text-white/50 text-xs">
             {filter === 'pending'
               ? 'Approvals appear when agents trigger require_approval policies.'
               : 'Try changing the status filter above.'}

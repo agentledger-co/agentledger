@@ -254,7 +254,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x21A9;</div>
           <p className="text-white/60 text-sm font-medium mb-2">No rollback hooks configured</p>
-          <p className="text-white/15 text-xs mb-4">Create hooks to automatically trigger rollback webhooks on failures.</p>
+          <p className="text-white/50 text-xs mb-4">Create hooks to automatically trigger rollback webhooks on failures.</p>
           <button
             onClick={() => setShowCreate(true)}
             className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20"

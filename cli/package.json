@@ -1,0 +1,21 @@
+{
+  "name": "agentledger-cli",
+  "version": "0.5.0",
+  "description": "CLI for AgentLedger — tail logs, pause agents, check budgets from the terminal.",
+  "bin": {
+    "agentledger": "./bin/agentledger.mjs"
+  },
+  "type": "module",
+  "files": ["bin", "README.md"],
+  "keywords": ["ai", "agents", "monitoring", "cli", "agentledger"],
+  "author": "AgentLedger",
+  "license": "MIT",
+  "homepage": "https://agentledger.co",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentledger-co/agentledger"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

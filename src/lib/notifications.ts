@@ -10,7 +10,7 @@ interface NotificationPayload {
 }
 
 /**
- * Send notifications (email + Slack) for an event. Non-blocking.
+ * Send notifications (email, Slack, Discord, PagerDuty) for an event. Non-blocking.
  */
 export async function sendNotifications(
   orgId: string,
@@ -32,6 +32,8 @@ export async function sendNotifications(
       .map(s => {
         if (s.channel === 'slack') return sendSlack(s.config, payload);
         if (s.channel === 'email') return sendEmail(s.config, payload);
+        if (s.channel === 'discord') return sendDiscord(s.config, payload);
+        if (s.channel === 'pagerduty') return sendPagerDuty(s.config, payload);
         return Promise.resolve();
       })
   );
@@ -149,4 +151,93 @@ async function sendEmail(
       metadata: { email: toEmail, event: payload.event, details: payload.details },
     });
   } catch { /* Non-critical */ }
+}
+
+async function sendDiscord(
+  config: Record<string, unknown>,
+  payload: NotificationPayload
+): Promise<void> {
+  const webhookUrl = config.webhook_url as string;
+  if (!webhookUrl) return;
+
+  const color = (payload.event === 'action.error' || payload.event === 'agent.killed')
+    ? 0xFF0000
+    : payload.event === 'budget.exceeded'
+      ? 0xFFA500
+      : 0xFFFF00;
+
+  const fields = [
+    { name: 'Agent', value: payload.agentName, inline: true },
+    { name: 'Event', value: payload.event, inline: true },
+    { name: 'Message', value: payload.message },
+  ];
+
+  if (payload.details && Object.keys(payload.details).length > 0) {
+    for (const [k, v] of Object.entries(payload.details)) {
+      fields.push({ name: k, value: String(v), inline: false });
+    }
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        embeds: [{
+          title: 'AgentLedger Alert',
+          color,
+          fields,
+          timestamp: new Date().toISOString(),
+        }],
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function sendPagerDuty(
+  config: Record<string, unknown>,
+  payload: NotificationPayload
+): Promise<void> {
+  const routingKey = config.routing_key as string;
+  if (!routingKey) return;
+
+  const severity = (payload.event === 'budget.exceeded' || payload.event === 'action.error')
+    ? 'critical'
+    : 'warning';
+
+  const body = {
+    routing_key: routingKey,
+    event_action: 'trigger',
+    payload: {
+      summary: `[AgentLedger] ${payload.event}: ${payload.message}`,
+      source: 'AgentLedger',
+      severity,
+      component: payload.agentName,
+      custom_details: {
+        agent: payload.agentName,
+        event: payload.event,
+        ...payload.details,
+      },
+    },
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    await fetch('https://events.pagerduty.com/v2/enqueue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }

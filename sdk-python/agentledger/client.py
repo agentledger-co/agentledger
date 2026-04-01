@@ -175,6 +175,115 @@ class AgentLedger:
         rand_part = _random_base36(8)
         return f"tr_{timestamp_b36}_{rand_part}"
 
+    def log_batch(
+        self,
+        actions: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Log multiple actions in a single request. Max 100 per call.
+
+        Each action dict should have: agent, service, action, and optionally
+        status, cost_cents, duration_ms, metadata, trace_id, input, output.
+        """
+        payload = []
+        for a in actions:
+            entry: Dict[str, Any] = {
+                "agent": a["agent"],
+                "service": a["service"],
+                "action": a["action"],
+                "status": a.get("status", "success"),
+                "cost_cents": a.get("cost_cents", 0),
+                "duration_ms": a.get("duration_ms", 0),
+                "metadata": a.get("metadata", {}),
+                "environment": self._environment,
+            }
+            if "trace_id" in a:
+                entry["trace_id"] = a["trace_id"]
+            if "input" in a:
+                entry["input"] = self._truncate(a["input"], 50000)
+            if "output" in a:
+                entry["output"] = self._truncate(a["output"], 50000)
+            payload.append(entry)
+        return self._request("POST", "/api/v1/actions/batch", json_body={"actions": payload})
+
+    def export_actions(
+        self,
+        from_date: str,
+        to_date: str,
+        format: str = "json",
+        agent: Optional[str] = None,
+        service: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> Any:
+        """Export action logs as JSON or CSV.
+
+        Args:
+            from_date: ISO date string (required).
+            to_date: ISO date string (required).
+            format: 'json' or 'csv'. Default 'json'.
+        """
+        params: Dict[str, Any] = {"from": from_date, "to": to_date, "format": format}
+        if agent:
+            params["agent"] = agent
+        if service:
+            params["service"] = service
+        if status:
+            params["status"] = status
+        if limit:
+            params["limit"] = limit
+        return self._request("GET", "/api/v1/export", params=params)
+
+    def forecast(
+        self,
+        days_back: int = 30,
+        forecast_days: int = 30,
+    ) -> Dict[str, Any]:
+        """Get cost forecasts for all agents."""
+        params = {
+            "days_back": days_back,
+            "forecast_days": forecast_days,
+            "environment": self._environment,
+        }
+        data = self._request("GET", "/api/v1/forecast", params=params)
+        return data.get("forecast", data)
+
+    def analytics(
+        self,
+        days: int = 7,
+        granularity: str = "daily",
+        agent: Optional[str] = None,
+        service: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Get advanced analytics with multi-day trends."""
+        params: Dict[str, Any] = {
+            "days": days,
+            "granularity": granularity,
+            "environment": self._environment,
+        }
+        if agent:
+            params["agent"] = agent
+        if service:
+            params["service"] = service
+        return self._request("GET", "/api/v1/analytics", params=params)
+
+    def policy_templates(self, category: Optional[str] = None) -> Dict[str, Any]:
+        """List available policy templates."""
+        params: Dict[str, str] = {}
+        if category:
+            params["category"] = category
+        return self._request("GET", "/api/v1/policies/templates", params=params)
+
+    def apply_policy_template(
+        self,
+        template_id: str,
+        agent_name: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Apply a policy template to create policies."""
+        body: Dict[str, Any] = {"template_id": template_id}
+        if agent_name:
+            body["agent_name"] = agent_name
+        return self._request("POST", "/api/v1/policies/templates", json_body=body)
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------

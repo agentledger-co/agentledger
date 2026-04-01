@@ -15,6 +15,8 @@ import EnvironmentSelector from '@/components/dashboard/EnvironmentSelector';
 import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
 import ForecastTab from '@/components/dashboard/ForecastTab';
 import PolicyTemplatesSection from '@/components/dashboard/PolicyTemplatesSection';
+import TraceReplayView from '@/components/dashboard/TraceReplayView';
+import WorkspaceSwitcher from '@/components/dashboard/WorkspaceSwitcher';
 
 interface Agent {
   id: string;
@@ -385,6 +387,7 @@ export default function DashboardPage() {
             <span className="text-base md:text-lg font-semibold tracking-tight">AgentLedger</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <WorkspaceSwitcher />
             <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); sessionStorage.setItem('al_environment', env); }} />
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
@@ -520,7 +523,7 @@ export default function DashboardPage() {
         ) : tab === 'insights' ? (
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
-              {['alerts', 'evaluations', 'analytics', 'forecast'].map(st => (
+              {['alerts', 'evaluations', 'analytics', 'forecast', 'replay'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
@@ -540,8 +543,10 @@ export default function DashboardPage() {
               <EvaluationsTab apiKey={apiKey} onToast={addToast} />
             ) : subTab === 'analytics' ? (
               <AnalyticsTab apiKey={apiKey} />
-            ) : (
+            ) : subTab === 'forecast' ? (
               <ForecastTab apiKey={apiKey} />
+            ) : (
+              <TraceReplayView apiKey={apiKey} onToast={addToast} />
             )}
           </div>
         ) : tab === 'settings' ? (

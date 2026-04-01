@@ -30,6 +30,26 @@
       "import": "./dist/esm/integrations/express.js",
       "require": "./dist/cjs/integrations/express.js",
       "types": "./dist/cjs/integrations/express.d.ts"
+    },
+    "./integrations/crewai": {
+      "import": "./dist/esm/integrations/crewai.js",
+      "require": "./dist/cjs/integrations/crewai.js",
+      "types": "./dist/cjs/integrations/crewai.d.ts"
+    },
+    "./integrations/autogen": {
+      "import": "./dist/esm/integrations/autogen.js",
+      "require": "./dist/cjs/integrations/autogen.js",
+      "types": "./dist/cjs/integrations/autogen.d.ts"
+    },
+    "./integrations/llamaindex": {
+      "import": "./dist/esm/integrations/llamaindex.js",
+      "require": "./dist/cjs/integrations/llamaindex.js",
+      "types": "./dist/cjs/integrations/llamaindex.d.ts"
+    },
+    "./integrations/vercel-ai": {
+      "import": "./dist/esm/integrations/vercel-ai.js",
+      "require": "./dist/cjs/integrations/vercel-ai.js",
+      "types": "./dist/cjs/integrations/vercel-ai.d.ts"
     }
   },
   "files": [

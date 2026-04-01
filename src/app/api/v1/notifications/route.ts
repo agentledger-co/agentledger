@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
   const { channel, events, active } = body;
   const config = (body.config || {}) as Record<string, unknown>;
 
-  if (!channel || !['email', 'slack'].includes(String(channel))) {
-    return NextResponse.json({ error: 'Invalid channel. Must be "email" or "slack".' }, { status: 400 });
+  if (!channel || !['email', 'slack', 'discord', 'pagerduty'].includes(String(channel))) {
+    return NextResponse.json({ error: 'Invalid channel. Must be "email", "slack", "discord", or "pagerduty".' }, { status: 400 });
   }
 
   if (!events || !Array.isArray(events) || events.length === 0) {
@@ -51,6 +51,14 @@ export async function POST(req: NextRequest) {
 
   if (channel === 'email' && (!config.email || typeof config.email !== 'string')) {
     return NextResponse.json({ error: 'Email channel requires config.email' }, { status: 400 });
+  }
+
+  if (channel === 'discord' && (!config.webhook_url || typeof config.webhook_url !== 'string')) {
+    return NextResponse.json({ error: 'Discord channel requires config.webhook_url' }, { status: 400 });
+  }
+
+  if (channel === 'pagerduty' && (!config.routing_key || typeof config.routing_key !== 'string')) {
+    return NextResponse.json({ error: 'PagerDuty channel requires config.routing_key' }, { status: 400 });
   }
 
   const supabase = createServiceClient();

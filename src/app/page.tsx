@@ -300,11 +300,11 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
 
 const FEATURES = [
   { icon: '📡', title: 'Live Streaming Feed', desc: 'Real-time SSE streaming of every action. Watch your agents work live with sub-second latency.' },
-  { icon: '🛡️', title: 'Policy Engine & Guardrails', desc: 'Define rules: rate limits, service allowlists, cost caps, payload regex blocks. Enforced before execution.' },
-  { icon: '✋', title: 'Human-in-the-Loop', desc: 'Require human approval for high-risk actions. Approve or deny from the dashboard or Slack.' },
-  { icon: '🔗', title: 'Trace Timeline', desc: 'Waterfall visualization showing how actions flow. See parallel execution, timing, and I/O at each step.' },
-  { icon: '🚨', title: 'Statistical Anomaly Detection', desc: 'ML-powered baselines learn normal behavior. Alerts fire when cost, rate, or duration deviates significantly.' },
-  { icon: '🐍', title: 'Python & TypeScript SDKs', desc: 'Sync and async SDKs for both languages. LangChain, OpenAI, MCP, CrewAI integrations built in.' },
+  { icon: '🛡️', title: 'Policy Engine & Templates', desc: 'Define rules or apply pre-built templates: conservative, cost-conscious, compliance. Rate limits, allowlists, cost caps, and more.' },
+  { icon: '✋', title: 'Human-in-the-Loop', desc: 'Require human approval for high-risk actions. Approve or deny from the dashboard, Slack, Discord, or PagerDuty.' },
+  { icon: '📊', title: 'Advanced Analytics & Forecasting', desc: 'Multi-day trend analysis, cost forecasting with linear regression, and budget overrun predictions.' },
+  { icon: '🔗', title: 'Trace Replay & Debugging', desc: 'Step through agent traces action-by-action. Inspect input/output at each step with a visual replay timeline.' },
+  { icon: '🐍', title: 'SDKs, CLI & 8 Integrations', desc: 'Python & TypeScript SDKs, CLI tool, plus LangChain, OpenAI, MCP, CrewAI, AutoGen, LlamaIndex, and Vercel AI SDK.' },
 ];
 
 const COMPARISON = [
@@ -314,11 +314,14 @@ const COMPARISON = [
   { feature: 'Human-in-the-loop approvals', us: true, them: false },
   { feature: 'Statistical anomaly detection', us: true, them: false },
   { feature: 'Agent evaluations & scoring', us: true, them: false },
-  { feature: 'Trace timeline visualization', us: true, them: true },
+  { feature: 'Trace replay & debugging', us: true, them: false },
+  { feature: 'Cost forecasting & analytics', us: true, them: false },
   { feature: 'Budget controls & enforcement', us: true, them: false },
-  { feature: 'Rollback / compensating actions', us: true, them: false },
+  { feature: 'Batch logging & data export', us: true, them: false },
+  { feature: 'CLI tool (npx agentledger)', us: true, them: false },
   { feature: 'Live SSE streaming', us: true, them: false },
   { feature: 'Python & TypeScript SDKs', us: true, them: true },
+  { feature: '8 framework integrations', us: true, them: true },
 ];
 
 const SDK_CODE = `import AgentLedger from 'agentledger';
@@ -349,7 +352,7 @@ const FAQ_ITEMS = [
   { q: 'Can I self-host AgentLedger?', a: 'Absolutely. You need a Supabase project (or any PostgreSQL 13+ database) and can deploy to Vercel, Railway, or any Node.js host. Full instructions are in the docs.' },
   { q: 'What happens if AgentLedger goes down?', a: 'AgentLedger is fail-open by default. If our service is unreachable, your agents continue running normally. No action is ever blocked due to an AgentLedger outage.' },
   { q: 'How is this different from Langfuse or Helicone?', a: 'Those tools trace LLM API calls (tokens, latency, prompts). AgentLedger tracks what happens after the LLM decides to act: the emails sent, tickets created, payments charged, and APIs called.' },
-  { q: 'What frameworks do you support?', a: 'LangChain, OpenAI Agents, MCP Servers, and Express out of the box. The core SDK works with any async function in any framework — just wrap it with ledger.track().' },
+  { q: 'What frameworks do you support?', a: 'LangChain, OpenAI Agents, MCP Servers, CrewAI, AutoGen, LlamaIndex, Vercel AI SDK, and Express out of the box. The core SDK works with any async function in any framework — just wrap it with ledger.track().' },
   { q: 'Where is my data stored?', a: 'On the hosted version, data is stored in Supabase (PostgreSQL) with row-level security. If you self-host, data stays entirely on your infrastructure. We never share or sell your data.' },
   { q: 'Can I require human approval for agent actions?', a: 'Yes. Create a require_approval policy for specific agents, services, or actions. When triggered, the agent pauses and waits for a human to approve or deny in the dashboard. Approvals auto-expire after 30 minutes.' },
   { q: 'Do you support Python?', a: 'Yes. We have both Python and TypeScript SDKs with sync and async support. The Python SDK includes integrations for LangChain, CrewAI, and OpenAI Agents.' },

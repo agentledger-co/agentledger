@@ -115,7 +115,8 @@ export default function DashboardPage() {
   const [actions, setActions] = useState<ActionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'budgets' | 'alerts' | 'webhooks' | 'policies' | 'approvals' | 'evaluations' | 'rollbacks' | 'team' | 'settings'>('overview');
+  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings'>('overview');
+  const [subTab, setSubTab] = useState<string>('policies');
   const [environment, setEnvironment] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('al_environment') || '' : '');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
@@ -379,22 +380,8 @@ export default function DashboardPage() {
               <svg className="logo-heartbeat" width="18" height="18" viewBox="0 0 48 48" fill="none"><path d="M8 26H14L17 20L21 32L25 14L29 28L32 22H40" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <span className="text-base md:text-lg font-semibold tracking-tight">AgentLedger</span>
-            <span className="text-[10px] md:text-xs text-white/40 bg-white/[0.03] px-1.5 md:px-2 py-0.5 rounded-full hidden sm:inline">beta</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <button
-              onClick={async () => {
-                const res = await fetch('/api/v1/seed', {
-                  method: 'POST',
-                  headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-                });
-                if (res.ok) { addToast('Demo data seeded', 'success'); fetchData(); }
-              }}
-              className="text-xs text-white/30 hover:text-white/50 bg-white/[0.03] hover:bg-white/10 px-2 md:px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <span className="hidden md:inline">+ Seed Demo Data</span>
-              <span className="md:hidden">+ Seed</span>
-            </button>
             <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); sessionStorage.setItem('al_environment', env); }} />
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
@@ -435,16 +422,28 @@ export default function DashboardPage() {
 
         {/* Tabs — scrollable on mobile */}
         <div className="flex gap-1 mb-6 bg-white/[0.03] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit">
-          {(['overview', 'actions', 'agents', 'budgets', 'alerts', 'policies', 'approvals', 'evaluations', 'webhooks', 'rollbacks', 'team', 'settings'] as const).map(t => (
+          {([
+            { key: 'overview', label: 'Overview' },
+            { key: 'actions', label: 'Actions' },
+            { key: 'agents', label: 'Agents' },
+            { key: 'control', label: 'Control' },
+            { key: 'insights', label: 'Insights' },
+            { key: 'settings', label: 'Settings' },
+          ] as const).map(t => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors capitalize whitespace-nowrap ${
-                tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'
+              key={t.key}
+              onClick={() => {
+                setTab(t.key);
+                if (t.key === 'control') setSubTab('policies');
+                if (t.key === 'insights') setSubTab('alerts');
+                if (t.key === 'settings') setSubTab('general');
+              }}
+              className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
+                tab === t.key ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'
               }`}
             >
-              {t}
-              {t === 'alerts' && stats && stats.alerts.length > 0 && (
+              {t.label}
+              {t.key === 'insights' && stats && stats.alerts.length > 0 && (
                 <span className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                   {stats.alerts.length}
                 </span>
@@ -492,25 +491,72 @@ export default function DashboardPage() {
           <ActionsTab actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} onOpenTrace={openTrace} />
         ) : tab === 'agents' ? (
           <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} onOpenTrace={openTrace} />
-        ) : tab === 'budgets' ? (
-          <BudgetsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} />
-        ) : tab === 'webhooks' ? (
-          <WebhooksTab apiKey={apiKey} onToast={addToast} />
-        ) : tab === 'policies' ? (
-          <PoliciesTab apiKey={apiKey} onToast={addToast} />
-        ) : tab === 'approvals' ? (
-          <ApprovalsTab apiKey={apiKey} onToast={addToast} />
-        ) : tab === 'evaluations' ? (
-          <EvaluationsTab apiKey={apiKey} onToast={addToast} />
-        ) : tab === 'rollbacks' ? (
-          <RollbackHooksTab apiKey={apiKey} onToast={addToast} />
-        ) : tab === 'team' ? (
-          <TeamTab onToast={addToast} />
+        ) : tab === 'control' ? (
+          <div>
+            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
+              {['policies', 'approvals', 'budgets'].map(st => (
+                <button key={st} onClick={() => setSubTab(st)}
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
+                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
+                  }`}>
+                  {st}
+                </button>
+              ))}
+            </div>
+            {subTab === 'policies' ? (
+              <PoliciesTab apiKey={apiKey} onToast={addToast} />
+            ) : subTab === 'approvals' ? (
+              <ApprovalsTab apiKey={apiKey} onToast={addToast} />
+            ) : (
+              <BudgetsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} />
+            )}
+          </div>
+        ) : tab === 'insights' ? (
+          <div>
+            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
+              {['alerts', 'evaluations'].map(st => (
+                <button key={st} onClick={() => setSubTab(st)}
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
+                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
+                  }`}>
+                  {st}
+                  {st === 'alerts' && stats.alerts.length > 0 && (
+                    <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                      {stats.alerts.length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {subTab === 'alerts' ? (
+              <AlertsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} onAcknowledge={acknowledgeAlert} />
+            ) : (
+              <EvaluationsTab apiKey={apiKey} onToast={addToast} />
+            )}
+          </div>
         ) : tab === 'settings' ? (
-          <SettingsTab apiKey={apiKey} onToast={addToast} />
-        ) : (
-          <AlertsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} onAcknowledge={acknowledgeAlert} />
-        )}
+          <div>
+            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
+              {['general', 'team', 'webhooks', 'rollbacks'].map(st => (
+                <button key={st} onClick={() => setSubTab(st)}
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
+                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
+                  }`}>
+                  {st}
+                </button>
+              ))}
+            </div>
+            {subTab === 'general' ? (
+              <SettingsTab apiKey={apiKey} onToast={addToast} />
+            ) : subTab === 'team' ? (
+              <TeamTab onToast={addToast} />
+            ) : subTab === 'webhooks' ? (
+              <WebhooksTab apiKey={apiKey} onToast={addToast} />
+            ) : (
+              <RollbackHooksTab apiKey={apiKey} onToast={addToast} />
+            )}
+          </div>
+        ) : null}
 
         {/* API Key display */}
         <div className="mt-8 p-3 md:p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
@@ -665,13 +711,55 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Total Actions" value={(stats.totalActions || 0).toLocaleString()} sub={`${stats.todayActions || 0} today`} />
-        <StatCard label="Cost Today" value={formatCost(stats.todayCostCents || 0)} sub={`${formatCost(stats.weekCostCents || 0)} this week`} accent="orange" />
-        <StatCard label="Active Agents" value={`${stats.activeAgents || 0}`} sub={`${stats.totalAgents || 0} total`} accent="emerald" />
+        <StatCard
+          label="Cost Today"
+          value={formatCost(stats.todayCostCents || 0)}
+          sub={`${formatCost(stats.weekCostCents || 0)} this week`}
+          accent="orange"
+          trend={(() => {
+            const dailyAvg = (stats.weekCostCents || 0) / 7;
+            const todayCost = stats.todayCostCents || 0;
+            if (dailyAvg === 0 && todayCost === 0) return undefined;
+            if (dailyAvg === 0) return { text: `\u2191 above avg`, color: 'red' as const };
+            const pctDiff = Math.round(((todayCost - dailyAvg) / dailyAvg) * 100);
+            if (pctDiff > 0) return { text: `\u2191 ${pctDiff}% vs avg`, color: 'red' as const };
+            return { text: `\u2193 ${Math.abs(pctDiff)}% vs avg`, color: 'emerald' as const };
+          })()}
+        />
+        <StatCard
+          label="Active Agents"
+          value={`${stats.activeAgents || 0}`}
+          sub={`${stats.totalAgents || 0} total`}
+          accent="emerald"
+          trend={(() => {
+            const pausedCount = stats.agents.filter(a => a.status === 'paused').length;
+            const killedCount = stats.agents.filter(a => a.status === 'killed').length;
+            if (killedCount > 0) return { text: `${killedCount} killed`, color: 'red' as const };
+            if (pausedCount > 0) return { text: `${pausedCount} paused`, color: 'amber' as const };
+            if (stats.activeAgents > 0) return { text: 'All healthy', color: 'emerald' as const };
+            return undefined;
+          })()}
+        />
         <StatCard
           label="Error Rate"
-          value={(stats.todayActions || 0) > 0 ? `${(((stats.errorCount || 0) / stats.todayActions) * 100).toFixed(1)}%` : '0%'}
+          value={(() => {
+            const rate = (stats.todayActions || 0) > 0 ? ((stats.errorCount || 0) / stats.todayActions) * 100 : 0;
+            return `${rate.toFixed(1)}%`;
+          })()}
           sub={`${stats.errorCount || 0} errors, ${stats.blockedCount || 0} blocked`}
-          accent={(stats.errorCount || 0) > 0 ? 'red' : 'emerald'}
+          accent={(() => {
+            const rate = (stats.todayActions || 0) > 0 ? ((stats.errorCount || 0) / stats.todayActions) * 100 : 0;
+            if (rate > 5) return 'red';
+            if (rate >= 1) return 'orange';
+            return 'emerald';
+          })()}
+          trend={(() => {
+            const rate = (stats.todayActions || 0) > 0 ? ((stats.errorCount || 0) / stats.todayActions) * 100 : 0;
+            if (rate > 5) return { text: 'Above threshold', color: 'red' as const };
+            if (rate >= 1) return { text: 'Elevated', color: 'amber' as const };
+            if (stats.todayActions > 0) return { text: 'Healthy', color: 'emerald' as const };
+            return undefined;
+          })()}
         />
       </div>
 
@@ -2666,21 +2754,27 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
 }
 
 // ==================== STAT CARD ====================
-function StatCard({ label, value, sub, accent = 'white' }: {
+function StatCard({ label, value, sub, accent = 'white', trend }: {
   label: string;
   value: string;
   sub: string;
   accent?: string;
+  trend?: { text: string; color: 'emerald' | 'red' | 'amber' | 'white' };
 }) {
   const accentColor = accent === 'orange' ? 'text-amber-400' :
     accent === 'emerald' ? 'text-emerald-400' :
     accent === 'red' ? 'text-red-400' : 'text-white';
+
+  const trendColor = trend?.color === 'emerald' ? 'text-emerald-400' :
+    trend?.color === 'red' ? 'text-red-400' :
+    trend?.color === 'amber' ? 'text-amber-400' : 'text-white/30';
 
   return (
     <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
       <p className="text-xs text-white/40 mb-2">{label}</p>
       <p className={`text-2xl font-bold ${accentColor}`}>{value}</p>
       <p className="text-xs text-white/30 mt-1">{sub}</p>
+      {trend && <p className={`text-[11px] ${trendColor} mt-1`}>{trend.text}</p>}
     </div>
   );
 }

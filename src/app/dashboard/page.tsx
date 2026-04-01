@@ -1048,15 +1048,26 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stats.agents.map(agent => (
-            <div 
-              key={agent.id} 
+          {stats.agents.map(agent => {
+            // Compute top services for this agent from actions
+            const agentServices: Record<string, number> = {};
+            actions.filter(a => a.agent_name === agent.name).forEach(a => {
+              agentServices[a.service] = (agentServices[a.service] || 0) + 1;
+            });
+            const topServices = Object.entries(agentServices)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 4)
+              .map(([name]) => name);
+
+            return (
+            <div
+              key={agent.id}
               onClick={() => onSelect(agent.name)}
               className={`bg-white/[0.03] rounded-xl border p-5 transition-colors cursor-pointer hover:bg-white/[0.05] ${
-              agent.status === 'killed' ? 'border-red-500/20 opacity-60' : 
+              agent.status === 'killed' ? 'border-red-500/20 opacity-60' :
               agent.status === 'paused' ? 'border-amber-500/20' : 'border-white/[0.06]'
             }`}>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <div className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT[agent.status]}`} />
                   <span className="font-medium font-mono text-sm">{agent.name}</span>
@@ -1066,6 +1077,13 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
                 </div>
                 <span className="text-xs text-white/20">→</span>
               </div>
+              {topServices.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-4 ml-[18px]">
+                  {topServices.map(s => (
+                    <span key={s} className="text-[10px] text-white/25 bg-white/[0.03] border border-white/[0.05] px-1.5 py-0.5 rounded font-mono">{s}</span>
+                  ))}
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
                   <p className="text-xs text-white/30 mb-0.5">Total Actions</p>
@@ -1111,7 +1129,8 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

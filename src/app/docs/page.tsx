@@ -235,7 +235,7 @@ export default function DocsPage() {
                 </div>
                 <p className="text-white/30 text-[14px] mb-2 ml-9">Deploy to Vercel with one click, or run locally:</p>
                 <div className="ml-9">
-                  <Code code={`git clone https://github.com/miken1988/agentledger.git
+                  <Code code={`git clone https://github.com/agentledger-co/agentledger.git
 cd agentledger
 cp .env.local.example .env.local
 # Add your Supabase URL, anon key, and service role key
@@ -1146,7 +1146,7 @@ result = tracked_run(agent, messages)`} filename="openai_python.py" />
             <Code code={`vercel deploy --prod`} lang="bash" />
 
             <h3 className="text-[16px] font-medium mt-8 mb-3">Run locally</h3>
-            <Code code={`git clone https://github.com/miken1988/agentledger.git
+            <Code code={`git clone https://github.com/agentledger-co/agentledger.git
 cd agentledger
 cp .env.local.example .env.local
 # Edit .env.local with your Supabase credentials
@@ -1160,7 +1160,7 @@ npm run dev
             <div className="flex items-center justify-between text-[12px] text-white/15">
               <p>{'\u00a9'} 2026 AgentLedger. MIT License.</p>
               <div className="flex gap-4">
-                <a href="https://github.com/miken1988/agentledger" className="hover:text-white/40 transition-colors">GitHub</a>
+                <a href="https://github.com/agentledger-co/agentledger" className="hover:text-white/40 transition-colors">GitHub</a>
                 <Link href="/" className="hover:text-white/40 transition-colors">Home</Link>
                 <Link href="/dashboard" className="hover:text-white/40 transition-colors">Dashboard</Link>
               </div>

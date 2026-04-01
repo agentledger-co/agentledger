@@ -2686,7 +2686,8 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
             value={slackUrl}
             onChange={e => setSlackUrl(e.target.value)}
             placeholder="https://hooks.slack.com/services/..."
-            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
+            className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+            style={{ backgroundColor: '#1e1e22', borderWidth: '1px', borderColor: '#3a3a42', color: '#f0f0f0' }}
           />
           <p className="text-[11px] text-white/50 mt-1.5">Create an incoming webhook in your Slack workspace settings.</p>
         </div>

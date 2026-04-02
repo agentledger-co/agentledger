@@ -3,6 +3,9 @@ import { fireWebhooks } from '@/lib/webhooks';
 import { sendNotifications } from '@/lib/notifications';
 
 // In-memory cache for baselines (5 min TTL)
+// NOTE: This in-memory cache is per-instance and will not be shared across
+// serverless invocations. For production, move to Redis (e.g. Upstash) so
+// that baselines are consistently cached across all instances.
 const baselineCache = new Map<string, { baselines: Record<string, Baseline>; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MIN_SAMPLE_SIZE = 50;

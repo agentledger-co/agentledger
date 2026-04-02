@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createBrowserClient as createSSRBrowserClient } from '@supabase/ssr';
 
 // Custom fetch that rewrites .supabase.com to .supabase.co
@@ -9,15 +9,22 @@ const supabaseFetch: typeof fetch = (url, options) => {
   return fetch(fixedUrl, options);
 };
 
-// Service role client for API routes (bypasses RLS)
-export function createServiceClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Service role client for API routes (bypasses RLS) — lazy singleton
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _serviceClient: SupabaseClient<any, "public", any> | null = null;
 
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { persistSession: false },
-    global: { fetch: supabaseFetch },
-  });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createServiceClient(): SupabaseClient<any, "public", any> {
+  if (!_serviceClient) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+    _serviceClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false },
+      global: { fetch: supabaseFetch },
+    });
+  }
+  return _serviceClient;
 }
 
 // Browser client for client components

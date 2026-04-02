@@ -27,13 +27,22 @@ export async function GET(req: NextRequest) {
   // Helper to conditionally filter by environment
   const envFilter = (q: any) => environment ? q.eq('environment', environment) : q;
 
-  const [totalResult, todayResult, agentsResult, todayLogsResult, weekLogsResult, alertsResult] = await Promise.all([
-    safe(envFilter(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId)), { count: 0 }),
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const [totalResult, todayResult, agentsResult, todayLogsResult, weekLogsResult, alertsResult, todayCostResult, weekCostResult] = await Promise.all([
+    // Count total actions (last 30 days instead of unfiltered full-table scan)
+    safe(envFilter(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId)).gte('created_at', thirtyDaysAgo.toISOString()), { count: 0 }),
     safe(envFilter(supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId)).gte('created_at', todayStart.toISOString()), { count: 0 }),
     safe(envFilter(supabase.from('agents').select('*').eq('org_id', auth.orgId)), { data: [] }),
-    safe(envFilter(supabase.from('action_logs').select('estimated_cost_cents, service, status, created_at, agent_name').eq('org_id', auth.orgId)).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: false }), { data: [] }),
-    safe(envFilter(supabase.from('action_logs').select('estimated_cost_cents, service, created_at, agent_name').eq('org_id', auth.orgId)).gte('created_at', weekAgo.toISOString()).order('created_at', { ascending: true }), { data: [] }),
+    // Today's logs — only fetch fields needed for breakdowns, not cost aggregation
+    safe(envFilter(supabase.from('action_logs').select('service, status, created_at, agent_name').eq('org_id', auth.orgId)).gte('created_at', todayStart.toISOString()).order('created_at', { ascending: false }), { data: [] }),
+    // Week logs — only fetch fields needed for hourly chart
+    safe(envFilter(supabase.from('action_logs').select('estimated_cost_cents, created_at').eq('org_id', auth.orgId)).gte('created_at', weekAgo.toISOString()).order('created_at', { ascending: true }), { data: [] }),
     safe(supabase.from('anomaly_alerts').select('*').eq('org_id', auth.orgId).is('acknowledged_at', null).order('created_at', { ascending: false }).limit(10), { data: [] }),
+    // Database-level SUM for today's cost via RPC, falling back to a count query
+    safe(envFilter(supabase.rpc('sum_cost_cents', { p_org_id: auth.orgId, p_since: todayStart.toISOString() })), { data: null }),
+    // Database-level SUM for week's cost via RPC
+    safe(envFilter(supabase.rpc('sum_cost_cents', { p_org_id: auth.orgId, p_since: weekAgo.toISOString() })), { data: null }),
   ]);
 
   const totalActions = totalResult?.count ?? 0;
@@ -43,9 +52,9 @@ export async function GET(req: NextRequest) {
   const weekLogs = weekLogsResult?.data ?? [];
   const alerts = alertsResult?.data ?? [];
 
-  // Cost totals
-  const todayCostCents = (todayLogs || []).reduce((sum: number, l: any) => sum + (l.estimated_cost_cents || 0), 0);
-  const weekCostCents = (weekLogs || []).reduce((sum: number, l: any) => sum + (l.estimated_cost_cents || 0), 0);
+  // Cost totals — prefer DB-level aggregation; fall back to JS reduce over week logs
+  const todayCostCents = todayCostResult?.data ?? (todayLogs || []).reduce((sum: number, l: any) => sum + (l.estimated_cost_cents || 0), 0);
+  const weekCostCents = weekCostResult?.data ?? (weekLogs || []).reduce((sum: number, l: any) => sum + (l.estimated_cost_cents || 0), 0);
 
   // Service breakdown
   const serviceBreakdown: Record<string, number> = {};
@@ -80,15 +89,16 @@ export async function GET(req: NextRequest) {
   const errorCount = (todayLogs || []).filter((l: any) => l.status === 'error').length;
   const blockedCount = (todayLogs || []).filter((l: any) => l.status === 'blocked').length;
 
-  // Enrich agents with aggregated totals — single query instead of N+1
+  // Enrich agents with aggregated totals — time-bounded to last 30 days
   const { data: agentStats } = await safe(
     envFilter(supabase.from('action_logs')
       .select('agent_name, estimated_cost_cents')
-      .eq('org_id', auth.orgId)),
+      .eq('org_id', auth.orgId)
+      .gte('created_at', thirtyDaysAgo.toISOString())),
     { data: [] }
   );
 
-  // Build lookup map from all action logs
+  // Build lookup map from time-bounded action logs
   const agentStatsMap: Record<string, { count: number; cost: number }> = {};
   (agentStats || []).forEach((row: any) => {
     const name = row.agent_name;

@@ -1,22 +1,24 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
-import TraceTimeline from '@/components/TraceTimeline';
-import PoliciesTab from '@/components/dashboard/PoliciesTab';
-import ApprovalsTab from '@/components/dashboard/ApprovalsTab';
-import EvaluationsTab from '@/components/dashboard/EvaluationsTab';
-import RollbackHooksTab from '@/components/dashboard/RollbackHooksTab';
-import TeamTab from '@/components/dashboard/TeamTab';
-import EnvironmentSelector from '@/components/dashboard/EnvironmentSelector';
-import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
-import ForecastTab from '@/components/dashboard/ForecastTab';
-import PolicyTemplatesSection from '@/components/dashboard/PolicyTemplatesSection';
-import TraceReplayView from '@/components/dashboard/TraceReplayView';
-import WorkspaceSwitcher from '@/components/dashboard/WorkspaceSwitcher';
+
+const TraceTimeline = dynamic(() => import('@/components/TraceTimeline'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const PoliciesTab = dynamic(() => import('@/components/dashboard/PoliciesTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const ApprovalsTab = dynamic(() => import('@/components/dashboard/ApprovalsTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const EvaluationsTab = dynamic(() => import('@/components/dashboard/EvaluationsTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const RollbackHooksTab = dynamic(() => import('@/components/dashboard/RollbackHooksTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const TeamTab = dynamic(() => import('@/components/dashboard/TeamTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const EnvironmentSelector = dynamic(() => import('@/components/dashboard/EnvironmentSelector'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const AnalyticsTab = dynamic(() => import('@/components/dashboard/AnalyticsTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const ForecastTab = dynamic(() => import('@/components/dashboard/ForecastTab'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const PolicyTemplatesSection = dynamic(() => import('@/components/dashboard/PolicyTemplatesSection'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const TraceReplayView = dynamic(() => import('@/components/dashboard/TraceReplayView'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
+const WorkspaceSwitcher = dynamic(() => import('@/components/dashboard/WorkspaceSwitcher'), { loading: () => <div className="text-white/60 text-center py-16">Loading...</div> });
 
 interface Agent {
   id: string;

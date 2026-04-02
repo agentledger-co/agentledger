@@ -25,27 +25,34 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ name
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const [
-    { count: totalActions },
-    { count: todayActions },
-    { data: costData },
-    { data: todayCostData },
-  ] = await Promise.all([
-    supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId).eq('agent_name', name),
-    supabase.from('action_logs').select('*', { count: 'exact', head: true }).eq('org_id', auth.orgId).eq('agent_name', name).gte('created_at', todayStart.toISOString()),
-    supabase.from('action_logs').select('estimated_cost_cents').eq('org_id', auth.orgId).eq('agent_name', name),
-    supabase.from('action_logs').select('estimated_cost_cents').eq('org_id', auth.orgId).eq('agent_name', name).gte('created_at', todayStart.toISOString()),
-  ]);
+  // Single query: fetch all cost values, then partition in JS for today vs total
+  const { data: allLogs, count: totalActions } = await supabase
+    .from('action_logs')
+    .select('estimated_cost_cents, created_at', { count: 'exact' })
+    .eq('org_id', auth.orgId)
+    .eq('agent_name', name);
 
-  const totalCostCents = costData?.reduce((sum, row) => sum + (row.estimated_cost_cents || 0), 0) || 0;
-  const todayCostCents = todayCostData?.reduce((sum, row) => sum + (row.estimated_cost_cents || 0), 0) || 0;
+  const rows = allLogs || [];
+  let totalCostCents = 0;
+  let todayActions = 0;
+  let todayCostCents = 0;
+  const todayIso = todayStart.toISOString();
+
+  for (const row of rows) {
+    const cost = row.estimated_cost_cents || 0;
+    totalCostCents += cost;
+    if (row.created_at >= todayIso) {
+      todayActions++;
+      todayCostCents += cost;
+    }
+  }
 
   return NextResponse.json({
     name: agent.name,
     status: agent.status,
     totalActions: totalActions || 0,
     totalCostCents,
-    todayActions: todayActions || 0,
+    todayActions,
     todayCostCents,
   });
 }

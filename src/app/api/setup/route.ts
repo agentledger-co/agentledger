@@ -11,11 +11,16 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
-  const { userId } = body;
+  const userId = typeof body.userId === 'string' ? body.userId : undefined;
   const name = sanitizeString(body.name);
 
   if (!name) {
     return NextResponse.json({ error: 'Organization name required' }, { status: 400 });
+  }
+
+  // Validate userId format if provided
+  if (userId && !/^[0-9a-f-]{36}$/i.test(userId)) {
+    return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 });
   }
 
   const supabase = createServiceClient();

@@ -22,10 +22,32 @@ const nextConfig: NextConfig = {
           { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com; frame-ancestors 'none';" },
         ],
       },
+      // Read-only GET endpoints that can tolerate short caching.
+      // These are listed BEFORE the catch-all /api/:path* rule so they
+      // take precedence.  POST/DELETE/PATCH mutations still get the
+      // strict no-store directive from the catch-all (and from the
+      // API route handlers themselves).
+      ...([
+        '/api/v1/stats',
+        '/api/v1/agents/:path*',
+        '/api/v1/analytics',
+        '/api/v1/forecast',
+        '/api/v1/usage',
+      ] as const).map((source) => ({
+        source,
+        headers: [
+          { key: 'Cache-Control', value: 'private, max-age=30, stale-while-revalidate=60' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+          { key: 'Access-Control-Max-Age', value: '86400' },
+        ],
+      })),
       {
+        // Catch-all: strict no-cache for every other API route
         source: '/api/:path*',
         headers: [
-          // No caching for API responses
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
           // Prevent API responses from being embedded
           { key: 'X-Frame-Options', value: 'DENY' },

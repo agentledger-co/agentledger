@@ -14,31 +14,36 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/api/v1/')) {
     // Skip rate limiting for health/cron endpoints
     if (!request.nextUrl.pathname.startsWith('/api/cron/')) {
-      // Use API key or IP as the rate limit key
-      const authHeader = request.headers.get('authorization') || '';
-      const apiKey = authHeader.startsWith('Bearer ') ? authHeader.slice(7, 17) : ''; // Use prefix only
-      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-      const rateLimitKey = apiKey || ip;
+      try {
+        // Use API key or IP as the rate limit key
+        const authHeader = request.headers.get('authorization') || '';
+        const apiKey = authHeader.startsWith('Bearer ') ? authHeader.slice(7, 17) : ''; // Use prefix only
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+        const rateLimitKey = apiKey || ip;
 
-      const result = checkGlobalRateLimit(rateLimitKey);
+        const result = checkGlobalRateLimit(rateLimitKey);
 
-      if (!result.allowed) {
-        return NextResponse.json(
-          { error: 'Too many requests. Please slow down.', retryAfter: result.retryAfterSeconds },
-          {
-            status: 429,
-            headers: rateLimitHeaders(result),
-          },
-        );
+        if (!result.allowed) {
+          return NextResponse.json(
+            { error: 'Too many requests. Please slow down.', retryAfter: result.retryAfterSeconds },
+            {
+              status: 429,
+              headers: rateLimitHeaders(result),
+            },
+          );
+        }
+
+        // Add rate limit headers to successful responses
+        const response = NextResponse.next();
+        const headers = rateLimitHeaders(result);
+        for (const [key, value] of Object.entries(headers)) {
+          response.headers.set(key, value);
+        }
+        return response;
+      } catch {
+        // Non-blocking: if rate limiting fails, let the request through
+        // rather than returning an error to the client.
       }
-
-      // Add rate limit headers to successful responses
-      const response = NextResponse.next();
-      const headers = rateLimitHeaders(result);
-      for (const [key, value] of Object.entries(headers)) {
-        response.headers.set(key, value);
-      }
-      return response;
     }
   }
 

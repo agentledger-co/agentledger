@@ -55,6 +55,13 @@ export async function GET(req: NextRequest) {
       const decoded = JSON.parse(Buffer.from(cursorParam, 'base64').toString('utf-8'));
       cursorCreatedAt = decoded.created_at || null;
       cursorId = decoded.id || null;
+      // Validate cursor values to prevent injection via .or() filter
+      if (cursorCreatedAt && isNaN(Date.parse(cursorCreatedAt))) {
+        return NextResponse.json({ error: 'Invalid cursor: bad date' }, { status: 400 });
+      }
+      if (cursorId && !/^[0-9a-f-]{36}$/i.test(cursorId)) {
+        return NextResponse.json({ error: 'Invalid cursor: bad id' }, { status: 400 });
+      }
     } catch {
       return NextResponse.json({ error: 'Invalid cursor' }, { status: 400 });
     }

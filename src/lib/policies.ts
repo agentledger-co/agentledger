@@ -24,6 +24,9 @@ interface CacheEntry {
 }
 
 const CACHE_TTL_MS = 30_000; // 30 seconds
+// NOTE: This in-memory cache is per-instance and will not be shared across
+// serverless invocations. For production, move to Redis (e.g. Upstash) so
+// that cache invalidation works reliably across all instances.
 const policyCache = new Map<string, CacheEntry>();
 
 /**

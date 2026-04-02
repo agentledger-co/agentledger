@@ -34,6 +34,31 @@ textarea:focus {
   outline: none;
 }
 
+/* Global input/select styling for dark theme visibility */
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+select,
+textarea {
+  background-color: #1e1e22 !important;
+  border-color: #3a3a42 !important;
+  color: #f0f0f0 !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #71717a !important;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #3b82f6 !important;
+  outline: none;
+}
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }

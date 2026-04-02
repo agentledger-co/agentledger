@@ -378,28 +378,28 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
       {/* Header */}
-      <header className="border-b border-white/[0.14] px-4 md:px-6 py-3 md:py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center logo-heartbeat-glow">
+      <header className="border-b border-white/[0.14] px-3 md:px-6 py-3 md:py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center logo-heartbeat-glow">
               <svg className="logo-heartbeat" width="18" height="18" viewBox="0 0 48 48" fill="none"><path d="M8 26H14L17 20L21 32L25 14L29 28L32 22H40" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <span className="text-base md:text-lg font-semibold tracking-tight">AgentLedger</span>
+            <span className="text-base md:text-lg font-semibold tracking-tight hidden sm:inline">AgentLedger</span>
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 overflow-x-auto scrollbar-hide">
             <WorkspaceSwitcher />
             <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); sessionStorage.setItem('al_environment', env); }} />
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                autoRefresh ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.08] text-white/40'
+              className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                autoRefresh ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.08] text-white/60'
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-400 animate-pulse' : 'bg-white/20'}`} />
+              <span className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
               {autoRefresh ? 'Live' : 'Paused'}
             </button>
-            <button onClick={fetchData} className="text-sm text-white/40 hover:text-white/60 transition-colors">
-              ↻ Refresh
+            <button onClick={fetchData} className="text-xs sm:text-sm text-white/60 hover:text-white/80 transition-colors whitespace-nowrap shrink-0">
+              ↻ <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               onClick={async () => {
@@ -411,7 +411,7 @@ export default function DashboardPage() {
                 } catch {}
                 window.location.href = '/login';
               }}
-              className="text-sm text-white/60 hover:text-white/50 transition-colors"
+              className="text-xs sm:text-sm text-white/60 hover:text-white/80 transition-colors whitespace-nowrap shrink-0"
             >
               Logout
             </button>
@@ -427,7 +427,7 @@ export default function DashboardPage() {
         )}
 
         {/* Tabs — scrollable on mobile */}
-        <div className="flex gap-1 mb-6 bg-white/[0.08] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit">
+        <div className="flex gap-1 mb-4 sm:mb-6 bg-white/[0.08] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit -mx-1 px-1">
           {([
             { key: 'overview', label: 'Overview' },
             { key: 'actions', label: 'Actions' },
@@ -444,8 +444,8 @@ export default function DashboardPage() {
                 if (t.key === 'insights') setSubTab('alerts');
                 if (t.key === 'settings') setSubTab('general');
               }}
-              className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
-                tab === t.key ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'
+              className={`px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md text-[11px] sm:text-xs md:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
+                tab === t.key ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/80'
               }`}
             >
               {t.label}
@@ -461,7 +461,7 @@ export default function DashboardPage() {
         {!stats ? (
           <div className="space-y-6">
             {/* Skeleton stat cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
               {[1,2,3,4].map(i => (
                 <div key={i} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
                   <div className="h-3 w-20 bg-white/[0.10] rounded animate-pulse mb-3" />
@@ -499,7 +499,7 @@ export default function DashboardPage() {
           <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} onOpenTrace={openTrace} />
         ) : tab === 'control' ? (
           <div>
-            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2">
+            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['policies', 'approvals', 'budgets'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
@@ -522,7 +522,7 @@ export default function DashboardPage() {
           </div>
         ) : tab === 'insights' ? (
           <div>
-            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2">
+            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['alerts', 'evaluations', 'analytics', 'forecast', 'replay'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
@@ -551,7 +551,7 @@ export default function DashboardPage() {
           </div>
         ) : tab === 'settings' ? (
           <div>
-            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2">
+            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['general', 'team', 'webhooks', 'rollbacks'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
@@ -724,7 +724,7 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
   return (
     <div className="space-y-6">
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <StatCard label="Total Actions" value={(stats.totalActions || 0).toLocaleString()} sub={`${stats.todayActions || 0} today`} />
         <StatCard
           label="Cost Today"
@@ -1747,7 +1747,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       )}
 
       {/* Spend Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <StatCard label="Cost Today" value={formatCost(stats.todayCostCents || 0)} sub="current period" accent="orange" />
         <StatCard label="Cost This Week" value={formatCost(stats.weekCostCents || 0)} sub="last 7 days" accent="orange" />
         <StatCard label="Active Budgets" value={`${budgets.length}`} sub={`${budgets.filter(b => b.status === 'exceeded').length} exceeded`} accent={budgets.some(b => b.status === 'exceeded') ? 'red' : 'emerald'} />
@@ -2299,7 +2299,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
                 style={{ width: `${Math.min(100, (usage.percentages as Record<string, number>)?.actions || 0)}%` }}
               />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-center">
               <div>
                 <p className="text-lg font-semibold">{((usage.usage as Record<string, number>)?.actionsToday || 0).toLocaleString()}</p>
                 <p className="text-[10px] text-white/55">Today</p>
@@ -2426,7 +2426,7 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
       <div 
-        className="relative w-full max-w-lg bg-[#111] border-l border-white/[0.14] h-full overflow-y-auto shadow-2xl"
+        className="relative w-full sm:max-w-lg bg-[#111] border-l border-white/[0.14] h-full overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -2713,7 +2713,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
         <button
           onClick={() => saveChannel('slack')}
           disabled={!slackUrl || saving}
-          className="text-xs bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium border border-blue-500/25"
+          className="text-xs sm:text-sm bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
         >
           {saving ? 'Saving...' : slackActive ? 'Update Slack' : 'Enable Slack'}
         </button>
@@ -2760,7 +2760,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
         <button
           onClick={() => saveChannel('email')}
           disabled={!email || saving}
-          className="text-xs bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium border border-blue-500/25"
+          className="text-xs sm:text-sm bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
         >
           {saving ? 'Saving...' : emailActive ? 'Update Email' : 'Enable Email'}
         </button>
@@ -2786,11 +2786,11 @@ function StatCard({ label, value, sub, accent = 'white', trend }: {
     trend?.color === 'amber' ? 'text-amber-400' : 'text-white/60';
 
   return (
-    <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
-      <p className="text-xs text-white/40 mb-2">{label}</p>
-      <p className={`text-2xl font-bold ${accentColor}`}>{value}</p>
-      <p className="text-xs text-white/60 mt-1">{sub}</p>
-      {trend && <p className={`text-[11px] ${trendColor} mt-1`}>{trend.text}</p>}
+    <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-3 sm:p-5">
+      <p className="text-[11px] sm:text-xs text-white/70 mb-1 sm:mb-2">{label}</p>
+      <p className={`text-lg sm:text-2xl font-bold ${accentColor}`}>{value}</p>
+      <p className="text-[11px] sm:text-xs text-white/60 mt-1">{sub}</p>
+      {trend && <p className={`text-[10px] sm:text-[11px] ${trendColor} mt-1`}>{trend.text}</p>}
     </div>
   );
 }

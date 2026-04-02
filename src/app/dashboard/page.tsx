@@ -12,6 +12,11 @@ import EvaluationsTab from '@/components/dashboard/EvaluationsTab';
 import RollbackHooksTab from '@/components/dashboard/RollbackHooksTab';
 import TeamTab from '@/components/dashboard/TeamTab';
 import EnvironmentSelector from '@/components/dashboard/EnvironmentSelector';
+import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
+import ForecastTab from '@/components/dashboard/ForecastTab';
+import PolicyTemplatesSection from '@/components/dashboard/PolicyTemplatesSection';
+import TraceReplayView from '@/components/dashboard/TraceReplayView';
+import WorkspaceSwitcher from '@/components/dashboard/WorkspaceSwitcher';
 
 interface Agent {
   id: string;
@@ -360,7 +365,7 @@ export default function DashboardPage() {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 logo-heartbeat-glow">
             <svg className="logo-heartbeat" width="22" height="22" viewBox="0 0 48 48" fill="none"><path d="M8 26H14L17 20L21 32L25 14L29 28L32 22H40" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <p className="text-white/30 text-[13px]">Loading...</p>
+          <p className="text-white/60 text-[13px]">Loading...</p>
         </div>
       </div>
     );
@@ -373,7 +378,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
       {/* Header */}
-      <header className="border-b border-white/[0.06] px-4 md:px-6 py-3 md:py-4">
+      <header className="border-b border-white/[0.14] px-4 md:px-6 py-3 md:py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center logo-heartbeat-glow">
@@ -382,11 +387,12 @@ export default function DashboardPage() {
             <span className="text-base md:text-lg font-semibold tracking-tight">AgentLedger</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <WorkspaceSwitcher />
             <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); sessionStorage.setItem('al_environment', env); }} />
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                autoRefresh ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.03] text-white/40'
+                autoRefresh ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.08] text-white/40'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-400 animate-pulse' : 'bg-white/20'}`} />
@@ -405,7 +411,7 @@ export default function DashboardPage() {
                 } catch {}
                 window.location.href = '/login';
               }}
-              className="text-sm text-white/30 hover:text-white/50 transition-colors"
+              className="text-sm text-white/60 hover:text-white/50 transition-colors"
             >
               Logout
             </button>
@@ -421,7 +427,7 @@ export default function DashboardPage() {
         )}
 
         {/* Tabs — scrollable on mobile */}
-        <div className="flex gap-1 mb-6 bg-white/[0.03] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit">
+        <div className="flex gap-1 mb-6 bg-white/[0.08] p-1 rounded-lg overflow-x-auto scrollbar-hide w-full md:w-fit">
           {([
             { key: 'overview', label: 'Overview' },
             { key: 'actions', label: 'Actions' },
@@ -457,30 +463,30 @@ export default function DashboardPage() {
             {/* Skeleton stat cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[1,2,3,4].map(i => (
-                <div key={i} className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-                  <div className="h-3 w-20 bg-white/[0.04] rounded animate-pulse mb-3" />
-                  <div className="h-7 w-16 bg-white/[0.06] rounded animate-pulse mb-2" />
-                  <div className="h-2.5 w-24 bg-white/[0.03] rounded animate-pulse" />
+                <div key={i} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
+                  <div className="h-3 w-20 bg-white/[0.10] rounded animate-pulse mb-3" />
+                  <div className="h-7 w-16 bg-white/[0.12] rounded animate-pulse mb-2" />
+                  <div className="h-2.5 w-24 bg-white/[0.08] rounded animate-pulse" />
                 </div>
               ))}
             </div>
             {/* Skeleton chart */}
-            <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 h-[280px]">
-              <div className="h-3 w-24 bg-white/[0.04] rounded animate-pulse mb-6" />
+            <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5 h-[280px]">
+              <div className="h-3 w-24 bg-white/[0.10] rounded animate-pulse mb-6" />
               <div className="flex items-end gap-1 h-[200px] pt-8">
                 {Array.from({length: 24}, (_, i) => (
-                  <div key={i} className="flex-1 bg-white/[0.03] rounded-t animate-pulse" style={{ height: `${20 + Math.random() * 60}%` }} />
+                  <div key={i} className="flex-1 bg-white/[0.08] rounded-t animate-pulse" style={{ height: `${20 + Math.random() * 60}%` }} />
                 ))}
               </div>
             </div>
             {/* Skeleton table */}
-            <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-3">
+            <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5 space-y-3">
               {[1,2,3,4,5].map(i => (
                 <div key={i} className="flex gap-4">
-                  <div className="h-4 w-12 bg-white/[0.04] rounded animate-pulse" />
-                  <div className="h-4 w-20 bg-white/[0.04] rounded animate-pulse" />
-                  <div className="h-4 w-16 bg-white/[0.04] rounded animate-pulse" />
-                  <div className="h-4 flex-1 bg-white/[0.03] rounded animate-pulse" />
+                  <div className="h-4 w-12 bg-white/[0.10] rounded animate-pulse" />
+                  <div className="h-4 w-20 bg-white/[0.10] rounded animate-pulse" />
+                  <div className="h-4 w-16 bg-white/[0.10] rounded animate-pulse" />
+                  <div className="h-4 flex-1 bg-white/[0.08] rounded animate-pulse" />
                 </div>
               ))}
             </div>
@@ -493,18 +499,21 @@ export default function DashboardPage() {
           <AgentsTab stats={stats} onToggle={toggleAgent} onKill={killAgent} onSelect={setSelectedAgent} selectedAgent={selectedAgent} actions={actions} apiKey={apiKey} onOpenAction={setDrawerAction} onOpenTrace={openTrace} />
         ) : tab === 'control' ? (
           <div>
-            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
+            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2">
               {['policies', 'approvals', 'budgets'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
-                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
+                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
                   {st}
                 </button>
               ))}
             </div>
             {subTab === 'policies' ? (
-              <PoliciesTab apiKey={apiKey} onToast={addToast} />
+              <div className="space-y-8">
+                <PolicyTemplatesSection apiKey={apiKey} onToast={addToast} onRefresh={fetchData} />
+                <PoliciesTab apiKey={apiKey} onToast={addToast} />
+              </div>
             ) : subTab === 'approvals' ? (
               <ApprovalsTab apiKey={apiKey} onToast={addToast} />
             ) : (
@@ -513,11 +522,11 @@ export default function DashboardPage() {
           </div>
         ) : tab === 'insights' ? (
           <div>
-            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
-              {['alerts', 'evaluations'].map(st => (
+            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2">
+              {['alerts', 'evaluations', 'analytics', 'forecast', 'replay'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
-                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
+                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
                   {st}
                   {st === 'alerts' && stats.alerts.length > 0 && (
@@ -530,17 +539,23 @@ export default function DashboardPage() {
             </div>
             {subTab === 'alerts' ? (
               <AlertsTab stats={stats} apiKey={apiKey} onRefresh={fetchData} onAcknowledge={acknowledgeAlert} />
-            ) : (
+            ) : subTab === 'evaluations' ? (
               <EvaluationsTab apiKey={apiKey} onToast={addToast} />
+            ) : subTab === 'analytics' ? (
+              <AnalyticsTab apiKey={apiKey} />
+            ) : subTab === 'forecast' ? (
+              <ForecastTab apiKey={apiKey} />
+            ) : (
+              <TraceReplayView apiKey={apiKey} onToast={addToast} />
             )}
           </div>
         ) : tab === 'settings' ? (
           <div>
-            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
+            <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2">
               {['general', 'team', 'webhooks', 'rollbacks'].map(st => (
                 <button key={st} onClick={() => setSubTab(st)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
-                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/30 hover:text-white/50'
+                    subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
                   {st}
                 </button>
@@ -559,13 +574,13 @@ export default function DashboardPage() {
         ) : null}
 
         {/* API Key display */}
-        <div className="mt-8 p-3 md:p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
-          <p className="text-xs text-white/30 mb-1">Your API Key (keep secret)</p>
+        <div className="mt-8 p-3 md:p-4 bg-white/[0.08] rounded-lg border border-white/[0.14]">
+          <p className="text-xs text-white/60 mb-1">Your API Key (keep secret)</p>
           <div className="flex items-center gap-2 flex-wrap">
             <code className="text-xs text-blue-400 font-mono break-all">{apiKey.slice(0, 15)}...{apiKey.slice(-4)}</code>
             <button
               onClick={() => { navigator.clipboard.writeText(apiKey); addToast('API key copied', 'info'); }}
-              className="text-xs text-white/30 hover:text-white/50"
+              className="text-xs text-white/60 hover:text-white/50"
             >
               Copy
             </button>
@@ -627,12 +642,12 @@ function SetupScreen({ onSetup, loading, error }: {
           <p className="text-white/50">The missing observability layer for AI agents</p>
         </div>
 
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-6">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6">
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setMode('new')}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                mode === 'new' ? 'bg-blue-500 text-white' : 'bg-white/[0.03] text-white/40'
+                mode === 'new' ? 'bg-blue-500 text-white' : 'bg-white/[0.08] text-white/40'
               }`}
             >
               New Account
@@ -640,7 +655,7 @@ function SetupScreen({ onSetup, loading, error }: {
             <button
               onClick={() => setMode('existing')}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                mode === 'existing' ? 'bg-blue-500 text-white' : 'bg-white/[0.03] text-white/40'
+                mode === 'existing' ? 'bg-blue-500 text-white' : 'bg-white/[0.08] text-white/40'
               }`}
             >
               I have a key
@@ -654,12 +669,12 @@ function SetupScreen({ onSetup, loading, error }: {
                 value={inputKey}
                 onChange={e => setInputKey(e.target.value)}
                 placeholder="al_..."
-                className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none mb-4"
+                className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none mb-4"
               />
               <button
                 onClick={() => onSetup(inputKey)}
                 disabled={loading || !inputKey.startsWith('al_')}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/30 text-white font-medium py-3 rounded-lg transition-colors"
+                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/60 text-white font-medium py-3 rounded-lg transition-colors"
               >
                 {loading ? 'Connecting...' : 'Connect'}
               </button>
@@ -672,7 +687,7 @@ function SetupScreen({ onSetup, loading, error }: {
               <button
                 onClick={() => onSetup()}
                 disabled={loading}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/30 text-white font-medium py-3 rounded-lg transition-colors"
+                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/60 text-white font-medium py-3 rounded-lg transition-colors"
               >
                 {loading ? 'Creating...' : 'Create Free Account'}
               </button>
@@ -765,17 +780,17 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
 
       {/* Plan Usage Bar */}
       {usage && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] px-5 py-4">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] px-5 py-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-xs text-white/40">Plan Usage</span>
-              <span className="text-[10px] bg-white/[0.04] text-white/30 px-1.5 py-0.5 rounded-full uppercase">{usage.plan || 'free'}</span>
+              <span className="text-[10px] bg-white/[0.10] text-white/60 px-1.5 py-0.5 rounded-full uppercase">{usage.plan || 'free'}</span>
             </div>
             <span className="text-xs text-white/50">
               {usage.actions_used.toLocaleString()} / {usage.actions_limit.toLocaleString()} actions this month
             </span>
           </div>
-          <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden">
+          <div className="h-2 bg-white/[0.10] rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
                 usage.percentage > 90 ? 'bg-red-500' : usage.percentage > 70 ? 'bg-amber-500' : 'bg-blue-500'
@@ -794,7 +809,7 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
       {/* Charts */}
       <div className="grid md:grid-cols-3 gap-4">
         {/* Activity Timeline */}
-        <div className="md:col-span-2 bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="md:col-span-2 bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h3 className="text-sm font-medium text-white/60 mb-4">Activity (24h)</h3>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={stats.hourlyData}>
@@ -817,7 +832,7 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
         </div>
 
         {/* Service Breakdown */}
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h3 className="text-sm font-medium text-white/60 mb-4">Services</h3>
           {Object.keys(stats.serviceBreakdown).length > 0 ? (
             <>
@@ -856,25 +871,25 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
           ) : (
             <div className="flex flex-col items-center justify-center h-[200px] text-center">
               <div className="text-2xl mb-2 opacity-30">📊</div>
-              <p className="text-white/30 text-sm">No service data yet</p>
-              <p className="text-white/15 text-xs mt-1">Charts appear once your agents start logging actions</p>
+              <p className="text-white/60 text-sm">No service data yet</p>
+              <p className="text-white/50 text-xs mt-1">Charts appear once your agents start logging actions</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Recent Actions Feed */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06]">
-        <div className="px-5 py-4 border-b border-white/[0.06]">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14]">
+        <div className="px-5 py-4 border-b border-white/[0.14]">
           <h3 className="text-sm font-medium text-white/60">Recent Actions</h3>
         </div>
         <div className="divide-y divide-white/[0.04]">
           {actions.length === 0 ? (
             <div className="px-5 py-12 text-center">
               <div className="text-2xl mb-3 opacity-30">📡</div>
-              <p className="text-white/30 text-sm font-medium mb-2">No actions yet</p>
-              <p className="text-white/15 text-xs mb-4 max-w-sm mx-auto">Send a test action to see it appear here in real-time:</p>
-              <div className="bg-black/30 rounded-lg p-3 max-w-md mx-auto mb-4">
+              <p className="text-white/60 text-sm font-medium mb-2">No actions yet</p>
+              <p className="text-white/50 text-xs mb-4 max-w-sm mx-auto">Send a test action to see it appear here in real-time:</p>
+              <div className="bg-white/[0.08] rounded-lg p-3 max-w-md mx-auto mb-4">
                 <code className="text-[11px] text-blue-400/70 font-mono whitespace-pre-wrap break-all">
                   {`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/actions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
@@ -886,7 +901,7 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
             </div>
           ) : (
             actions.slice(0, 10).map(action => (
-              <div key={action.id} className="px-5 py-3 flex items-center gap-4 hover:bg-white/[0.015] transition-colors">
+              <div key={action.id} className="px-5 py-3 flex items-center gap-4 hover:bg-white/[0.12] transition-colors">
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                   action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-400' :
                   action.status === 'error' ? 'bg-red-400' : 'bg-amber-400'
@@ -894,20 +909,20 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white/80">{action.agent_name}</span>
-                    <span className="text-white/20">→</span>
+                    <span className="text-white/50">→</span>
                     <span className="text-sm text-blue-400">{action.service}</span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-white/50">·</span>
                     <span className="text-sm text-white/40">{action.action}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 flex-shrink-0">
                   {action.estimated_cost_cents > 0 && (
-                    <span className="text-xs text-white/30">{formatCost(action.estimated_cost_cents)}</span>
+                    <span className="text-xs text-white/60">{formatCost(action.estimated_cost_cents)}</span>
                   )}
                   {action.duration_ms > 0 && (
-                    <span className="text-xs text-white/30">{action.duration_ms}ms</span>
+                    <span className="text-xs text-white/60">{action.duration_ms}ms</span>
                   )}
-                  <span className="text-xs text-white/20">{timeAgo(action.created_at)}</span>
+                  <span className="text-xs text-white/50">{timeAgo(action.created_at)}</span>
                 </div>
               </div>
             ))
@@ -948,20 +963,20 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
       {/* Search + Filters */}
       <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-sm">⌕</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">⌕</span>
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search actions..."
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white/60 focus:border-blue-500/50 focus:outline-none appearance-none cursor-pointer"
+            className="bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-xs text-white/60 focus:border-blue-500/50 focus:outline-none appearance-none cursor-pointer"
           >
             <option value="all">All statuses</option>
             {statuses.map(s => <option key={s} value={s}>{s}</option>)}
@@ -969,7 +984,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
           <select
             value={serviceFilter}
             onChange={e => setServiceFilter(e.target.value)}
-            className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white/60 focus:border-blue-500/50 focus:outline-none appearance-none cursor-pointer"
+            className="bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-xs text-white/60 focus:border-blue-500/50 focus:outline-none appearance-none cursor-pointer"
           >
             <option value="all">All services</option>
             {services.map(s => <option key={s} value={s}>{s}</option>)}
@@ -977,7 +992,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
           <select
             value={agentFilter}
             onChange={e => setAgentFilter(e.target.value)}
-            className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white/60 focus:border-blue-500/50 focus:outline-none appearance-none cursor-pointer"
+            className="bg-white/[0.08] border border-white/[0.14] rounded-lg px-3 py-2 text-xs text-white/60 focus:border-blue-500/50 focus:outline-none appearance-none cursor-pointer"
           >
             <option value="all">All agents</option>
             {agents.map(a => <option key={a} value={a}>{a}</option>)}
@@ -985,7 +1000,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
           {activeFilters > 0 && (
             <button
               onClick={() => { setSearch(''); setStatusFilter('all'); setServiceFilter('all'); setAgentFilter('all'); }}
-              className="text-[11px] text-white/30 hover:text-white/50 px-2"
+              className="text-[11px] text-white/60 hover:text-white/50 px-2"
             >
               Clear ({activeFilters})
             </button>
@@ -994,14 +1009,14 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
       </div>
 
       {/* Results count */}
-      <p className="text-[11px] text-white/20">{filtered.length} of {actions.length} actions</p>
+      <p className="text-[11px] text-white/50">{filtered.length} of {actions.length} actions</p>
 
       {/* Table — scrollable on mobile */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px]">
             <thead>
-              <tr className="border-b border-white/[0.06] text-left">
+              <tr className="border-b border-white/[0.14] text-left">
                 <th className="px-4 py-3 text-xs font-medium text-white/40">Status</th>
                 <th className="px-4 py-3 text-xs font-medium text-white/40">Agent</th>
                 <th className="px-4 py-3 text-xs font-medium text-white/40">Service</th>
@@ -1014,11 +1029,11 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
             <tbody className="divide-y divide-white/[0.04]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-white/20 text-sm">
+                  <td colSpan={7} className="px-4 py-12 text-center text-white/50 text-sm">
                     {actions.length === 0 ? (
                       <div>
-                        <p className="text-white/30 mb-1">No actions recorded yet</p>
-                        <p className="text-white/15 text-xs">Send your first event using the SDK or curl to see it here.</p>
+                        <p className="text-white/60 mb-1">No actions recorded yet</p>
+                        <p className="text-white/50 text-xs">Send your first event using the SDK or curl to see it here.</p>
                       </div>
                     ) : 'No matching actions'}
                   </td>
@@ -1028,7 +1043,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
                   <tr
                     key={action.id}
                     onClick={() => onOpenAction(action)}
-                    className="hover:bg-white/[0.015] transition-colors cursor-pointer"
+                    className="hover:bg-white/[0.12] transition-colors cursor-pointer"
                   >
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
@@ -1044,7 +1059,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
                     <td className="px-4 py-3 text-sm text-white/40">
                       {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-white/30">
+                    <td className="px-4 py-3 text-xs text-white/60">
                       {action.trace_id && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onOpenTrace(action.trace_id!); }}
@@ -1061,7 +1076,7 @@ function ActionsTab({ actions, apiKey, onOpenAction, onOpenTrace }: { actions: A
           </table>
         </div>
         {filtered.length > 100 && (
-          <div className="px-4 py-2 border-t border-white/[0.04] text-xs text-white/20 text-center">
+          <div className="px-4 py-2 border-t border-white/[0.12] text-xs text-white/50 text-center">
             Showing first 100 of {filtered.length} results
           </div>
         )}
@@ -1115,7 +1130,7 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
               </button>
               <button
                 onClick={() => setKillConfirm(null)}
-                className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 font-medium py-2.5 rounded-lg transition-colors text-sm border border-white/[0.06]"
+                className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 font-medium py-2.5 rounded-lg transition-colors text-sm border border-white/[0.14]"
               >
                 Cancel
               </button>
@@ -1125,11 +1140,11 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
       )}
 
       {stats.agents.length === 0 ? (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-12 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-12 text-center">
           <div className="text-2xl mb-3 opacity-30">🤖</div>
-          <p className="text-white/30 text-sm font-medium mb-2">No agents registered yet</p>
-          <p className="text-white/15 text-xs mb-4">Agents are auto-registered when they first log an action. Use the SDK to get started:</p>
-          <div className="bg-black/30 rounded-lg p-3 max-w-sm mx-auto mb-3">
+          <p className="text-white/60 text-sm font-medium mb-2">No agents registered yet</p>
+          <p className="text-white/50 text-xs mb-4">Agents are auto-registered when they first log an action. Use the SDK to get started:</p>
+          <div className="bg-white/[0.08] rounded-lg p-3 max-w-sm mx-auto mb-3">
             <code className="text-[11px] text-blue-400/70 font-mono">await ledger.track({'{'} agent: &apos;my-bot&apos;, service: &apos;slack&apos;, action: &apos;send&apos; {'}'}, fn)</code>
           </div>
           <a href="/docs#core-sdk" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">View integration guide →</a>
@@ -1151,9 +1166,9 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
             <div
               key={agent.id}
               onClick={() => onSelect(agent.name)}
-              className={`bg-white/[0.03] rounded-xl border p-5 transition-colors cursor-pointer hover:bg-white/[0.05] ${
+              className={`bg-white/[0.08] rounded-xl border p-5 transition-colors cursor-pointer hover:bg-white/[0.05] ${
               agent.status === 'killed' ? 'border-red-500/20 opacity-60' :
-              agent.status === 'paused' ? 'border-amber-500/20' : 'border-white/[0.06]'
+              agent.status === 'paused' ? 'border-amber-500/20' : 'border-white/[0.14]'
             }`}>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -1163,30 +1178,30 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
                     <span className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded uppercase font-medium">killed</span>
                   )}
                 </div>
-                <span className="text-xs text-white/20">→</span>
+                <span className="text-xs text-white/50">→</span>
               </div>
               {topServices.length > 0 && (
                 <div className="flex flex-wrap gap-1 mb-4 ml-[18px]">
                   {topServices.map(s => (
-                    <span key={s} className="text-[10px] text-white/25 bg-white/[0.03] border border-white/[0.05] px-1.5 py-0.5 rounded font-mono">{s}</span>
+                    <span key={s} className="text-[10px] text-white/55 bg-white/[0.08] border border-white/[0.05] px-1.5 py-0.5 rounded font-mono">{s}</span>
                   ))}
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                  <p className="text-xs text-white/30 mb-0.5">Total Actions</p>
+                  <p className="text-xs text-white/60 mb-0.5">Total Actions</p>
                   <p className="text-lg font-semibold">{(agent.total_actions || 0).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-white/30 mb-0.5">Total Cost</p>
+                  <p className="text-xs text-white/60 mb-0.5">Total Cost</p>
                   <p className="text-lg font-semibold">{formatCost(agent.total_cost_cents || 0)}</p>
                 </div>
               </div>
               {agent.last_active_at && (
-                <p className="text-xs text-white/20 mb-3">Last active {timeAgo(agent.last_active_at)}</p>
+                <p className="text-xs text-white/50 mb-3">Last active {timeAgo(agent.last_active_at)}</p>
               )}
               {/* Action buttons */}
-              <div className="flex gap-2 pt-3 border-t border-white/[0.04]">
+              <div className="flex gap-2 pt-3 border-t border-white/[0.12]">
                 {agent.status !== 'killed' ? (
                   <>
                     <button
@@ -1280,7 +1295,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
               </button>
               <button
                 onClick={() => setKillConfirm(false)}
-                className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 font-medium py-2.5 rounded-lg transition-colors text-sm border border-white/[0.06]"
+                className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 font-medium py-2.5 rounded-lg transition-colors text-sm border border-white/[0.14]"
               >
                 Cancel
               </button>
@@ -1341,40 +1356,40 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
-          <p className="text-xs text-white/30 mb-1">Total Actions</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          <p className="text-xs text-white/60 mb-1">Total Actions</p>
           <p className="text-2xl font-semibold">{(agent.total_actions || 0).toLocaleString()}</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
-          <p className="text-xs text-white/30 mb-1">Total Cost</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          <p className="text-xs text-white/60 mb-1">Total Cost</p>
           <p className="text-2xl font-semibold">{formatCost(agent.total_cost_cents || 0)}</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
-          <p className="text-xs text-white/30 mb-1">Success Rate</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          <p className="text-xs text-white/60 mb-1">Success Rate</p>
           <p className={`text-2xl font-semibold ${successRate >= 95 ? 'text-emerald-400' : successRate >= 80 ? 'text-amber-400' : 'text-red-400'}`}>
             {successRate}%
           </p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
-          <p className="text-xs text-white/30 mb-1">Avg Duration</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          <p className="text-xs text-white/60 mb-1">Avg Duration</p>
           <p className="text-2xl font-semibold">{avgDuration > 0 ? `${avgDuration}ms` : '—'}</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
-          <p className="text-xs text-white/30 mb-1">Errors</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          <p className="text-xs text-white/60 mb-1">Errors</p>
           <p className={`text-2xl font-semibold ${errorCount > 0 ? 'text-red-400' : 'text-white/60'}`}>{errorCount}</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
-          <p className="text-xs text-white/30 mb-1">Blocked</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          <p className="text-xs text-white/60 mb-1">Blocked</p>
           <p className={`text-2xl font-semibold ${blockedCount > 0 ? 'text-amber-400' : 'text-white/60'}`}>{blockedCount}</p>
         </div>
       </div>
 
       {/* Services & Action Types */}
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h3 className="text-sm font-medium text-white/50 mb-3">Services Used</h3>
           {services.length === 0 ? (
-            <p className="text-xs text-white/20">No services recorded</p>
+            <p className="text-xs text-white/50">No services recorded</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {services.map(s => {
@@ -1388,17 +1403,17 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
             </div>
           )}
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h3 className="text-sm font-medium text-white/50 mb-3">Action Types</h3>
           {actionTypes.length === 0 ? (
-            <p className="text-xs text-white/20">No actions recorded</p>
+            <p className="text-xs text-white/50">No actions recorded</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {actionTypes.map(a => {
                 const count = agentActions.filter(act => act.action === a).length;
                 return (
                   <span key={a} className="text-xs bg-white/[0.05] text-white/50 px-2.5 py-1 rounded-lg">
-                    {a} <span className="text-white/20 ml-1">{count}</span>
+                    {a} <span className="text-white/50 ml-1">{count}</span>
                   </span>
                 );
               })}
@@ -1409,7 +1424,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
 
       {/* Last active */}
       {agent.last_active_at && (
-        <p className="text-xs text-white/20">Last active {timeAgo(agent.last_active_at)} · {new Date(agent.last_active_at).toLocaleString()}</p>
+        <p className="text-xs text-white/50">Last active {timeAgo(agent.last_active_at)} · {new Date(agent.last_active_at).toLocaleString()}</p>
       )}
 
       {/* Action history with trace/list toggle */}
@@ -1418,16 +1433,16 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
           <h3 className="text-sm font-medium text-white/50">Action History</h3>
           {/* Show trace toggle if there are any traced actions */}
           {agentActions.some(a => a.trace_id) && (
-            <div className="flex gap-1 bg-white/[0.03] rounded-lg p-0.5">
+            <div className="flex gap-1 bg-white/[0.08] rounded-lg p-0.5">
               <button
                 onClick={() => setViewMode('list')}
-                className={`text-[10px] px-2.5 py-1 rounded transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white/70' : 'text-white/30 hover:text-white/50'}`}
+                className={`text-[10px] px-2.5 py-1 rounded transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white/70' : 'text-white/60 hover:text-white/50'}`}
               >
                 List
               </button>
               <button
                 onClick={() => setViewMode('traces')}
-                className={`text-[10px] px-2.5 py-1 rounded transition-colors ${viewMode === 'traces' ? 'bg-purple-500/20 text-purple-400' : 'text-white/30 hover:text-white/50'}`}
+                className={`text-[10px] px-2.5 py-1 rounded transition-colors ${viewMode === 'traces' ? 'bg-purple-500/20 text-purple-400' : 'text-white/60 hover:text-white/50'}`}
               >
                 ⟐ Traces
               </button>
@@ -1454,12 +1469,12 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
                   ))}
                   {untraced.length > 0 && (
                     <div className="mt-4">
-                      <p className="text-[10px] text-white/20 mb-2">Untraced actions ({untraced.length})</p>
+                      <p className="text-[10px] text-white/50 mb-2">Untraced actions ({untraced.length})</p>
                       {untraced.slice(0, 20).map(action => (
                         <div
                           key={action.id}
                           onClick={() => onOpenAction(action)}
-                          className="px-3 py-2 flex items-center gap-3 hover:bg-white/[0.02] cursor-pointer rounded transition-colors"
+                          className="px-3 py-2 flex items-center gap-3 hover:bg-white/[0.12] cursor-pointer rounded transition-colors"
                         >
                           <div className={`w-1.5 h-1.5 rounded-full ${
                             action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-400' :
@@ -1467,7 +1482,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
                           }`} />
                           <span className="text-xs text-blue-400">{action.service}</span>
                           <span className="text-xs text-white/40">{action.action}</span>
-                          <span className="text-[10px] text-white/20 ml-auto">{timeAgo(action.created_at)}</span>
+                          <span className="text-[10px] text-white/50 ml-auto">{timeAgo(action.created_at)}</span>
                         </div>
                       ))}
                     </div>
@@ -1478,11 +1493,11 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
           </div>
         ) : (
         // List view — existing table
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px]">
               <thead>
-                <tr className="border-b border-white/[0.06] text-left">
+                <tr className="border-b border-white/[0.14] text-left">
                   <th className="px-4 py-3 text-xs font-medium text-white/40">Status</th>
                   <th className="px-4 py-3 text-xs font-medium text-white/40">Service</th>
                   <th className="px-4 py-3 text-xs font-medium text-white/40">Action</th>
@@ -1494,7 +1509,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
               <tbody className="divide-y divide-white/[0.04]">
                 {agentActions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-white/20 text-sm">
+                    <td colSpan={6} className="px-4 py-12 text-center text-white/50 text-sm">
                       No actions recorded for this agent yet.
                     </td>
                   </tr>
@@ -1503,7 +1518,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
                     <tr
                       key={action.id}
                       onClick={() => onOpenAction(action)}
-                      className="hover:bg-white/[0.015] transition-colors cursor-pointer"
+                      className="hover:bg-white/[0.12] transition-colors cursor-pointer"
                     >
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium ${STATUS_COLORS[action.status] || 'text-white/40'}`}>
@@ -1518,7 +1533,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
                       <td className="px-4 py-3 text-sm text-white/40">
                         {action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-xs text-white/30">
+                      <td className="px-4 py-3 text-xs text-white/60">
                         {action.trace_id && (
                           <button
                             onClick={(e) => { e.stopPropagation(); onOpenTrace(action.trace_id!); }}
@@ -1535,7 +1550,7 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
             </table>
           </div>
           {agentActions.length > 100 && (
-            <div className="px-4 py-2 border-t border-white/[0.04] text-xs text-white/20 text-center">
+            <div className="px-4 py-2 border-t border-white/[0.12] text-xs text-white/50 text-center">
               Showing first 100 of {agentActions.length} actions
             </div>
           )}
@@ -1565,17 +1580,17 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
         <div className="flex justify-end">
           <button
             onClick={() => onAcknowledge()}
-            className="text-xs text-white/40 hover:text-white/60 bg-white/[0.03] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            className="text-xs text-white/40 hover:text-white/60 bg-white/[0.08] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
           >
             ✓ Acknowledge All
           </button>
         </div>
       )}
       {stats.alerts.length === 0 ? (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-12 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-12 text-center">
           <div className="text-2xl mb-3 opacity-50">✓</div>
-          <p className="text-white/30 text-sm font-medium mb-1">All clear</p>
-          <p className="text-white/15 text-xs">No active alerts. Your agents are behaving normally.</p>
+          <p className="text-white/60 text-sm font-medium mb-1">All clear</p>
+          <p className="text-white/50 text-xs">No active alerts. Your agents are behaving normally.</p>
         </div>
       ) : (
         stats.alerts.map(alert => (
@@ -1585,7 +1600,7 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm">{SEVERITY_ICON[alert.severity || 'warning'] || '⚠️'}</span>
                   <span className="font-medium text-sm capitalize">{alert.alert_type.replace(/_/g, ' ')}</span>
-                  <span className="text-white/20 text-xs">·</span>
+                  <span className="text-white/50 text-xs">·</span>
                   <span className="text-xs font-mono text-blue-400">{alert.agent_name}</span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-medium ${
                     alert.severity === 'critical' ? 'bg-red-500/20 text-red-400' :
@@ -1596,11 +1611,11 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
                   </span>
                 </div>
                 <p className="text-sm text-white/60">{alert.message}</p>
-                <p className="text-xs text-white/20 mt-1">{timeAgo(alert.created_at)}</p>
+                <p className="text-xs text-white/50 mt-1">{timeAgo(alert.created_at)}</p>
               </div>
               <button
                 onClick={() => onAcknowledge(alert.id)}
-                className="text-xs text-white/30 hover:text-white/60 bg-white/[0.03] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors ml-4 flex-shrink-0"
+                className="text-xs text-white/60 hover:text-white/60 bg-white/[0.08] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors ml-4 flex-shrink-0"
               >
                 ✓ Ack
               </button>
@@ -1695,7 +1710,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
   };
 
   const BUDGET_STATUS_BORDER: Record<string, string> = {
-    ok: 'border-white/[0.06]',
+    ok: 'border-white/[0.14]',
     warning: 'border-amber-500/30',
     critical: 'border-blue-500/30',
     exceeded: 'border-red-500/30',
@@ -1720,12 +1735,12 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       {/* Budget delete confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold mb-2">Delete Budget?</h3>
             <p className="text-sm text-white/40 mb-4">This will remove the budget and its tracking. The agent will no longer have spending limits.</p>
             <div className="flex gap-3">
               <button onClick={() => deleteBudget(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Delete</button>
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.06]">Cancel</button>
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
             </div>
           </div>
         </div>
@@ -1741,7 +1756,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
 
       {/* Spend by Agent Chart */}
       {agentSpend.length > 0 && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h3 className="text-sm font-medium text-white/60 mb-4">Spend by Agent</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={agentSpend} layout="vertical">
@@ -1759,8 +1774,8 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       )}
 
       {/* Budget List */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06]">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="bg-white/[0.08] rounded-xl border border-white/[0.14]">
+        <div className="px-5 py-4 border-b border-white/[0.14] flex items-center justify-between">
           <h3 className="text-sm font-medium text-white/60">Budget Controls</h3>
           <button
             onClick={() => setShowCreate(!showCreate)}
@@ -1772,14 +1787,14 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
 
         {/* Create Budget Form */}
         {showCreate && (
-          <div className="px-5 py-4 border-b border-white/[0.06] bg-white/[0.015]">
+          <div className="px-5 py-4 border-b border-white/[0.14] bg-white/[0.12]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
               <div>
                 <label className="text-xs text-white/40 mb-1 block">Agent</label>
                 <select
                   value={newBudget.agent}
                   onChange={e => setNewBudget({ ...newBudget, agent: e.target.value })}
-                  className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/60 focus:outline-none"
                 >
                   <option value="">Select agent...</option>
                   {stats.agents.map(a => (
@@ -1792,7 +1807,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                 <select
                   value={newBudget.period}
                   onChange={e => setNewBudget({ ...newBudget, period: e.target.value })}
-                  className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500/60 focus:outline-none"
                 >
                   <option value="hourly">Hourly</option>
                   <option value="daily">Daily</option>
@@ -1807,7 +1822,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                   value={newBudget.maxActions}
                   onChange={e => setNewBudget({ ...newBudget, maxActions: e.target.value })}
                   placeholder="e.g. 100"
-                  className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
                 />
               </div>
               <div>
@@ -1818,7 +1833,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                   value={newBudget.maxCostDollars}
                   onChange={e => setNewBudget({ ...newBudget, maxCostDollars: e.target.value })}
                   placeholder="e.g. 5.00"
-                  className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+                  className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
                 />
               </div>
             </div>
@@ -1826,7 +1841,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
               <button
                 onClick={createBudget}
                 disabled={creating || !newBudget.agent || (!newBudget.maxActions && !newBudget.maxCostDollars)}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/30 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="bg-blue-500 hover:bg-blue-600 disabled:bg-white/10 disabled:text-white/60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
               >
                 {creating ? 'Creating...' : 'Create Budget'}
               </button>
@@ -1843,12 +1858,12 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
 
         {/* Budget Cards */}
         {loading ? (
-          <div className="px-5 py-12 text-center text-white/20 text-sm">Loading budgets...</div>
+          <div className="px-5 py-12 text-center text-white/50 text-sm">Loading budgets...</div>
         ) : budgets.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <div className="text-2xl mb-3 opacity-30">💰</div>
-            <p className="text-white/30 text-sm font-medium mb-2">No budgets configured</p>
-            <p className="text-white/15 text-xs mb-4">Set spending limits to automatically pause agents when they exceed their budget.</p>
+            <p className="text-white/60 text-sm font-medium mb-2">No budgets configured</p>
+            <p className="text-white/50 text-xs mb-4">Set spending limits to automatically pause agents when they exceed their budget.</p>
             <a href="/docs#budgets" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">Learn about budgets →</a>
           </div>
         ) : (
@@ -1856,11 +1871,11 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
             {budgets.map(budget => {
               const pctMax = Math.max(budget.pct_actions || 0, budget.pct_cost || 0);
               return (
-                <div key={budget.id} className={`px-5 py-4 hover:bg-white/[0.015] transition-colors border-l-2 ${BUDGET_STATUS_BORDER[budget.status]}`}>
+                <div key={budget.id} className={`px-5 py-4 hover:bg-white/[0.12] transition-colors border-l-2 ${BUDGET_STATUS_BORDER[budget.status]}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <span className="font-medium font-mono text-sm text-white/80">{budget.agent_name}</span>
-                      <span className="text-xs text-white/30 bg-white/[0.03] px-2 py-0.5 rounded capitalize">{budget.period}</span>
+                      <span className="text-xs text-white/60 bg-white/[0.08] px-2 py-0.5 rounded capitalize">{budget.period}</span>
                       <span className={`text-xs px-2 py-0.5 rounded capitalize font-medium ${
                         budget.status === 'ok' ? 'bg-emerald-500/10 text-emerald-400' :
                         budget.status === 'warning' ? 'bg-amber-500/10 text-amber-400' :
@@ -1873,7 +1888,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => resetBudget(budget.id)}
-                        className="text-xs text-white/30 hover:text-white/50 transition-colors px-2 py-1"
+                        className="text-xs text-white/60 hover:text-white/50 transition-colors px-2 py-1"
                         title="Reset counters"
                       >
                         ↻ Reset
@@ -1895,7 +1910,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                           <span className="text-white/40">Actions</span>
                           <span className="text-white/60">{budget.current_actions.toLocaleString()} / {budget.max_actions.toLocaleString()}</span>
                         </div>
-                        <div className="h-2 bg-white/[0.03] rounded-full overflow-hidden">
+                        <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all ${BUDGET_STATUS_COLORS[budget.status]}`}
                             style={{ width: `${Math.min(budget.pct_actions || 0, 100)}%` }}
@@ -1909,7 +1924,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                           <span className="text-white/40">Cost</span>
                           <span className="text-white/60">{formatCost(budget.current_cost_cents)} / {formatCost(budget.max_cost_cents)}</span>
                         </div>
-                        <div className="h-2 bg-white/[0.03] rounded-full overflow-hidden">
+                        <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all ${BUDGET_STATUS_COLORS[budget.status]}`}
                             style={{ width: `${Math.min(budget.pct_cost || 0, 100)}%` }}
@@ -1927,7 +1942,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
 
       {/* Cost Timeline from hourly data */}
       {stats.hourlyData.some(h => h.cost > 0) && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h3 className="text-sm font-medium text-white/60 mb-4">Cost Timeline (24h)</h3>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={stats.hourlyData}>
@@ -2018,7 +2033,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
     fetchWebhooks();
   };
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading webhooks...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading webhooks...</div>;
 
   return (
     <div className="space-y-4">
@@ -2028,11 +2043,11 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
           <div className="bg-[#1a1a1a] border border-blue-500/20 rounded-xl p-6 max-w-md mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold mb-2">Webhook Secret</h3>
             <p className="text-sm text-white/40 mb-4">Save this secret now — you won&apos;t see it again. Use it to verify webhook signatures.</p>
-            <div className="bg-black/50 rounded-lg p-3 mb-4 flex items-center justify-between gap-2">
+            <div className="bg-white/[0.08] rounded-lg p-3 mb-4 flex items-center justify-between gap-2">
               <code className="text-[13px] text-blue-400 font-mono break-all">{shownSecret}</code>
               <button
                 onClick={() => { navigator.clipboard.writeText(shownSecret); onToast('Secret copied', 'info'); }}
-                className="text-xs text-white/30 hover:text-white/60 flex-shrink-0"
+                className="text-xs text-white/60 hover:text-white/60 flex-shrink-0"
               >
                 Copy
               </button>
@@ -2050,7 +2065,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-white/70">Webhooks</h3>
-          <p className="text-xs text-white/30 mt-0.5">Get notified when agents act, budgets exceed, or alerts fire.</p>
+          <p className="text-xs text-white/60 mt-0.5">Get notified when agents act, budgets exceed, or alerts fire.</p>
         </div>
         <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
           + Add Webhook
@@ -2058,23 +2073,23 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       </div>
 
       {showCreate && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4 space-y-3">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 space-y-3">
           <input
             type="url"
             value={newUrl}
             onChange={e => setNewUrl(e.target.value)}
             placeholder="https://your-server.com/webhook"
-            className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
           <input
             type="text"
             value={newDesc}
             onChange={e => setNewDesc(e.target.value)}
             placeholder="Description (optional)"
-            className="w-full bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
           <div>
-            <p className="text-xs text-white/30 mb-2">Events (empty = all events)</p>
+            <p className="text-xs text-white/60 mb-2">Events (empty = all events)</p>
             <div className="flex flex-wrap gap-2">
               {EVENTS.map(evt => (
                 <button
@@ -2083,7 +2098,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
                   className={`text-[11px] px-2 py-1 rounded-md transition-colors ${
                     selectedEvents.includes(evt)
                       ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      : 'bg-white/[0.03] text-white/30 border border-white/[0.06] hover:text-white/50'
+                      : 'bg-white/[0.08] text-white/60 border border-white/[0.14] hover:text-white/50'
                   }`}
                 >
                   {evt}
@@ -2092,10 +2107,10 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             </div>
           </div>
           <div className="flex gap-2 pt-1">
-            <button onClick={createWebhook} disabled={!newUrl} className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+            <button onClick={createWebhook} disabled={!newUrl} className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
               Create
             </button>
-            <button onClick={() => setShowCreate(false)} className="text-xs text-white/30 hover:text-white/50 px-3 py-2">
+            <button onClick={() => setShowCreate(false)} className="text-xs text-white/60 hover:text-white/50 px-3 py-2">
               Cancel
             </button>
           </div>
@@ -2103,10 +2118,10 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       )}
 
       {webhooks.length === 0 && !showCreate ? (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">🔗</div>
-          <p className="text-white/30 text-sm font-medium mb-2">No webhooks configured</p>
-          <p className="text-white/15 text-xs mb-4">Get HTTP notifications when agents act, budgets exceed, or alerts fire.</p>
+          <p className="text-white/60 text-sm font-medium mb-2">No webhooks configured</p>
+          <p className="text-white/50 text-xs mb-4">Get HTTP notifications when agents act, budgets exceed, or alerts fire.</p>
           <button onClick={() => setShowCreate(true)} className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20">
             Create your first webhook
           </button>
@@ -2114,17 +2129,17 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       ) : (
         <div className="space-y-2">
           {webhooks.map(wh => (
-            <div key={wh.id as string} className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+            <div key={wh.id as string} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`w-2 h-2 rounded-full ${wh.active ? 'bg-emerald-400' : 'bg-white/20'}`} />
                     <code className="text-xs text-blue-400 font-mono truncate block">{wh.url as string}</code>
                   </div>
-                  {wh.description ? <p className="text-xs text-white/30 mb-1.5">{String(wh.description)}</p> : null}
+                  {wh.description ? <p className="text-xs text-white/60 mb-1.5">{String(wh.description)}</p> : null}
                   <div className="flex flex-wrap gap-1">
                     {(wh.events as string[])?.map(evt => (
-                      <span key={evt} className="text-[10px] bg-white/[0.03] text-white/25 px-1.5 py-0.5 rounded">{evt}</span>
+                      <span key={evt} className="text-[10px] bg-white/[0.08] text-white/55 px-1.5 py-0.5 rounded">{evt}</span>
                     ))}
                   </div>
                   {(wh.failure_count as number) > 0 && (
@@ -2149,7 +2164,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       )}
 
       {/* HMAC Verification docs */}
-      <div className="bg-white/[0.02] rounded-xl border border-white/[0.04] p-4">
+      <div className="bg-white/[0.12] rounded-xl border border-white/[0.12] p-4">
         <h4 className="text-xs font-medium text-white/40 mb-2">Verifying webhook signatures</h4>
         <code className="text-[11px] text-emerald-400/60 font-mono block whitespace-pre leading-relaxed">{`const crypto = require('crypto');
 const signature = req.headers['x-agentledger-signature'];
@@ -2259,7 +2274,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
     }
   };
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -2267,14 +2282,14 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       {usage && (
         <div>
           <h3 className="text-sm font-medium text-white/70 mb-3">Usage</h3>
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-white/40">Actions this month</span>
               <span className="text-xs text-white/60 font-mono">
                 {((usage.usage as Record<string, number>)?.actionsThisMonth || 0).toLocaleString()} / {((usage.limits as Record<string, number>)?.actionsPerMonth || 0).toLocaleString()}
               </span>
             </div>
-            <div className="w-full h-2 bg-white/[0.04] rounded-full overflow-hidden mb-4">
+            <div className="w-full h-2 bg-white/[0.10] rounded-full overflow-hidden mb-4">
               <div
                 className={`h-full rounded-full transition-all ${
                   ((usage.percentages as Record<string, number>)?.actions || 0) > 90 ? 'bg-red-500' :
@@ -2287,23 +2302,23 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-lg font-semibold">{((usage.usage as Record<string, number>)?.actionsToday || 0).toLocaleString()}</p>
-                <p className="text-[10px] text-white/25">Today</p>
+                <p className="text-[10px] text-white/55">Today</p>
               </div>
               <div>
                 <p className="text-lg font-semibold">{((usage.usage as Record<string, number>)?.actionsThisWeek || 0).toLocaleString()}</p>
-                <p className="text-[10px] text-white/25">This Week</p>
+                <p className="text-[10px] text-white/55">This Week</p>
               </div>
               <div>
                 <p className="text-lg font-semibold">{(usage.usage as Record<string, number>)?.agents || 0}</p>
-                <p className="text-[10px] text-white/25">Agents ({((usage.limits as Record<string, number>)?.maxAgents || 0)} max)</p>
+                <p className="text-[10px] text-white/55">Agents ({((usage.limits as Record<string, number>)?.maxAgents || 0)} max)</p>
               </div>
               <div>
                 <p className="text-sm font-semibold capitalize text-blue-400">{usage.plan as string}</p>
-                <p className="text-[10px] text-white/25">Plan</p>
+                <p className="text-[10px] text-white/55">Plan</p>
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-white/[0.04]">
-              <p className="text-[11px] text-white/20">
+            <div className="mt-4 pt-3 border-t border-white/[0.12]">
+              <p className="text-[11px] text-white/50">
                 Data retention: {((usage.limits as Record<string, number>)?.retentionDays || 1)} day{((usage.limits as Record<string, number>)?.retentionDays || 1) > 1 ? 's' : ''}.
                 Actions older than this are automatically deleted.
                 {((usage.percentages as Record<string, number>)?.actions || 0) > 75 && (
@@ -2320,7 +2335,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-medium text-white/70">API Keys</h3>
-            <p className="text-xs text-white/30 mt-0.5">Manage authentication keys for your organization. Max 5 active keys.</p>
+            <p className="text-xs text-white/60 mt-0.5">Manage authentication keys for your organization. Max 5 active keys.</p>
           </div>
           <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
             + New Key
@@ -2328,31 +2343,31 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         </div>
 
         {showCreate && (
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4 mb-4 flex items-center gap-3">
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 mb-4 flex items-center gap-3">
             <input
               type="text"
               value={newKeyName}
               onChange={e => setNewKeyName(e.target.value)}
               placeholder="Key name (e.g., production, staging)"
-              className="flex-1 bg-black/50 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+              className="flex-1 bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
             />
             <button onClick={createKey} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
               Create
             </button>
-            <button onClick={() => setShowCreate(false)} className="text-xs text-white/30 hover:text-white/50 px-2 py-2">Cancel</button>
+            <button onClick={() => setShowCreate(false)} className="text-xs text-white/60 hover:text-white/50 px-2 py-2">Cancel</button>
           </div>
         )}
 
         <div className="space-y-2">
           {keys.map(k => (
-            <div key={k.id as string} className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4 flex items-center justify-between gap-3">
+            <div key={k.id as string} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-sm text-white/70 font-medium">{k.name as string}</span>
                   {k.id === 'current' && <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded">In Use</span>}
                 </div>
-                <code className="text-xs text-white/25 font-mono">{k.key_prefix as string}{'...'}</code>
-                {k.description ? <p className="text-xs text-white/20 mt-0.5">{String(k.description)}</p> : null}
+                <code className="text-xs text-white/55 font-mono">{k.key_prefix as string}{'...'}</code>
+                {k.description ? <p className="text-xs text-white/50 mt-0.5">{String(k.description)}</p> : null}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => rotateKey(k.id as string)} className="text-[11px] text-blue-400/60 hover:text-blue-400 px-2 py-1 rounded-md">
@@ -2375,7 +2390,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       {/* Danger Zone */}
       <div className="border border-red-500/10 rounded-xl p-4">
         <h3 className="text-sm font-medium text-red-400/60 mb-1">Danger Zone</h3>
-        <p className="text-xs text-white/20 mb-3">Revoking all keys will lock you out of the API. You&apos;ll need to create a new key through the dashboard.</p>
+        <p className="text-xs text-white/50 mb-3">Revoking all keys will lock you out of the API. You&apos;ll need to create a new key through the dashboard.</p>
         <button
           onClick={async () => {
             if (!confirm('Are you sure you want to revoke ALL API keys? This will lock you out of the API. You will need to create a new key through the dashboard.')) return;
@@ -2411,11 +2426,11 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
       <div 
-        className="relative w-full max-w-lg bg-[#111] border-l border-white/[0.06] h-full overflow-y-auto shadow-2xl"
+        className="relative w-full max-w-lg bg-[#111] border-l border-white/[0.14] h-full overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-[#111] border-b border-white/[0.06] px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-[#111] border-b border-white/[0.14] px-6 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
             <span className={`text-xs font-medium px-2 py-0.5 rounded ${
               action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-500/10 text-emerald-400' :
@@ -2423,35 +2438,35 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
             }`}>{action.status}</span>
             <span className="text-sm font-medium text-white/80">{action.action}</span>
           </div>
-          <button onClick={onClose} className="text-white/30 hover:text-white/60 text-lg transition-colors">✕</button>
+          <button onClick={onClose} className="text-white/60 hover:text-white/60 text-lg transition-colors">✕</button>
         </div>
 
         <div className="px-6 py-5 space-y-6">
           {/* Summary */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-1">Agent</p>
+              <p className="text-[10px] uppercase text-white/55 mb-1">Agent</p>
               <p className="text-sm font-mono text-white/80">{action.agent_name}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-1">Service</p>
+              <p className="text-[10px] uppercase text-white/55 mb-1">Service</p>
               <p className="text-sm text-blue-400">{action.service}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-1">Duration</p>
+              <p className="text-[10px] uppercase text-white/55 mb-1">Duration</p>
               <p className="text-sm text-white/60">{action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-1">Cost</p>
+              <p className="text-[10px] uppercase text-white/55 mb-1">Cost</p>
               <p className="text-sm text-white/60">{action.estimated_cost_cents > 0 ? formatCost(action.estimated_cost_cents) : '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-1">Timestamp</p>
+              <p className="text-[10px] uppercase text-white/55 mb-1">Timestamp</p>
               <p className="text-sm text-white/60">{new Date(action.created_at).toLocaleString()}</p>
             </div>
             {action.trace_id ? (
               <div>
-                <p className="text-[10px] uppercase text-white/25 mb-1">Trace ID</p>
+                <p className="text-[10px] uppercase text-white/55 mb-1">Trace ID</p>
                 {onOpenTrace ? (
                   <button
                     onClick={() => onOpenTrace(action.trace_id!)}
@@ -2469,14 +2484,14 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
 
           {/* ID */}
           <div>
-            <p className="text-[10px] uppercase text-white/25 mb-1">Action ID</p>
-            <p className="text-xs font-mono text-white/30 break-all">{action.id}</p>
+            <p className="text-[10px] uppercase text-white/55 mb-1">Action ID</p>
+            <p className="text-xs font-mono text-white/60 break-all">{action.id}</p>
           </div>
 
           {/* Input */}
           {hasInput ? (
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-2">Input</p>
+              <p className="text-[10px] uppercase text-white/55 mb-2">Input</p>
               <pre className="text-[11px] text-emerald-300/70 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(action.input, null, 2)}
               </pre>
@@ -2486,7 +2501,7 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
           {/* Output */}
           {hasOutput ? (
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-2">Output</p>
+              <p className="text-[10px] uppercase text-white/55 mb-2">Output</p>
               <pre className="text-[11px] text-blue-300/70 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(action.output, null, 2)}
               </pre>
@@ -2496,8 +2511,8 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
           {/* Metadata */}
           {hasMeta ? (
             <div>
-              <p className="text-[10px] uppercase text-white/25 mb-2">Metadata</p>
-              <pre className="text-[11px] text-white/30 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
+              <p className="text-[10px] uppercase text-white/55 mb-2">Metadata</p>
+              <pre className="text-[11px] text-white/60 font-mono bg-black/40 rounded-lg p-3 overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
                 {JSON.stringify(meta, null, 2)}
               </pre>
             </div>
@@ -2505,9 +2520,9 @@ function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onC
 
           {/* No data hint */}
           {!hasInput && !hasOutput && !hasMeta && (
-            <div className="bg-white/[0.02] rounded-lg border border-white/[0.04] p-4 text-center">
-              <p className="text-xs text-white/20 mb-2">No input/output data recorded</p>
-              <p className="text-[10px] text-white/10">Tip: Pass <code className="text-blue-400/50">input</code> and <code className="text-blue-400/50">captureOutput: true</code> in the SDK to see request/response data here.</p>
+            <div className="bg-white/[0.12] rounded-lg border border-white/[0.12] p-4 text-center">
+              <p className="text-xs text-white/50 mb-2">No input/output data recorded</p>
+              <p className="text-[10px] text-white/40">Tip: Pass <code className="text-blue-400/50">input</code> and <code className="text-blue-400/50">captureOutput: true</code> in the SDK to see request/response data here.</p>
             </div>
           )}
         </div>
@@ -2524,16 +2539,16 @@ function TraceGroup({ traceId, actions, onOpenAction, onOpenTrace }: { traceId: 
   const totalDuration = sorted.reduce((sum, a) => sum + (a.duration_ms || 0), 0);
 
   return (
-    <div className={`bg-white/[0.02] rounded-xl border ${hasError ? 'border-red-500/15' : 'border-purple-500/15'} mb-3 overflow-hidden`}>
+    <div className={`bg-white/[0.12] rounded-xl border ${hasError ? 'border-red-500/15' : 'border-purple-500/15'} mb-3 overflow-hidden`}>
       <div 
-        className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors"
+        className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/[0.12] transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3">
           <span className="text-purple-400 text-xs">⟐</span>
           <span className="text-xs font-mono text-purple-400/70">{traceId}</span>
-          <span className="text-[10px] text-white/20">{sorted.length} steps</span>
-          <span className="text-[10px] text-white/20">{totalDuration}ms total</span>
+          <span className="text-[10px] text-white/50">{sorted.length} steps</span>
+          <span className="text-[10px] text-white/50">{totalDuration}ms total</span>
           {hasError && <span className="text-[10px] text-red-400">has errors</span>}
         </div>
         <div className="flex items-center gap-2">
@@ -2546,16 +2561,16 @@ function TraceGroup({ traceId, actions, onOpenAction, onOpenTrace }: { traceId: 
               Timeline
             </button>
           )}
-          <span className="text-white/20 text-xs">{expanded ? '▾' : '▸'}</span>
+          <span className="text-white/50 text-xs">{expanded ? '▾' : '▸'}</span>
         </div>
       </div>
       {expanded && (
-        <div className="border-t border-white/[0.04]">
+        <div className="border-t border-white/[0.12]">
           {sorted.map((action, idx) => (
             <div 
               key={action.id}
               onClick={() => onOpenAction(action)}
-              className="px-4 py-2.5 flex items-center gap-3 hover:bg-white/[0.02] cursor-pointer transition-colors border-b border-white/[0.02] last:border-0"
+              className="px-4 py-2.5 flex items-center gap-3 hover:bg-white/[0.12] cursor-pointer transition-colors border-b border-white/[0.10] last:border-0"
             >
               {/* Step indicator */}
               <div className="flex flex-col items-center w-6 flex-shrink-0">
@@ -2563,16 +2578,16 @@ function TraceGroup({ traceId, actions, onOpenAction, onOpenTrace }: { traceId: 
                   action.status === 'success' || action.status === 'allowed' ? 'bg-emerald-400' :
                   action.status === 'error' ? 'bg-red-400' : 'bg-amber-400'
                 }`} />
-                {idx < sorted.length - 1 && <div className="w-px h-4 bg-white/[0.06] mt-0.5" />}
+                {idx < sorted.length - 1 && <div className="w-px h-4 bg-white/[0.12] mt-0.5" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-blue-400">{action.service}</span>
-                  <span className="text-white/15">·</span>
+                  <span className="text-white/50">·</span>
                   <span className="text-xs text-white/50">{action.action}</span>
                 </div>
               </div>
-              <span className="text-[10px] text-white/20 flex-shrink-0">{action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}</span>
+              <span className="text-[10px] text-white/50 flex-shrink-0">{action.duration_ms > 0 ? `${action.duration_ms}ms` : '—'}</span>
             </div>
           ))}
         </div>
@@ -2651,32 +2666,33 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-medium text-white/60 mb-1">Notifications</h3>
-        <p className="text-xs text-white/20">Get alerted via Slack or email when things go wrong.</p>
+        <h3 className="text-sm font-medium text-white/90 mb-1">Notifications</h3>
+        <p className="text-xs text-white/60">Get alerted via Slack, Discord, PagerDuty, or email when things go wrong.</p>
       </div>
 
       {/* Slack */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-4">
+      <div className="bg-white/[0.06] rounded-xl border border-white/[0.16] p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">💬</span>
-            <h4 className="text-sm font-medium">Slack</h4>
-            {slackActive && <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase">active</span>}
+            <h4 className="text-sm font-medium text-white">Slack</h4>
+            {slackActive && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-medium">active</span>}
           </div>
         </div>
         <div>
-          <label className="text-xs text-white/30 block mb-1">Webhook URL</label>
+          <label className="text-xs text-white/80 block mb-1">Webhook URL</label>
           <input
             type="url"
             value={slackUrl}
             onChange={e => setSlackUrl(e.target.value)}
             placeholder="https://hooks.slack.com/services/..."
-            className="w-full bg-black/30 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/15 focus:border-blue-500/50 focus:outline-none"
+            className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+            style={{ backgroundColor: '#1e1e22', borderWidth: '1px', borderColor: '#3a3a42', color: '#f0f0f0' }}
           />
-          <p className="text-[10px] text-white/15 mt-1">Create an incoming webhook in your Slack workspace settings.</p>
+          <p className="text-[11px] text-white/50 mt-1.5">Create an incoming webhook in your Slack workspace settings.</p>
         </div>
         <div>
-          <label className="text-xs text-white/30 block mb-2">Events</label>
+          <label className="text-xs text-white/80 block mb-2">Events</label>
           <div className="flex flex-wrap gap-2">
             {ALL_EVENTS.map(e => (
               <button
@@ -2684,8 +2700,8 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
                 onClick={() => toggleEvent(slackEvents, setSlackEvents, e.key)}
                 className={`text-[11px] px-2.5 py-1 rounded-lg transition-colors ${
                   slackEvents.includes(e.key)
-                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
-                    : 'bg-white/[0.03] text-white/30 border border-white/[0.04] hover:border-white/10'
+                    ? 'bg-blue-500/25 text-blue-300 border border-blue-500/30'
+                    : 'bg-white/[0.10] text-white/70 border border-white/[0.16] hover:border-white/[0.24]'
                 }`}
                 title={e.desc}
               >
@@ -2697,33 +2713,33 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
         <button
           onClick={() => saveChannel('slack')}
           disabled={!slackUrl || saving}
-          className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
+          className="text-xs bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium border border-blue-500/25"
         >
           {saving ? 'Saving...' : slackActive ? 'Update Slack' : 'Enable Slack'}
         </button>
       </div>
 
       {/* Email */}
-      <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5 space-y-4">
+      <div className="bg-white/[0.06] rounded-xl border border-white/[0.16] p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">📧</span>
-            <h4 className="text-sm font-medium">Email</h4>
-            {emailActive && <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase">active</span>}
+            <h4 className="text-sm font-medium text-white">Email</h4>
+            {emailActive && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-medium">active</span>}
           </div>
         </div>
         <div>
-          <label className="text-xs text-white/30 block mb-1">Email Address</label>
+          <label className="text-xs text-white/80 block mb-1">Email Address</label>
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="alerts@yourcompany.com"
-            className="w-full bg-black/30 border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-white placeholder-white/15 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-3 py-2 text-sm text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none"
           />
         </div>
         <div>
-          <label className="text-xs text-white/30 block mb-2">Events</label>
+          <label className="text-xs text-white/80 block mb-2">Events</label>
           <div className="flex flex-wrap gap-2">
             {ALL_EVENTS.map(e => (
               <button
@@ -2731,8 +2747,8 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
                 onClick={() => toggleEvent(emailEvents, setEmailEvents, e.key)}
                 className={`text-[11px] px-2.5 py-1 rounded-lg transition-colors ${
                   emailEvents.includes(e.key)
-                    ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20'
-                    : 'bg-white/[0.03] text-white/30 border border-white/[0.04] hover:border-white/10'
+                    ? 'bg-blue-500/25 text-blue-300 border border-blue-500/30'
+                    : 'bg-white/[0.10] text-white/70 border border-white/[0.16] hover:border-white/[0.24]'
                 }`}
                 title={e.desc}
               >
@@ -2744,7 +2760,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
         <button
           onClick={() => saveChannel('email')}
           disabled={!email || saving}
-          className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium"
+          className="text-xs bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-30 px-4 py-2 rounded-lg transition-colors font-medium border border-blue-500/25"
         >
           {saving ? 'Saving...' : emailActive ? 'Update Email' : 'Enable Email'}
         </button>
@@ -2767,13 +2783,13 @@ function StatCard({ label, value, sub, accent = 'white', trend }: {
 
   const trendColor = trend?.color === 'emerald' ? 'text-emerald-400' :
     trend?.color === 'red' ? 'text-red-400' :
-    trend?.color === 'amber' ? 'text-amber-400' : 'text-white/30';
+    trend?.color === 'amber' ? 'text-amber-400' : 'text-white/60';
 
   return (
-    <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+    <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
       <p className="text-xs text-white/40 mb-2">{label}</p>
       <p className={`text-2xl font-bold ${accentColor}`}>{value}</p>
-      <p className="text-xs text-white/30 mt-1">{sub}</p>
+      <p className="text-xs text-white/60 mt-1">{sub}</p>
       {trend && <p className={`text-[11px] ${trendColor} mt-1`}>{trend.text}</p>}
     </div>
   );

@@ -182,7 +182,7 @@ CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_org ON webhook_deliveries(org_
 CREATE TABLE IF NOT EXISTS notification_settings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   org_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  channel TEXT NOT NULL CHECK (channel IN ('email', 'slack')),
+  channel TEXT NOT NULL CHECK (channel IN ('email', 'slack', 'discord', 'pagerduty')),
   config JSONB NOT NULL DEFAULT '{}',
   events TEXT[] NOT NULL DEFAULT '{}',
   active BOOLEAN NOT NULL DEFAULT true,

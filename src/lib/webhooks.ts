@@ -8,7 +8,8 @@ export type WebhookEvent =
   | 'agent.resumed'
   | 'budget.exceeded'
   | 'budget.warning'
-  | 'alert.created';
+  | 'alert.created'
+  | 'batch.logged';
 
 interface WebhookPayload {
   event: WebhookEvent;

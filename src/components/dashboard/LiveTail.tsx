@@ -219,25 +219,25 @@ export default function LiveTail({ apiKey, environment, agentFilter }: LiveTailP
       : 'Disconnected';
 
   return (
-    <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] flex flex-col" style={{ maxHeight: '600px' }}>
+    <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] flex flex-col" style={{ maxHeight: '600px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.14]">
         <div className="flex items-center gap-3">
           <h3 className="text-sm font-medium text-white/70">Live Tail</h3>
           <div className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${connectionColor}`} />
-            <span className="text-[11px] text-white/30">{connectionLabel}</span>
+            <span className="text-[11px] text-white/60">{connectionLabel}</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-white/30 tabular-nums">{actionRate} actions/min</span>
+          <span className="text-[11px] text-white/60 tabular-nums">{actionRate} actions/min</span>
 
           <button
             onClick={handlePauseResume}
             className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${
               paused
                 ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
-                : 'bg-white/[0.03] text-white/40 hover:text-white/60 hover:bg-white/[0.06]'
+                : 'bg-white/[0.08] text-white/40 hover:text-white/60 hover:bg-white/[0.12]'
             }`}
           >
             {paused ? (
@@ -256,7 +256,7 @@ export default function LiveTail({ apiKey, environment, agentFilter }: LiveTailP
 
           <button
             onClick={handleClear}
-            className="text-xs text-white/30 hover:text-white/50 px-2.5 py-1.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+            className="text-xs text-white/60 hover:text-white/50 px-2.5 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] transition-colors"
           >
             Clear
           </button>
@@ -268,8 +268,8 @@ export default function LiveTail({ apiKey, environment, agentFilter }: LiveTailP
         {actions.length === 0 ? (
           <div className="flex items-center justify-center h-48">
             <div className="text-center">
-              <p className="text-white/30 text-sm mb-1">Waiting for actions...</p>
-              <p className="text-white/15 text-xs">Actions will appear here in real time as they are logged.</p>
+              <p className="text-white/60 text-sm mb-1">Waiting for actions...</p>
+              <p className="text-white/50 text-xs">Actions will appear here in real time as they are logged.</p>
             </div>
           </div>
         ) : (
@@ -277,31 +277,31 @@ export default function LiveTail({ apiKey, environment, agentFilter }: LiveTailP
             {actions.map((action, i) => (
               <div
                 key={action.id || `${action.created_at}-${i}`}
-                className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-colors text-[13px]"
+                className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.06] transition-colors text-[13px]"
               >
                 {/* Status dot */}
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[action.status] || 'bg-gray-400'}`} />
 
                 {/* Timestamp */}
-                <span className="text-white/30 font-mono text-xs tabular-nums w-[64px] flex-shrink-0">
+                <span className="text-white/60 font-mono text-xs tabular-nums w-[64px] flex-shrink-0">
                   {formatTimestamp(action.created_at)}
                 </span>
 
                 {/* Agent -> Service */}
                 <span className="text-white/70 truncate min-w-0 max-w-[140px]">{action.agent_name}</span>
-                <span className="text-white/15 flex-shrink-0">&rarr;</span>
+                <span className="text-white/50 flex-shrink-0">&rarr;</span>
                 <span className="text-blue-400/70 truncate min-w-0 max-w-[100px]">{action.service}</span>
 
                 {/* Action name */}
                 <span className="text-white/50 truncate min-w-0 flex-1">{action.action}</span>
 
                 {/* Duration */}
-                <span className="text-white/30 font-mono text-xs tabular-nums w-[56px] text-right flex-shrink-0">
+                <span className="text-white/60 font-mono text-xs tabular-nums w-[56px] text-right flex-shrink-0">
                   {formatDuration(action.duration_ms)}
                 </span>
 
                 {/* Cost */}
-                <span className="text-white/30 font-mono text-xs tabular-nums w-[56px] text-right flex-shrink-0">
+                <span className="text-white/60 font-mono text-xs tabular-nums w-[56px] text-right flex-shrink-0">
                   {formatCost(action.estimated_cost_cents)}
                 </span>
               </div>
@@ -311,8 +311,8 @@ export default function LiveTail({ apiKey, environment, agentFilter }: LiveTailP
       </div>
 
       {/* Footer */}
-      <div className="border-t border-white/[0.06] px-4 py-2 flex items-center justify-between">
-        <span className="text-[11px] text-white/20">{actions.length} actions in feed</span>
+      <div className="border-t border-white/[0.14] px-4 py-2 flex items-center justify-between">
+        <span className="text-[11px] text-white/50">{actions.length} actions in feed</span>
         {paused && bufferRef.current.length > 0 && (
           <span className="text-[11px] text-amber-400/60">{bufferRef.current.length} buffered</span>
         )}

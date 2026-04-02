@@ -63,22 +63,22 @@ export default function EnvironmentSelector({ apiKey, environment, onChange }: E
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-1.5 text-[12px] text-white/70 hover:bg-white/[0.06] transition-colors"
+        className="flex items-center gap-2 bg-white/[0.10] border border-white/[0.14] rounded-lg px-3 py-1.5 text-[12px] text-white/70 hover:bg-white/[0.12] transition-colors"
       >
         <span className={`w-2 h-2 rounded-full ${currentDotColor}`} />
         <span className="capitalize">{currentLabel}</span>
-        <svg className={`w-3 h-3 text-white/30 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className={`w-3 h-3 text-white/60 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-44 bg-[#141416] border border-white/[0.08] rounded-lg shadow-xl z-50 py-1 overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 w-44 bg-[#141416] border border-white/[0.16] rounded-lg shadow-xl z-50 py-1 overflow-hidden">
           {/* All option */}
           <button
             onClick={() => { onChange(''); setOpen(false); }}
-            className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] text-left transition-colors hover:bg-white/[0.06] ${
-              !environment ? 'bg-white/[0.04] text-white' : 'text-white/60'
+            className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] text-left transition-colors hover:bg-white/[0.12] ${
+              !environment ? 'bg-white/[0.10] text-white' : 'text-white/60'
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-white/20" />
@@ -89,8 +89,8 @@ export default function EnvironmentSelector({ apiKey, environment, onChange }: E
             <button
               key={env}
               onClick={() => { onChange(env); setOpen(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] text-left transition-colors hover:bg-white/[0.06] ${
-                environment === env ? 'bg-white/[0.04] text-white' : 'text-white/60'
+              className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] text-left transition-colors hover:bg-white/[0.12] ${
+                environment === env ? 'bg-white/[0.10] text-white' : 'text-white/60'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${getEnvDotColor(env)}`} />
@@ -99,7 +99,7 @@ export default function EnvironmentSelector({ apiKey, environment, onChange }: E
           ))}
 
           {environments.length === 0 && (
-            <div className="px-3 py-2 text-[11px] text-white/20">No environments found</div>
+            <div className="px-3 py-2 text-[11px] text-white/50">No environments found</div>
           )}
         </div>
       )}

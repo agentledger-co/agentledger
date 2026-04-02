@@ -65,15 +65,42 @@ npm install agentledger
 **📊 Live Dashboard** — every action, cost, and error in real-time  
 **💰 Budget Controls** — hourly/daily/weekly/monthly spend limits per agent  
 **🛑 Kill Switch** — pause or kill any agent instantly from dashboard or SDK  
-**🚨 Alerts** — notifications when agents exceed budgets or spike in activity  
-**🔗 Webhooks** — HTTP callbacks for action.logged, budget.exceeded, agent.killed  
-**✈️ Pre-flight Checks** — block actions before they happen if agent is over budget  
+**🚨 Alerts** — Slack, Discord, PagerDuty, and email notifications  
+**🛡️ Policy Templates** — pre-built rule sets (conservative, compliance, cost-conscious) with one-click apply  
+**📈 Cost Forecasting** — predict future spend with linear regression and budget overrun warnings  
+**📊 Advanced Analytics** — multi-day trends, daily/hourly granularity, service & agent breakdowns  
+**🔗 Trace Replay** — step through agent traces action-by-action with full input/output inspection  
+**📦 Batch Logging** — log up to 100 actions per request for high-throughput agents  
+**📤 Data Export** — export action logs as CSV or JSON for compliance and reporting  
+**⌨️ CLI Tool** — `npx agentledger-cli` for tail, stats, pause/kill from the terminal  
+**🔒 Global Rate Limiting** — API-level token bucket rate limiter with standard headers  
 **0️⃣ Zero Dependencies** — the SDK has no external dependencies  
 **🔓 Fail-Open** — if AgentLedger is down, your agents keep running  
 
+## CLI
+
+```bash
+npx agentledger-cli stats       # Dashboard summary
+npx agentledger-cli actions     # List recent actions
+npx agentledger-cli tail        # Live stream of actions
+npx agentledger-cli forecast    # Cost forecasts
+npx agentledger-cli export --from 2025-01-01 --to 2025-01-31
+```
+
 ## Framework Integrations
 
-Works with any agent framework. Built-in integrations for:
+Works with any agent framework. Built-in integrations for **8 frameworks**:
+
+| Framework | Import |
+|-----------|--------|
+| LangChain | `agentledger/integrations/langchain` |
+| OpenAI Agents | `agentledger/integrations/openai` |
+| MCP Servers | `agentledger/integrations/mcp` |
+| Express | `agentledger/integrations/express` |
+| CrewAI | `agentledger/integrations/crewai` |
+| AutoGen | `agentledger/integrations/autogen` |
+| LlamaIndex | `agentledger/integrations/llamaindex` |
+| Vercel AI SDK | `agentledger/integrations/vercel-ai` |
 
 ### LangChain
 ```typescript
@@ -82,23 +109,18 @@ const callback = new AgentLedgerCallback({ apiKey: 'al_...', agent: 'my-bot' });
 const chain = new LLMChain({ llm, prompt, callbacks: [callback] });
 ```
 
-### OpenAI
+### Vercel AI SDK
 ```typescript
-import { wrapOpenAI } from 'agentledger/integrations/openai';
-const openai = wrapOpenAI(new OpenAI(), { apiKey: 'al_...', agent: 'my-bot' });
-// All calls automatically tracked
+import { createVercelAIMiddleware } from 'agentledger/integrations/vercel-ai';
+const middleware = createVercelAIMiddleware(ledger, { agent: 'my-app' });
+const result = await generateText({ model: openai('gpt-4o'), prompt: '...' });
+middleware.onFinish(result);
 ```
 
-### MCP (Model Context Protocol)
+### CrewAI
 ```typescript
-import { wrapMCPServer } from 'agentledger/integrations/mcp';
-wrapMCPServer(mcpServer, { apiKey: 'al_...', agent: 'my-mcp' });
-```
-
-### Express
-```typescript
-import { agentLedgerMiddleware } from 'agentledger/integrations/express';
-app.use('/api/agent', agentLedgerMiddleware({ apiKey: 'al_...', agent: 'api-bot' }));
+import { createCrewAICallback } from 'agentledger/integrations/crewai';
+const callback = createCrewAICallback(ledger, { agent: 'my-crew' });
 ```
 
 ## SDK API
@@ -124,6 +146,24 @@ await ledger.log({ agent, service, action, status, durationMs });
 await ledger.pauseAgent('my-bot');
 await ledger.resumeAgent('my-bot');
 await ledger.killAgent('my-bot');
+
+// Batch logging (up to 100 actions)
+await ledger.logBatch([
+  { agent: 'bot', service: 'openai', action: 'completion', costCents: 5 },
+  { agent: 'bot', service: 'slack', action: 'send', costCents: 0 },
+]);
+
+// Data export
+const csv = await ledger.export({ from: '2025-01-01', to: '2025-01-31', format: 'csv' });
+
+// Cost forecasting
+const forecast = await ledger.forecast({ daysBack: 30, forecastDays: 30 });
+
+// Advanced analytics
+const analytics = await ledger.analytics({ days: 30, granularity: 'daily' });
+
+// Policy templates
+await ledger.applyPolicyTemplate('conservative', 'my-bot');
 ```
 
 ## REST API
@@ -145,6 +185,11 @@ All endpoints require `Authorization: Bearer al_...` header.
 | `GET` | `/api/v1/alerts` | List alerts |
 | `POST` | `/api/v1/alerts/acknowledge` | Acknowledge alerts |
 | `GET/POST/DELETE/PATCH` | `/api/v1/webhooks` | Manage webhooks |
+| `POST` | `/api/v1/actions/batch` | Batch log up to 100 actions |
+| `GET` | `/api/v1/export` | Export actions as CSV or JSON |
+| `GET` | `/api/v1/forecast` | Cost forecasting with trends |
+| `GET` | `/api/v1/analytics` | Advanced analytics & breakdowns |
+| `GET/POST` | `/api/v1/policies/templates` | List/apply policy templates |
 
 ## Architecture
 

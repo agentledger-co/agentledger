@@ -60,7 +60,7 @@ const ENTRIES = [
 export default function ChangelogPage() {
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
-      <nav className="border-b border-white/[0.06] px-6 py-4 sticky top-0 bg-[#08080a]/80 backdrop-blur-2xl z-50">
+      <nav className="border-b border-white/[0.14] px-6 py-4 sticky top-0 bg-[#08080a]/80 backdrop-blur-2xl z-50">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -68,7 +68,7 @@ export default function ChangelogPage() {
             </div>
             <span className="text-lg font-semibold tracking-tight">AgentLedger</span>
           </Link>
-          <Link href="/" className="text-[13px] text-white/30 hover:text-white/70 transition-colors">
+          <Link href="/" className="text-[13px] text-white/60 hover:text-white/70 transition-colors">
             Back to home
           </Link>
         </div>
@@ -76,15 +76,15 @@ export default function ChangelogPage() {
 
       <div className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-[32px] font-bold mb-2 tracking-tight">Changelog</h1>
-        <p className="text-white/30 text-[15px] mb-12">What&apos;s new in AgentLedger.</p>
+        <p className="text-white/60 text-[15px] mb-12">What&apos;s new in AgentLedger.</p>
 
         <div className="space-y-12">
           {ENTRIES.map(entry => (
-            <div key={entry.version} className="relative pl-8 border-l border-white/[0.06]">
+            <div key={entry.version} className="relative pl-8 border-l border-white/[0.14]">
               <div className="absolute left-0 top-0 w-2 h-2 rounded-full bg-blue-500 -translate-x-[5px]" />
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-[11px] font-mono bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-full border border-blue-500/20">{entry.version}</span>
-                <span className="text-[13px] text-white/25">{entry.date}</span>
+                <span className="text-[13px] text-white/55">{entry.date}</span>
               </div>
               <h2 className="text-[20px] font-semibold mb-4">{entry.title}</h2>
               <ul className="space-y-2.5">

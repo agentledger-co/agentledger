@@ -53,7 +53,7 @@ function scoreBadgeBg(score: number): string {
 const LABEL_COLORS: Record<string, string> = {
   good: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   bad: 'bg-red-500/10 text-red-400 border-red-500/20',
-  neutral: 'bg-white/[0.04] text-white/40 border-white/[0.06]',
+  neutral: 'bg-white/[0.10] text-white/40 border-white/[0.14]',
   harmful: 'bg-red-500/10 text-red-400 border-red-500/20',
   helpful: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   accurate: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -89,19 +89,19 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading evaluations...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading evaluations...</div>;
 
   if (!evalStats || (evalStats.totalEvaluations === 0 && evaluations.length === 0)) {
     return (
       <div className="space-y-4">
         <div>
           <h3 className="text-sm font-medium text-white/70">Evaluations</h3>
-          <p className="text-xs text-white/30 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
+          <p className="text-xs text-white/60 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x1F4CA;</div>
-          <p className="text-white/30 text-sm font-medium mb-2">No evaluations yet</p>
-          <p className="text-white/15 text-xs">Submit evaluations via the API to track agent quality and performance over time.</p>
+          <p className="text-white/60 text-sm font-medium mb-2">No evaluations yet</p>
+          <p className="text-white/50 text-xs">Submit evaluations via the API to track agent quality and performance over time.</p>
         </div>
       </div>
     );
@@ -119,25 +119,25 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
     <div className="space-y-6">
       <div>
         <h3 className="text-sm font-medium text-white/70">Evaluations</h3>
-        <p className="text-xs text-white/30 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
+        <p className="text-xs text-white/60 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
       </div>
 
       {/* Overview cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-          <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Average Score</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
+          <p className="text-[11px] text-white/60 uppercase tracking-wider mb-1">Average Score</p>
           <p className={`text-3xl font-bold ${scoreColor(evalStats.avgScore)}`}>
             {evalStats.avgScore.toFixed(1)}
           </p>
-          <p className="text-[11px] text-white/20 mt-1">out of 100</p>
+          <p className="text-[11px] text-white/50 mt-1">out of 100</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-          <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Total Evaluations</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
+          <p className="text-[11px] text-white/60 uppercase tracking-wider mb-1">Total Evaluations</p>
           <p className="text-3xl font-bold text-white/80">{evalStats.totalEvaluations.toLocaleString()}</p>
-          <p className="text-[11px] text-white/20 mt-1">all time</p>
+          <p className="text-[11px] text-white/50 mt-1">all time</p>
         </div>
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-          <p className="text-[11px] text-white/30 uppercase tracking-wider mb-1">Top Agent</p>
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
+          <p className="text-[11px] text-white/60 uppercase tracking-wider mb-1">Top Agent</p>
           {topAgent ? (
             <>
               <p className="text-lg font-semibold text-white/70 truncate">{topAgent.agent_name}</p>
@@ -146,14 +146,14 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
               </p>
             </>
           ) : (
-            <p className="text-white/20 text-sm">No data</p>
+            <p className="text-white/50 text-sm">No data</p>
           )}
         </div>
       </div>
 
       {/* Score trend chart */}
       {evalStats.trend && evalStats.trend.length > 1 && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h4 className="text-sm font-medium text-white/60 mb-4">Score Trend</h4>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={evalStats.trend}>
@@ -199,34 +199,34 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
 
       {/* Per-agent breakdown */}
       {evalStats.byAgent && evalStats.byAgent.length > 0 && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/[0.14]">
             <h4 className="text-sm font-medium text-white/60">Per-Agent Breakdown</h4>
           </div>
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Agent</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Avg Score</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Evaluations</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 w-1/3">Score</th>
+              <tr className="border-b border-white/[0.14]">
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Avg Score</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Evaluations</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 w-1/3">Score</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {evalStats.byAgent.map(agent => (
-                <tr key={agent.agent_name} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={agent.agent_name} className="hover:bg-white/[0.06] transition-colors">
                   <td className="px-4 py-3 text-white/70 font-medium">{agent.agent_name}</td>
                   <td className={`px-4 py-3 font-medium ${scoreColor(agent.avg_score)}`}>{agent.avg_score.toFixed(1)}</td>
                   <td className="px-4 py-3 text-white/40 hidden sm:table-cell">{agent.count}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-white/[0.04] rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-white/[0.10] rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${scoreBgColor(agent.avg_score)}`}
                           style={{ width: `${agent.avg_score}%` }}
                         />
                       </div>
-                      <span className="text-[11px] text-white/30 w-8 text-right">{Math.round(agent.avg_score)}</span>
+                      <span className="text-[11px] text-white/60 w-8 text-right">{Math.round(agent.avg_score)}</span>
                     </div>
                   </td>
                 </tr>
@@ -238,13 +238,13 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
 
       {/* Label distribution */}
       {evalStats.byLabel && evalStats.byLabel.length > 0 && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-5">
           <h4 className="text-sm font-medium text-white/60 mb-4">Label Distribution</h4>
           <div className="space-y-2.5">
             {evalStats.byLabel.map(item => (
               <div key={item.label} className="flex items-center gap-3">
                 <span className="text-[13px] text-white/50 w-24 truncate">{item.label}</span>
-                <div className="flex-1 h-5 bg-white/[0.04] rounded-md overflow-hidden">
+                <div className="flex-1 h-5 bg-white/[0.10] rounded-md overflow-hidden">
                   <div
                     className="h-full bg-blue-500/40 rounded-md flex items-center px-2"
                     style={{ width: `${Math.max((item.count / maxLabelCount) * 100, 8)}%` }}
@@ -260,30 +260,30 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
 
       {/* Recent evaluations */}
       {evaluations.length > 0 && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/[0.06]">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/[0.14]">
             <h4 className="text-sm font-medium text-white/60">Recent Evaluations</h4>
           </div>
           <div className="divide-y divide-white/[0.04]">
             {evaluations.map(evaluation => (
-              <div key={evaluation.id} className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
+              <div key={evaluation.id} className="px-4 py-3 hover:bg-white/[0.06] transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-[13px] text-white/60 font-medium">{evaluation.agent_name}</span>
                       {evaluation.action_id && (
-                        <span className="text-[10px] text-white/20 font-mono">#{evaluation.action_id.slice(0, 8)}</span>
+                        <span className="text-[10px] text-white/50 font-mono">#{evaluation.action_id.slice(0, 8)}</span>
                       )}
                       {evaluation.label && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${LABEL_COLORS[evaluation.label.toLowerCase()] || 'bg-white/[0.04] text-white/40 border-white/[0.06]'}`}>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${LABEL_COLORS[evaluation.label.toLowerCase()] || 'bg-white/[0.10] text-white/40 border-white/[0.14]'}`}>
                           {evaluation.label}
                         </span>
                       )}
                     </div>
                     {evaluation.feedback && (
-                      <p className="text-[12px] text-white/30 line-clamp-2">{evaluation.feedback}</p>
+                      <p className="text-[12px] text-white/60 line-clamp-2">{evaluation.feedback}</p>
                     )}
-                    <div className="flex items-center gap-3 mt-1 text-[11px] text-white/20">
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-white/50">
                       {evaluation.evaluated_by && <span>by {evaluation.evaluated_by}</span>}
                       <span>{timeAgo(evaluation.created_at)}</span>
                     </div>

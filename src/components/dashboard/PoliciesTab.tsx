@@ -272,14 +272,14 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
     config: Record<string, string>,
     setConfig: (cfg: Record<string, string>) => void
   ) => {
-    const inputClass = 'w-full bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none';
+    const inputClass = 'w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/50 focus:border-blue-500/50 focus:outline-none';
 
     switch (ruleType) {
       case 'rate_limit':
         return (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Max Actions</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Max Actions</label>
               <input
                 type="number"
                 value={config.max_actions || ''}
@@ -289,7 +289,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
               />
             </div>
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Window (seconds)</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Window (seconds)</label>
               <input
                 type="number"
                 value={config.window_seconds || ''}
@@ -304,7 +304,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
       case 'service_blocklist':
         return (
           <div>
-            <label className="text-[11px] text-white/30 mb-1 block">Services (comma-separated)</label>
+            <label className="text-[11px] text-white/60 mb-1 block">Services (comma-separated)</label>
             <input
               type="text"
               value={config.services || ''}
@@ -317,7 +317,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
       case 'cost_limit_per_action':
         return (
           <div>
-            <label className="text-[11px] text-white/30 mb-1 block">Max Cost (cents)</label>
+            <label className="text-[11px] text-white/60 mb-1 block">Max Cost (cents)</label>
             <input
               type="number"
               value={config.max_cost_cents || ''}
@@ -331,7 +331,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         return (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Patterns (one per line)</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Patterns (one per line)</label>
               <textarea
                 value={config.patterns || ''}
                 onChange={e => setConfig({ ...config, patterns: e.target.value })}
@@ -341,14 +341,14 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
               />
             </div>
             <div>
-              <label className="text-[11px] text-white/30 mb-1.5 block">Apply to fields</label>
+              <label className="text-[11px] text-white/60 mb-1.5 block">Apply to fields</label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 text-[13px] text-white/60 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={config.fields_input === 'true'}
                     onChange={e => setConfig({ ...config, fields_input: String(e.target.checked) })}
-                    className="rounded border-white/20 bg-white/[0.04] text-blue-500 focus:ring-blue-500/30"
+                    className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30"
                   />
                   Input
                 </label>
@@ -357,7 +357,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
                     type="checkbox"
                     checked={config.fields_output === 'true'}
                     onChange={e => setConfig({ ...config, fields_output: String(e.target.checked) })}
-                    className="rounded border-white/20 bg-white/[0.04] text-blue-500 focus:ring-blue-500/30"
+                    className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30"
                   />
                   Output
                 </label>
@@ -369,7 +369,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         return (
           <div className="space-y-3">
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Services (comma-separated, empty = all)</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Services (comma-separated, empty = all)</label>
               <input
                 type="text"
                 value={config.services || ''}
@@ -379,7 +379,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
               />
             </div>
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Actions (comma-separated, empty = all)</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Actions (comma-separated, empty = all)</label>
               <input
                 type="text"
                 value={config.actions || ''}
@@ -395,19 +395,19 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
     }
   };
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading policies...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading policies...</div>;
 
   return (
     <div className="space-y-4">
       {/* Delete confirmation modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold mb-2">Delete Policy?</h3>
             <p className="text-sm text-white/40 mb-4">This will permanently remove this policy rule. Agents will no longer be subject to this constraint.</p>
             <div className="flex gap-3">
               <button onClick={() => deletePolicy(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Delete</button>
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.06]">Cancel</button>
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
             </div>
           </div>
         </div>
@@ -416,20 +416,20 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
       {/* Edit modal */}
       {editingId && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setEditingId(null)}>
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 max-w-lg w-full mx-4 space-y-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-lg w-full mx-4 space-y-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold">Edit Policy</h3>
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Agent Name (empty = all agents)</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Agent Name (empty = all agents)</label>
               <input
                 type="text"
                 value={editAgent}
                 onChange={e => setEditAgent(e.target.value)}
                 placeholder="All agents"
-                className="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Rule Type</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Rule Type</label>
               <select
                 value={editRuleType}
                 onChange={e => {
@@ -437,7 +437,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
                   setEditRuleType(rt);
                   setEditConfig(getDefaultConfig(rt));
                 }}
-                className="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
               >
                 {RULE_TYPES.map(rt => (
                   <option key={rt} value={rt} className="bg-[#1a1a1a]">{RULE_TYPE_LABELS[rt]}</option>
@@ -446,19 +446,19 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
             </div>
             {renderConfigFields(editRuleType, editConfig, setEditConfig)}
             <div>
-              <label className="text-[11px] text-white/30 mb-1 block">Priority</label>
+              <label className="text-[11px] text-white/60 mb-1 block">Priority</label>
               <input
                 type="number"
                 value={editPriority}
                 onChange={e => setEditPriority(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
+                className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
               />
             </div>
             <div className="flex gap-2 pt-1">
               <button onClick={saveEdit} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
                 Save Changes
               </button>
-              <button onClick={() => setEditingId(null)} className="text-xs text-white/30 hover:text-white/50 px-3 py-2">
+              <button onClick={() => setEditingId(null)} className="text-xs text-white/60 hover:text-white/50 px-3 py-2">
                 Cancel
               </button>
             </div>
@@ -469,7 +469,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-white/70">Policies</h3>
-          <p className="text-xs text-white/30 mt-0.5">Define rules that govern how agents can act: rate limits, service restrictions, cost caps, and approval flows.</p>
+          <p className="text-xs text-white/60 mt-0.5">Define rules that govern how agents can act: rate limits, service restrictions, cost caps, and approval flows.</p>
         </div>
         <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
           + Create Policy
@@ -477,19 +477,19 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
       </div>
 
       {showCreate && (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4 space-y-3">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 space-y-3">
           <div>
-            <label className="text-[11px] text-white/30 mb-1 block">Agent Name (empty = all agents)</label>
+            <label className="text-[11px] text-white/60 mb-1 block">Agent Name (empty = all agents)</label>
             <input
               type="text"
               value={newAgent}
               onChange={e => setNewAgent(e.target.value)}
               placeholder="All agents"
-              className="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+              className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
             />
           </div>
           <div>
-            <label className="text-[11px] text-white/30 mb-1 block">Rule Type</label>
+            <label className="text-[11px] text-white/60 mb-1 block">Rule Type</label>
             <select
               value={newRuleType}
               onChange={e => {
@@ -497,7 +497,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
                 setNewRuleType(rt);
                 setNewConfig(getDefaultConfig(rt));
               }}
-              className="w-full bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
+              className="w-full bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
             >
               {RULE_TYPES.map(rt => (
                 <option key={rt} value={rt} className="bg-[#1a1a1a]">{RULE_TYPE_LABELS[rt]}</option>
@@ -506,20 +506,20 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
           </div>
           {renderConfigFields(newRuleType, newConfig, setNewConfig)}
           <div>
-            <label className="text-[11px] text-white/30 mb-1 block">Priority</label>
+            <label className="text-[11px] text-white/60 mb-1 block">Priority</label>
             <input
               type="number"
               value={newPriority}
               onChange={e => setNewPriority(e.target.value)}
               placeholder="0"
-              className="w-32 bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
+              className="w-32 bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none"
             />
           </div>
           <div className="flex gap-2 pt-1">
-            <button onClick={createPolicy} disabled={creating} className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+            <button onClick={createPolicy} disabled={creating} className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
               {creating ? 'Creating...' : 'Create'}
             </button>
-            <button onClick={() => setShowCreate(false)} className="text-xs text-white/30 hover:text-white/50 px-3 py-2">
+            <button onClick={() => setShowCreate(false)} className="text-xs text-white/60 hover:text-white/50 px-3 py-2">
               Cancel
             </button>
           </div>
@@ -527,33 +527,33 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
       )}
 
       {policies.length === 0 && !showCreate ? (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-8 text-center">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
           <div className="text-2xl mb-3 opacity-30">&#x1F6E1;</div>
-          <p className="text-white/30 text-sm font-medium mb-2">No policies configured</p>
-          <p className="text-white/15 text-xs mb-4">Policies let you enforce rate limits, restrict services, cap costs, and require approvals for agent actions.</p>
+          <p className="text-white/60 text-sm font-medium mb-2">No policies configured</p>
+          <p className="text-white/50 text-xs mb-4">Policies let you enforce rate limits, restrict services, cap costs, and require approvals for agent actions.</p>
           <button onClick={() => setShowCreate(true)} className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20">
             Create your first policy
           </button>
         </div>
       ) : policies.length > 0 ? (
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Agent</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Rule Type</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden md:table-cell">Config</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Enabled</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Priority</th>
-                <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Actions</th>
+              <tr className="border-b border-white/[0.14]">
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Rule Type</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden md:table-cell">Config</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Enabled</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Priority</th>
+                <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {policies.map(policy => (
-                <tr key={policy.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-4 py-3 text-white/70">{policy.agent_name || <span className="text-white/30 italic">All agents</span>}</td>
+                <tr key={policy.id} className="hover:bg-white/[0.06] transition-colors">
+                  <td className="px-4 py-3 text-white/70">{policy.agent_name || <span className="text-white/60 italic">All agents</span>}</td>
                   <td className="px-4 py-3">
-                    <span className="text-[11px] bg-white/[0.04] text-white/50 px-2 py-0.5 rounded-md">
+                    <span className="text-[11px] bg-white/[0.10] text-white/50 px-2 py-0.5 rounded-md">
                       {RULE_TYPE_LABELS[policy.rule_type as RuleType] || policy.rule_type}
                     </span>
                   </td>

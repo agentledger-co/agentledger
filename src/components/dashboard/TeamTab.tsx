@@ -33,7 +33,7 @@ const ROLE_COLORS: Record<string, string> = {
   owner: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   admin: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   member: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  viewer: 'bg-white/[0.06] text-white/40 border-white/10',
+  viewer: 'bg-white/[0.12] text-white/40 border-white/[0.16]',
 };
 
 const ASSIGNABLE_ROLES = ['admin', 'member', 'viewer'] as const;
@@ -181,22 +181,22 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
     }
   };
 
-  const inputClass = 'bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/20 focus:border-blue-500/50 focus:outline-none';
-  const selectClass = 'bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none';
+  const inputClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/50 focus:border-blue-500/50 focus:outline-none';
+  const selectClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none';
 
-  if (loading) return <div className="text-white/30 text-center py-16">Loading team...</div>;
+  if (loading) return <div className="text-white/60 text-center py-16">Loading team...</div>;
 
   return (
     <div className="space-y-6">
       {/* Remove confirmation modal */}
       {removeConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setRemoveConfirm(null)}>
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold mb-2">Remove Member?</h3>
             <p className="text-sm text-white/40 mb-4">This will remove this user from your organization. They will lose access immediately.</p>
             <div className="flex gap-3">
               <button onClick={() => removeMember(removeConfirm)} className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Remove</button>
-              <button onClick={() => setRemoveConfirm(null)} className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.06]">Cancel</button>
+              <button onClick={() => setRemoveConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
             </div>
           </div>
         </div>
@@ -205,12 +205,12 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
       {/* Revoke confirmation modal */}
       {revokeConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setRevokeConfirm(null)}>
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
             <h3 className="font-semibold mb-2">Revoke Invite?</h3>
             <p className="text-sm text-white/40 mb-4">This invite link will no longer work.</p>
             <div className="flex gap-3">
               <button onClick={() => revokeInvite(revokeConfirm)} className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Revoke</button>
-              <button onClick={() => setRevokeConfirm(null)} className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.06]">Cancel</button>
+              <button onClick={() => setRevokeConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
             </div>
           </div>
         </div>
@@ -221,23 +221,23 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-sm font-medium text-white/70">Team Members</h3>
-            <p className="text-xs text-white/30 mt-0.5">Manage who has access to your organization.</p>
+            <p className="text-xs text-white/60 mt-0.5">Manage who has access to your organization.</p>
           </div>
         </div>
 
-        <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Email</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Role</th>
-                <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Joined</th>
-                {isManager && <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Actions</th>}
+              <tr className="border-b border-white/[0.14]">
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Email</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Role</th>
+                <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Joined</th>
+                {isManager && <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {members.map(member => (
-                <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={member.id} className="hover:bg-white/[0.06] transition-colors">
                   <td className="px-4 py-3 text-white/70">{member.email}</td>
                   <td className="px-4 py-3">
                     {isManager && member.role !== 'owner' ? (
@@ -257,7 +257,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-white/30 hidden sm:table-cell">{timeAgo(member.created_at)}</td>
+                  <td className="px-4 py-3 text-white/60 hidden sm:table-cell">{timeAgo(member.created_at)}</td>
                   {isManager && (
                     <td className="px-4 py-3 text-right">
                       {member.role !== 'owner' && (
@@ -281,7 +281,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
       {isManager && (
         <div>
           <h3 className="text-sm font-medium text-white/70 mb-3">Invite Team Member</h3>
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-4">
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
@@ -303,7 +303,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
               <button
                 onClick={sendInvite}
                 disabled={sending || !inviteEmail.trim()}
-                className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/30 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+                className="bg-blue-500 hover:bg-blue-400 disabled:bg-white/10 disabled:text-white/60 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
               >
                 {sending ? 'Sending...' : 'Send Invite'}
               </button>
@@ -316,26 +316,26 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
       {invites.length > 0 && (
         <div>
           <h3 className="text-sm font-medium text-white/70 mb-3">Pending Invites</h3>
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Email</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Role</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden sm:table-cell">Expires</th>
-                  {isManager && <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Actions</th>}
+                <tr className="border-b border-white/[0.14]">
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Email</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Role</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Expires</th>
+                  {isManager && <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {invites.map(invite => (
-                  <tr key={invite.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={invite.id} className="hover:bg-white/[0.06] transition-colors">
                     <td className="px-4 py-3 text-white/70">{invite.email}</td>
                     <td className="px-4 py-3">
                       <span className={`text-[11px] px-2 py-0.5 rounded-md border ${ROLE_COLORS[invite.role] || ROLE_COLORS.viewer}`}>
                         {invite.role}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-white/30 hidden sm:table-cell">{timeAgo(invite.expires_at)}</td>
+                    <td className="px-4 py-3 text-white/60 hidden sm:table-cell">{timeAgo(invite.expires_at)}</td>
                     {isManager && (
                       <td className="px-4 py-3 text-right">
                         <button
@@ -358,34 +358,34 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
       <div>
         <h3 className="text-sm font-medium text-white/70 mb-3">Audit Log</h3>
         {auditLogs.length === 0 ? (
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-6 text-center">
-            <p className="text-white/30 text-sm">No audit events yet</p>
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6 text-center">
+            <p className="text-white/60 text-sm">No audit events yet</p>
           </div>
         ) : (
-          <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] overflow-hidden">
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Action</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3">Resource</th>
-                  <th className="text-left text-[11px] text-white/30 font-medium px-4 py-3 hidden md:table-cell">User</th>
-                  <th className="text-right text-[11px] text-white/30 font-medium px-4 py-3">Time</th>
+                <tr className="border-b border-white/[0.14]">
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Action</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Resource</th>
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden md:table-cell">User</th>
+                  <th className="text-right text-[11px] text-white/60 font-medium px-4 py-3">Time</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {auditLogs.map(log => (
-                  <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={log.id} className="hover:bg-white/[0.06] transition-colors">
                     <td className="px-4 py-2.5">
-                      <span className="text-[11px] bg-white/[0.04] text-white/50 px-2 py-0.5 rounded-md">
+                      <span className="text-[11px] bg-white/[0.10] text-white/50 px-2 py-0.5 rounded-md">
                         {log.action}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-white/40">
                       {log.resource_type}
-                      {log.resource_id && <span className="text-white/20 ml-1">({log.resource_id.slice(0, 8)}...)</span>}
+                      {log.resource_id && <span className="text-white/50 ml-1">({log.resource_id.slice(0, 8)}...)</span>}
                     </td>
-                    <td className="px-4 py-2.5 text-white/30 hidden md:table-cell">{log.user_email || '-'}</td>
-                    <td className="px-4 py-2.5 text-white/30 text-right">{timeAgo(log.created_at)}</td>
+                    <td className="px-4 py-2.5 text-white/60 hidden md:table-cell">{log.user_email || '-'}</td>
+                    <td className="px-4 py-2.5 text-white/60 text-right">{timeAgo(log.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

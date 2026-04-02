@@ -69,7 +69,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
   };
 
   const selectClass =
-    'appearance-none bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none pr-8 cursor-pointer';
+    'appearance-none bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none pr-8 cursor-pointer';
 
   const chevronStyle: React.CSSProperties = {
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
@@ -78,12 +78,12 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
   };
 
   return (
-    <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-3">
+    <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-3">
       <div className="flex flex-wrap items-center gap-2">
         {/* Search */}
         <div className="relative flex-1 min-w-[180px]">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -96,7 +96,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search actions..."
-            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-9 pr-3 py-2 text-[13px] text-white/80 placeholder-white/20 focus:border-blue-500/50 focus:outline-none"
+            className="w-full bg-white/[0.10] border border-white/[0.16] rounded-lg pl-9 pr-3 py-2 text-[13px] text-white/80 placeholder-white/50 focus:border-blue-500/50 focus:outline-none"
           />
         </div>
 
@@ -144,14 +144,14 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
             type="date"
             value={from}
             onChange={e => setFrom(e.target.value)}
-            className={`bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 focus:border-blue-500/50 focus:outline-none [color-scheme:dark] ${from ? 'border-blue-500/30' : ''}`}
+            className={`bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 focus:border-blue-500/50 focus:outline-none [color-scheme:dark] ${from ? 'border-blue-500/30' : ''}`}
           />
-          <span className="text-white/20 text-xs">to</span>
+          <span className="text-white/50 text-xs">to</span>
           <input
             type="date"
             value={to}
             onChange={e => setTo(e.target.value)}
-            className={`bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 focus:border-blue-500/50 focus:outline-none [color-scheme:dark] ${to ? 'border-blue-500/30' : ''}`}
+            className={`bg-white/[0.10] border border-white/[0.16] rounded-lg px-3 py-2 text-[13px] text-white/80 focus:border-blue-500/50 focus:outline-none [color-scheme:dark] ${to ? 'border-blue-500/30' : ''}`}
           />
         </div>
 
@@ -159,7 +159,7 @@ export default function FilterBar({ onFilterChange, agents, services }: FilterBa
         {hasFilters && (
           <button
             onClick={clearAll}
-            className="text-[11px] text-white/30 hover:text-white/60 bg-white/[0.04] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-colors flex items-center gap-1"
+            className="text-[11px] text-white/60 hover:text-white/60 bg-white/[0.10] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-colors flex items-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

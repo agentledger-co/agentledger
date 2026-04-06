@@ -299,12 +299,12 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
 }
 
 const FEATURES = [
-  { icon: '📡', title: 'Live Streaming Feed', desc: 'Real-time SSE streaming of every action. Watch your agents work live with sub-second latency.' },
-  { icon: '🛡️', title: 'Policy Engine & Templates', desc: 'Define rules or apply pre-built templates: conservative, cost-conscious, compliance. Rate limits, allowlists, cost caps, and more.' },
-  { icon: '✋', title: 'Human-in-the-Loop', desc: 'Require human approval for high-risk actions. Approve or deny from the dashboard, Slack, Discord, or PagerDuty.' },
-  { icon: '📊', title: 'Advanced Analytics & Forecasting', desc: 'Multi-day trend analysis, cost forecasting with linear regression, and budget overrun predictions.' },
-  { icon: '🔗', title: 'Trace Replay & Debugging', desc: 'Step through agent traces action-by-action. Inspect input/output at each step with a visual replay timeline.' },
-  { icon: '🐍', title: 'SDKs, CLI & 8 Integrations', desc: 'Python & TypeScript SDKs, CLI tool, plus LangChain, OpenAI, MCP, CrewAI, AutoGen, LlamaIndex, and Vercel AI SDK.' },
+  { iconPath: 'M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.788m13.788 0c3.808 3.808 3.808 9.98 0 13.788M12 12h.008v.008H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z', title: 'Live Streaming Feed', desc: 'Real-time SSE streaming of every action. Watch your agents work live with sub-second latency.' },
+  { iconPath: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z', title: 'Policy Engine & Templates', desc: 'Define rules or apply pre-built templates: conservative, cost-conscious, compliance. Rate limits, allowlists, cost caps, and more.' },
+  { iconPath: 'M10.05 4.575a1.575 1.575 0 10-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 013.15 0v1.5m-3.15 0l.075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 013.15 0V15M6.9 7.575a1.575 1.575 0 10-3.15 0v8.175a6.75 6.75 0 006.75 6.75h2.018a5.25 5.25 0 003.712-1.538l1.732-1.732a5.25 5.25 0 001.538-3.712l.003-2.024a.668.668 0 01.198-.471 1.575 1.575 0 10-2.228-2.228 3.818 3.818 0 00-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0116.35 15m.002 0h-.002', title: 'Human-in-the-Loop', desc: 'Require human approval for high-risk actions. Approve or deny from the dashboard, Slack, Discord, or PagerDuty.' },
+  { iconPath: 'M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941', title: 'Advanced Analytics & Forecasting', desc: 'Multi-day trend analysis, cost forecasting with linear regression, and budget overrun predictions.' },
+  { iconPath: 'M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3', title: 'Trace Replay & Debugging', desc: 'Step through agent traces action-by-action. Inspect input/output at each step with a visual replay timeline.' },
+  { iconPath: 'M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z', title: 'SDKs, CLI & 8 Integrations', desc: 'Python & TypeScript SDKs, CLI tool, plus LangChain, OpenAI, MCP, CrewAI, AutoGen, LlamaIndex, and Vercel AI SDK.' },
 ];
 
 const COMPARISON = [
@@ -484,10 +484,12 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(f => (
-              <div key={f.title} className="bg-white/[0.06] rounded-2xl border border-white/[0.14] p-8 hover:border-blue-500/20 hover:bg-white/[0.08] transition-all duration-300 group">
-                <div className="text-3xl mb-5">{f.icon}</div>
+              <div key={f.title} className="bg-white/[0.04] rounded-2xl border border-white/[0.10] p-8 hover:border-white/[0.18] hover:bg-white/[0.06] transition-all duration-300 group">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.10] flex items-center justify-center mb-5 group-hover:border-blue-500/30 group-hover:bg-blue-500/[0.06] transition-all">
+                  <svg className="w-5 h-5 text-white/40 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={f.iconPath} /></svg>
+                </div>
                 <h3 className="font-semibold mb-3 text-[16px] group-hover:text-blue-400 transition-colors">{f.title}</h3>
-                <p className="text-[14px] text-white/45 leading-relaxed">{f.desc}</p>
+                <p className="text-[14px] text-white/40 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>

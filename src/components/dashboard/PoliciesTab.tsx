@@ -529,9 +529,11 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
 
       {policies.length === 0 && !showCreate ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
-          <div className="text-2xl mb-3 opacity-30">&#x1F6E1;</div>
-          <p className="text-white/60 text-sm font-medium mb-2">No policies configured</p>
-          <p className="text-white/50 text-xs mb-4">Policies let you enforce rate limits, restrict services, cap costs, and require approvals for agent actions.</p>
+          <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-3">
+            <svg className="w-5 h-5 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+          </div>
+          <p className="text-white/50 text-sm font-medium mb-2">No policies configured</p>
+          <p className="text-white/40 text-xs mb-4">Define rules to enforce rate limits, restrict services, cap costs, and require approvals.</p>
           <button onClick={() => setShowCreate(true)} className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20">
             Create your first policy
           </button>

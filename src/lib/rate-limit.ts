@@ -4,6 +4,14 @@
  * Applied at the API middleware level to prevent abuse.
  * Uses a sliding window counter per API key.
  * Separate from the policy-level rate_limit (which is per-agent).
+ *
+ * LIMITATION: This uses an in-memory Map, which does NOT persist across
+ * serverless function invocations. Each cold start gets a fresh store, and
+ * concurrent instances maintain independent counters. This means the limiter
+ * is best-effort only and will under-count in a serverless environment.
+ *
+ * TODO: Replace with Upstash Redis (@upstash/ratelimit) for production so
+ * that rate-limit state is shared across all instances and survives restarts.
  */
 
 interface RateLimitEntry {
@@ -57,38 +65,48 @@ export function checkGlobalRateLimit(
   key: string,
   config: RateLimitConfig = DEFAULT_CONFIG,
 ): RateLimitResult {
-  cleanup();
+  try {
+    cleanup();
 
-  const now = Date.now();
-  let entry = store.get(key);
+    const now = Date.now();
+    let entry = store.get(key);
 
-  if (!entry) {
-    entry = { tokens: config.maxRequests, lastRefill: now };
-    store.set(key, entry);
-  }
+    if (!entry) {
+      entry = { tokens: config.maxRequests, lastRefill: now };
+      store.set(key, entry);
+    }
 
-  // Refill tokens based on elapsed time
-  const elapsed = (now - entry.lastRefill) / 1000;
-  const refillRate = config.maxRequests / config.windowSeconds;
-  entry.tokens = Math.min(config.maxRequests, entry.tokens + elapsed * refillRate);
-  entry.lastRefill = now;
+    // Refill tokens based on elapsed time
+    const elapsed = (now - entry.lastRefill) / 1000;
+    const refillRate = config.maxRequests / config.windowSeconds;
+    entry.tokens = Math.min(config.maxRequests, entry.tokens + elapsed * refillRate);
+    entry.lastRefill = now;
 
-  if (entry.tokens < 1) {
-    const retryAfter = Math.ceil((1 - entry.tokens) / refillRate);
+    if (entry.tokens < 1) {
+      const retryAfter = Math.ceil((1 - entry.tokens) / refillRate);
+      return {
+        allowed: false,
+        remaining: 0,
+        limit: config.maxRequests,
+        retryAfterSeconds: retryAfter,
+      };
+    }
+
+    entry.tokens -= 1;
     return {
-      allowed: false,
-      remaining: 0,
+      allowed: true,
+      remaining: Math.floor(entry.tokens),
       limit: config.maxRequests,
-      retryAfterSeconds: retryAfter,
+    };
+  } catch {
+    // Fail open: if anything goes wrong with the in-memory limiter,
+    // allow the request through rather than blocking legitimate traffic.
+    return {
+      allowed: true,
+      remaining: config.maxRequests,
+      limit: config.maxRequests,
     };
   }
-
-  entry.tokens -= 1;
-  return {
-    allowed: true,
-    remaining: Math.floor(entry.tokens),
-    limit: config.maxRequests,
-  };
 }
 
 /** Reset rate limit for a key (useful for testing). */

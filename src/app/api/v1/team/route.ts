@@ -38,29 +38,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch team members', detail: error.message }, { status: 500 });
   }
 
-  // Fetch user emails from auth.users via admin API
-  const enriched = await Promise.all(
-    (members || []).map(async (m) => {
-      try {
-        const { data: { user } } = await supabase.auth.admin.getUserById(m.user_id);
-        return {
-          id: m.id,
-          user_id: m.user_id,
-          email: user?.email || 'unknown',
-          role: m.role,
-          created_at: m.created_at,
-        };
-      } catch {
-        return {
-          id: m.id,
-          user_id: m.user_id,
-          email: 'unknown',
-          role: m.role,
-          created_at: m.created_at,
-        };
-      }
-    })
-  );
+  // Fetch all user emails in a single batch call instead of N+1 individual lookups
+  let emailMap: Record<string, string> = {};
+  try {
+    const userIds = (members || []).map((m) => m.user_id);
+    const { data: { users } } = await supabase.auth.admin.listUsers();
+    const relevantUsers = (users || []).filter((u) => userIds.includes(u.id));
+    emailMap = Object.fromEntries(relevantUsers.map((u) => [u.id, u.email || 'unknown']));
+  } catch {
+    // Fall back to empty map — emails will show as 'unknown'
+  }
+
+  const enriched = (members || []).map((m) => ({
+    id: m.id,
+    user_id: m.user_id,
+    email: emailMap[m.user_id] || 'unknown',
+    role: m.role,
+    created_at: m.created_at,
+  }));
 
   return NextResponse.json({ members: enriched, currentRole: ctx.role });
 }

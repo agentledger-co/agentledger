@@ -121,6 +121,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [actions, setActions] = useState<ActionLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings'>('overview');
   const [subTab, setSubTab] = useState<string>('policies');
@@ -231,6 +232,7 @@ export default function DashboardPage() {
   }, []);
   const fetchData = useCallback(async () => {
     if (!apiKey) return;
+    setRefreshing(true);
     try {
       const [statsRes, actionsRes] = await Promise.all([
         fetch('/api/v1/stats', { headers: { Authorization: `Bearer ${apiKey}` } }),
@@ -261,11 +263,11 @@ export default function DashboardPage() {
         setActions(actionsData.actions || []);
       }
     } catch (e: unknown) {
-      // Only show error if we don't have any data yet (first load failure)
-      // Auto-refresh failures are silent — the existing data stays visible
       if (!stats) {
         setError(e instanceof Error ? e.message : 'Failed to fetch data');
       }
+    } finally {
+      setRefreshing(false);
     }
   }, [apiKey]);
 
@@ -400,8 +402,8 @@ export default function DashboardPage() {
               <span className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-400 animate-pulse' : 'bg-white/30'}`} />
               {autoRefresh ? 'Live' : 'Paused'}
             </button>
-            <button onClick={fetchData} className="text-xs sm:text-sm text-white/60 hover:text-white/80 transition-colors whitespace-nowrap shrink-0">
-              ↻ <span className="hidden sm:inline">Refresh</span>
+            <button onClick={fetchData} disabled={refreshing} className={`text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0 ${refreshing ? 'text-blue-400' : 'text-white/60 hover:text-white/80'}`}>
+              <span className={`inline-block ${refreshing ? 'animate-spin' : ''}`}>↻</span> <span className="hidden sm:inline">{refreshing ? 'Refreshing' : 'Refresh'}</span>
             </button>
             <button
               onClick={async () => {

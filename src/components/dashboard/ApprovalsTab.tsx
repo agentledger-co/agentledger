@@ -48,6 +48,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
   const [filter, setFilter] = useState<StatusFilter>('pending');
   const [expandedInput, setExpandedInput] = useState<string | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
+  const [decidingId, setDecidingId] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchApprovals = useCallback(async () => {
@@ -93,6 +94,8 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
   }, [filter, fetchApprovals, fetchPendingCount]);
 
   const handleDecision = async (id: string, decision: 'approved' | 'denied') => {
+    if (decidingId) return;
+    setDecidingId(id);
     try {
       const res = await fetch('/api/v1/approvals', {
         method: 'PATCH',
@@ -109,6 +112,8 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
       }
     } catch {
       onToast('Failed to process decision', 'error');
+    } finally {
+      setDecidingId(null);
     }
   };
 
@@ -230,15 +235,17 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <button
                       onClick={() => handleDecision(approval.id, 'approved')}
-                      className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-colors border border-emerald-500/20"
+                      disabled={decidingId === approval.id}
+                      className="bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-emerald-400 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-colors border border-emerald-500/20"
                     >
-                      Approve
+                      {decidingId === approval.id ? 'Processing...' : 'Approve'}
                     </button>
                     <button
                       onClick={() => handleDecision(approval.id, 'denied')}
-                      className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20"
+                      disabled={decidingId === approval.id}
+                      className="bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-400 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20"
                     >
-                      Deny
+                      {decidingId === approval.id ? 'Processing...' : 'Deny'}
                     </button>
                   </div>
                 )}

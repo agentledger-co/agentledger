@@ -34,6 +34,8 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Form state
   const [formAgent, setFormAgent] = useState('');
@@ -109,6 +111,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
   };
 
   const toggleHook = async (id: string, currentEnabled: boolean) => {
+    setTogglingId(id);
     try {
       const res = await fetch(`/api/v1/rollback-hooks`, {
         method: 'PATCH',
@@ -123,10 +126,13 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
       }
     } catch {
       onToast('Failed to update hook', 'error');
+    } finally {
+      setTogglingId(null);
     }
   };
 
   const deleteHook = async (id: string) => {
+    setDeletingId(id);
     try {
       const res = await fetch(`/api/v1/rollback-hooks?id=${id}`, {
         method: 'DELETE',
@@ -141,6 +147,8 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
       }
     } catch {
       onToast('Failed to delete hook', 'error');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -288,7 +296,8 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                     <td className="px-4 py-3">
                       <button
                         onClick={() => toggleHook(hook.id, hook.enabled)}
-                        className={`relative w-9 h-5 rounded-full transition-colors ${hook.enabled ? 'bg-emerald-500' : 'bg-white/10'}`}
+                        disabled={togglingId === hook.id}
+                        className={`relative w-9 h-5 rounded-full transition-colors ${togglingId === hook.id ? 'opacity-50 cursor-not-allowed' : ''} ${hook.enabled ? 'bg-emerald-500' : 'bg-white/10'}`}
                       >
                         <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${hook.enabled ? 'translate-x-4' : ''}`} />
                       </button>
@@ -298,9 +307,10 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => deleteHook(hook.id)}
-                            className="text-[11px] text-red-400 hover:text-red-300 px-2 py-1 bg-red-500/10 rounded"
+                            disabled={!!deletingId}
+                            className="text-[11px] text-red-400 hover:text-red-300 disabled:opacity-50 px-2 py-1 bg-red-500/10 rounded"
                           >
-                            Confirm
+                            {deletingId ? 'Deleting...' : 'Confirm'}
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(null)}

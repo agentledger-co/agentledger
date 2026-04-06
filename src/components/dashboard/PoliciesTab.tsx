@@ -118,6 +118,9 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   // Create form state
   const [newAgent, setNewAgent] = useState('');
@@ -180,30 +183,40 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
   };
 
   const toggleEnabled = async (id: string, enabled: boolean) => {
-    const res = await fetch('/api/v1/policies', {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, enabled: !enabled }),
-    });
-    if (res.ok) {
-      onToast(`Policy ${!enabled ? 'enabled' : 'disabled'}`, 'success');
-      fetchPolicies();
-    } else {
-      onToast('Failed to update policy', 'error');
+    setTogglingId(id);
+    try {
+      const res = await fetch('/api/v1/policies', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, enabled: !enabled }),
+      });
+      if (res.ok) {
+        onToast(`Policy ${!enabled ? 'enabled' : 'disabled'}`, 'success');
+        fetchPolicies();
+      } else {
+        onToast('Failed to update policy', 'error');
+      }
+    } finally {
+      setTogglingId(null);
     }
   };
 
   const deletePolicy = async (id: string) => {
-    const res = await fetch(`/api/v1/policies?id=${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (res.ok) {
-      onToast('Policy deleted', 'success');
-      setDeleteConfirm(null);
-      fetchPolicies();
-    } else {
-      onToast('Failed to delete policy', 'error');
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/v1/policies?id=${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (res.ok) {
+        onToast('Policy deleted', 'success');
+        setDeleteConfirm(null);
+        fetchPolicies();
+      } else {
+        onToast('Failed to delete policy', 'error');
+      }
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -248,23 +261,28 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
 
   const saveEdit = async () => {
     if (!editingId) return;
-    const res = await fetch('/api/v1/policies', {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: editingId,
-        agent_name: editAgent || null,
-        rule_type: editRuleType,
-        rule_config: buildConfigPayload(editRuleType, editConfig),
-        priority: parseInt(editPriority) || 0,
-      }),
-    });
-    if (res.ok) {
-      onToast('Policy updated', 'success');
-      setEditingId(null);
-      fetchPolicies();
-    } else {
-      onToast('Failed to update policy', 'error');
+    setSaving(true);
+    try {
+      const res = await fetch('/api/v1/policies', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingId,
+          agent_name: editAgent || null,
+          rule_type: editRuleType,
+          rule_config: buildConfigPayload(editRuleType, editConfig),
+          priority: parseInt(editPriority) || 0,
+        }),
+      });
+      if (res.ok) {
+        onToast('Policy updated', 'success');
+        setEditingId(null);
+        fetchPolicies();
+      } else {
+        onToast('Failed to update policy', 'error');
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -407,7 +425,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
             <h3 className="font-semibold mb-2">Delete Policy?</h3>
             <p className="text-sm text-white/40 mb-4">This will permanently remove this policy rule. Agents will no longer be subject to this constraint.</p>
             <div className="flex gap-3">
-              <button onClick={() => deletePolicy(deleteConfirm)} className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Delete</button>
+              <button onClick={() => deletePolicy(deleteConfirm)} disabled={!!deletingId} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors">{deletingId ? 'Deleting...' : 'Delete'}</button>
               <button onClick={() => setDeleteConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
             </div>
           </div>
@@ -456,8 +474,8 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
               />
             </div>
             <div className="flex gap-2 pt-1">
-              <button onClick={saveEdit} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
-                Save Changes
+              <button onClick={saveEdit} disabled={saving} className="bg-blue-500 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+                {saving ? 'Saving...' : 'Save Changes'}
               </button>
               <button onClick={() => setEditingId(null)} className="text-xs text-white/60 hover:text-white/50 px-3 py-2">
                 Cancel
@@ -566,9 +584,10 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
                   <td className="px-4 py-3">
                     <button
                       onClick={() => toggleEnabled(policy.id, policy.enabled)}
+                      disabled={togglingId === policy.id}
                       className={`w-9 h-5 rounded-full transition-colors relative ${
-                        policy.enabled ? 'bg-emerald-500' : 'bg-white/[0.08]'
-                      }`}
+                        togglingId === policy.id ? 'opacity-50 cursor-not-allowed' : ''
+                      } ${policy.enabled ? 'bg-emerald-500' : 'bg-white/[0.08]'}`}
                     >
                       <span className={`block w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-transform ${
                         policy.enabled ? 'translate-x-[18px]' : 'translate-x-[3px]'

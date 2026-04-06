@@ -99,9 +99,11 @@ export default function EvaluationsTab({ apiKey, onToast }: { apiKey: string; on
           <p className="text-xs text-white/60 mt-0.5">Track agent quality scores, labels, and feedback over time.</p>
         </div>
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
-          <div className="text-2xl mb-3 opacity-30">&#x1F4CA;</div>
-          <p className="text-white/60 text-sm font-medium mb-2">No evaluations yet</p>
-          <p className="text-white/50 text-xs">Submit evaluations via the API to track agent quality and performance over time.</p>
+          <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-3">
+            <svg className="w-5 h-5 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+          </div>
+          <p className="text-white/50 text-sm font-medium mb-2">No evaluations yet</p>
+          <p className="text-white/40 text-xs">Submit evaluations via the API to track agent quality over time.</p>
         </div>
       </div>
     );

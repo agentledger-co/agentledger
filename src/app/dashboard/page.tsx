@@ -872,9 +872,11 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-[200px] text-center">
-              <div className="text-2xl mb-2 opacity-30">📊</div>
-              <p className="text-white/60 text-sm">No service data yet</p>
-              <p className="text-white/50 text-xs mt-1">Charts appear once your agents start logging actions</p>
+              <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-3">
+                <svg className="w-5 h-5 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+              </div>
+              <p className="text-white/50 text-sm">No service data yet</p>
+              <p className="text-white/30 text-xs mt-1">Charts will populate as agents log actions</p>
             </div>
           )}
         </div>
@@ -888,8 +890,10 @@ function OverviewTab({ stats, actions, apiKey }: { stats: Stats; actions: Action
         <div className="divide-y divide-white/[0.04]">
           {actions.length === 0 ? (
             <div className="px-5 py-12 text-center">
-              <div className="text-2xl mb-3 opacity-30">📡</div>
-              <p className="text-white/60 text-sm font-medium mb-2">No actions yet</p>
+              <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-3">
+                <svg className="w-5 h-5 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
+              </div>
+              <p className="text-white/50 text-sm font-medium mb-2">No actions yet</p>
               <p className="text-white/50 text-xs mb-4 max-w-sm mx-auto">Send a test action to see it appear here in real-time:</p>
               <div className="bg-white/[0.08] rounded-lg p-3 max-w-md mx-auto mb-4">
                 <code className="text-[11px] text-blue-400/70 font-mono whitespace-pre-wrap break-all">
@@ -1117,7 +1121,9 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
       {killConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setKillConfirm(null)}>
           <div className="bg-[#1a1a1a] border border-red-500/30 rounded-xl p-6 max-w-md mx-4" onClick={e => e.stopPropagation()}>
-            <div className="text-2xl mb-3">🚨</div>
+            <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+            </div>
             <h3 className="font-semibold text-lg mb-2">Kill Agent: {killConfirm}?</h3>
             <p className="text-sm text-white/50 mb-4">
               This will permanently stop the agent from performing any actions. 
@@ -1143,8 +1149,10 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
 
       {stats.agents.length === 0 ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-12 text-center">
-          <div className="text-2xl mb-3 opacity-30">🤖</div>
-          <p className="text-white/60 text-sm font-medium mb-2">No agents registered yet</p>
+          <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-3">
+            <svg className="w-5 h-5 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" /></svg>
+          </div>
+          <p className="text-white/50 text-sm font-medium mb-2">No agents registered yet</p>
           <p className="text-white/50 text-xs mb-4">Agents are auto-registered when they first log an action. Use the SDK to get started:</p>
           <div className="bg-white/[0.08] rounded-lg p-3 max-w-sm mx-auto mb-3">
             <code className="text-[11px] text-blue-400/70 font-mono">await ledger.track({'{'} agent: &apos;my-bot&apos;, service: &apos;slack&apos;, action: &apos;send&apos; {'}'}, fn)</code>
@@ -1282,7 +1290,9 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
       {killConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setKillConfirm(false)}>
           <div className="bg-[#1a1a1a] border border-red-500/30 rounded-xl p-6 max-w-md mx-4" onClick={e => e.stopPropagation()}>
-            <div className="text-2xl mb-3">🚨</div>
+            <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3">
+              <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+            </div>
             <h3 className="font-semibold text-lg mb-2">Kill Agent: {agent.name}?</h3>
             <p className="text-sm text-white/50 mb-4">
               This will permanently stop the agent from performing any actions. 
@@ -1570,11 +1580,6 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
     warning: 'border-amber-500/20 bg-amber-500/5',
     critical: 'border-red-500/20 bg-red-500/5',
   };
-  const SEVERITY_ICON: Record<string, string> = {
-    info: 'ℹ️',
-    warning: '⚠️',
-    critical: '🚨',
-  };
 
   return (
     <div className="space-y-4">
@@ -1584,15 +1589,17 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
             onClick={() => onAcknowledge()}
             className="text-xs text-white/40 hover:text-white/60 bg-white/[0.08] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
           >
-            ✓ Acknowledge All
+            Acknowledge All
           </button>
         </div>
       )}
       {stats.alerts.length === 0 ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-12 text-center">
-          <div className="text-2xl mb-3 opacity-50">✓</div>
-          <p className="text-white/60 text-sm font-medium mb-1">All clear</p>
-          <p className="text-white/50 text-xs">No active alerts. Your agents are behaving normally.</p>
+          <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+          </div>
+          <p className="text-white/60 text-sm font-medium mb-1">No active alerts</p>
+          <p className="text-white/40 text-xs">Alerts will appear here when anomalies or policy violations are detected.</p>
         </div>
       ) : (
         stats.alerts.map(alert => (
@@ -1600,26 +1607,38 @@ function AlertsTab({ stats, apiKey, onRefresh, onAcknowledge }: { stats: Stats; 
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm">{SEVERITY_ICON[alert.severity || 'warning'] || '⚠️'}</span>
+                  {alert.severity === 'critical' ? (
+                    <div className="w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                      <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                    </div>
+                  ) : alert.severity === 'info' ? (
+                    <div className="w-5 h-5 rounded-full bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-amber-500/15 flex items-center justify-center flex-shrink-0">
+                      <div className="w-2 h-2 rounded-sm bg-amber-400 rotate-45" />
+                    </div>
+                  )}
                   <span className="font-medium text-sm capitalize">{alert.alert_type.replace(/_/g, ' ')}</span>
-                  <span className="text-white/50 text-xs">·</span>
-                  <span className="text-xs font-mono text-blue-400">{alert.agent_name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-medium ${
-                    alert.severity === 'critical' ? 'bg-red-500/20 text-red-400' :
-                    alert.severity === 'info' ? 'bg-blue-500/20 text-blue-400' :
-                    'bg-amber-500/20 text-amber-400'
+                  <span className="text-white/30">·</span>
+                  <span className="text-xs font-mono text-blue-400/80">{alert.agent_name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wide font-medium ${
+                    alert.severity === 'critical' ? 'bg-red-500/15 text-red-400' :
+                    alert.severity === 'info' ? 'bg-blue-500/15 text-blue-400' :
+                    'bg-amber-500/15 text-amber-400'
                   }`}>
                     {alert.severity || 'warning'}
                   </span>
                 </div>
                 <p className="text-sm text-white/60">{alert.message}</p>
-                <p className="text-xs text-white/50 mt-1">{timeAgo(alert.created_at)}</p>
+                <p className="text-xs text-white/40 mt-1">{timeAgo(alert.created_at)}</p>
               </div>
               <button
                 onClick={() => onAcknowledge(alert.id)}
-                className="text-xs text-white/60 hover:text-white/60 bg-white/[0.08] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors ml-4 flex-shrink-0"
+                className="text-xs text-white/50 hover:text-white/60 bg-white/[0.08] hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors ml-4 flex-shrink-0"
               >
-                ✓ Ack
+                Ack
               </button>
             </div>
           </div>
@@ -2121,9 +2140,11 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 
       {webhooks.length === 0 && !showCreate ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-8 text-center">
-          <div className="text-2xl mb-3 opacity-30">🔗</div>
-          <p className="text-white/60 text-sm font-medium mb-2">No webhooks configured</p>
-          <p className="text-white/50 text-xs mb-4">Get HTTP notifications when agents act, budgets exceed, or alerts fire.</p>
+          <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-3">
+            <svg className="w-5 h-5 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+          </div>
+          <p className="text-white/50 text-sm font-medium mb-2">No webhooks configured</p>
+          <p className="text-white/40 text-xs mb-4">Get HTTP notifications when agents act, budgets exceed, or alerts fire.</p>
           <button onClick={() => setShowCreate(true)} className="text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors border border-blue-500/20">
             Create your first webhook
           </button>

@@ -97,5 +97,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create API key', detail: keyError.message }, { status: 500 });
   }
 
+  // Fire-and-forget Slack notification for new signup
+  const slackWebhook = process.env.SLACK_SIGNUP_WEBHOOK_URL;
+  if (slackWebhook) {
+    fetch(slackWebhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `New signup: *${name}* just created an org on AgentLedger`,
+      }),
+    }).catch(() => { /* non-critical — don't block response */ });
+  }
+
   return NextResponse.json({ orgId: org.id, apiKey: key });
 }

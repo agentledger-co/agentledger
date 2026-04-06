@@ -13,6 +13,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.47.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "date-fns": "^4.1.0",

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -19,7 +20,7 @@ const nextConfig: NextConfig = {
           // HSTS — force HTTPS for 1 year
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
           // Content Security Policy
-          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com; frame-ancestors 'none';" },
+          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com https://plausible.io https://*.ingest.sentry.io; frame-ancestors 'none';" },
         ],
       },
       // Read-only GET endpoints that can tolerate short caching.
@@ -62,4 +63,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Suppress source map upload warnings when SENTRY_AUTH_TOKEN is not set
+  silent: true,
+  // Disable source map upload unless explicitly configured
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+});

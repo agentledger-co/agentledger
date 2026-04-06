@@ -11,7 +11,7 @@ interface Approval {
   status: 'pending' | 'approved' | 'denied' | 'expired';
   decided_by: string | null;
   expires_at: string | null;
-  created_at: string;
+  requested_at: string;
   decided_at: string | null;
 }
 
@@ -189,7 +189,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
                   </div>
 
                   <div className="flex items-center gap-3 text-[11px] text-white/55">
-                    <span>Requested {timeAgo(approval.created_at)}</span>
+                    <span>Requested {timeAgo(approval.requested_at)}</span>
                     {approval.status === 'pending' && approval.expires_at && (
                       <span className={`${
                         new Date(approval.expires_at).getTime() - Date.now() < 60000

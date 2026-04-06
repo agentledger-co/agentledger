@@ -7,7 +7,7 @@ interface RollbackHook {
   agent_name: string | null;
   service: string | null;
   action: string | null;
-  webhook_url: string;
+  rollback_webhook_url: string;
   enabled: boolean;
   created_at: string;
 }
@@ -82,7 +82,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
     }
     setCreating(true);
     try {
-      const body: Record<string, unknown> = { webhook_url: formUrl, enabled: formEnabled };
+      const body: Record<string, unknown> = { rollback_webhook_url: formUrl, enabled: formEnabled };
       if (formAgent.trim()) body.agent_name = formAgent.trim();
       if (formService.trim()) body.service = formService.trim();
       if (formAction.trim()) body.action = formAction.trim();
@@ -283,7 +283,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                     <td className="px-4 py-3 text-xs text-white/70">{hook.service || <span className="text-white/50">Any</span>}</td>
                     <td className="px-4 py-3 text-xs text-white/70">{hook.action || <span className="text-white/50">Any</span>}</td>
                     <td className="px-4 py-3">
-                      <code className="text-[11px] text-blue-400 font-mono truncate block max-w-[280px]">{hook.webhook_url}</code>
+                      <code className="text-[11px] text-blue-400 font-mono truncate block max-w-[280px]">{hook.rollback_webhook_url}</code>
                     </td>
                     <td className="px-4 py-3">
                       <button

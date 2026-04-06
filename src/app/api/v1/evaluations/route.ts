@@ -3,6 +3,17 @@ import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { sanitizeString } from '@/lib/validate';
 
+// Flatten the joined action_logs.agent_name into a top-level field
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function flattenAgentName(evaluations: any[] | null): any[] {
+  if (!evaluations) return [];
+  return evaluations.map(e => ({
+    ...e,
+    agent_name: e.action_logs?.agent_name ?? null,
+    action_logs: undefined,
+  }));
+}
+
 // POST /api/v1/evaluations - Create an evaluation
 export async function POST(req: NextRequest) {
   const auth = await authenticateApiKey(req);
@@ -106,7 +117,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('evaluations')
-      .select('*')
+      .select('*, action_logs(agent_name)')
       .eq('org_id', auth.orgId)
       .in('action_id', ids);
 
@@ -122,13 +133,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch evaluations', detail: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ evaluations: evaluations || [] });
+    return NextResponse.json({ evaluations: flattenAgentName(evaluations) });
   }
 
   // No agent filter — direct query
   let query = supabase
     .from('evaluations')
-    .select('*')
+    .select('*, action_logs(agent_name)')
     .eq('org_id', auth.orgId);
 
   if (label) query = query.eq('label', label);
@@ -143,5 +154,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch evaluations', detail: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ evaluations: evaluations || [] });
+  return NextResponse.json({ evaluations: flattenAgentName(evaluations) });
 }

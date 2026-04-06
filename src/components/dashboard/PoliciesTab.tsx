@@ -6,7 +6,7 @@ interface Policy {
   id: string;
   agent_name: string | null;
   rule_type: string;
-  config: Record<string, unknown>;
+  rule_config: Record<string, unknown>;
   enabled: boolean;
   priority: number;
   created_at: string;
@@ -32,7 +32,8 @@ const RULE_TYPE_LABELS: Record<RuleType, string> = {
   require_approval: 'Require Approval',
 };
 
-function formatConfig(ruleType: string, config: Record<string, unknown>): string {
+function formatConfig(ruleType: string, config: Record<string, unknown> | undefined | null): string {
+  if (!config) return '—';
   switch (ruleType) {
     case 'rate_limit':
       return `Max ${config.max_actions ?? '?'} actions / ${config.window_seconds ?? '?'}s`;
@@ -156,7 +157,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         body: JSON.stringify({
           agent_name: newAgent || null,
           rule_type: newRuleType,
-          config: buildConfigPayload(newRuleType, newConfig),
+          rule_config: buildConfigPayload(newRuleType, newConfig),
           priority: parseInt(newPriority) || 0,
         }),
       });
@@ -212,7 +213,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
     setEditRuleType(policy.rule_type as RuleType);
     setEditPriority(String(policy.priority));
     // Rebuild config fields from the policy config
-    const cfg = policy.config;
+    const cfg = policy.rule_config;
     switch (policy.rule_type) {
       case 'rate_limit':
         setEditConfig({
@@ -254,7 +255,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         id: editingId,
         agent_name: editAgent || null,
         rule_type: editRuleType,
-        config: buildConfigPayload(editRuleType, editConfig),
+        rule_config: buildConfigPayload(editRuleType, editConfig),
         priority: parseInt(editPriority) || 0,
       }),
     });
@@ -558,7 +559,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
                     </span>
                   </td>
                   <td className="px-4 py-3 text-white/40 hidden md:table-cell max-w-[240px] truncate">
-                    {formatConfig(policy.rule_type, policy.config)}
+                    {formatConfig(policy.rule_type, policy.rule_config)}
                   </td>
                   <td className="px-4 py-3">
                     <button

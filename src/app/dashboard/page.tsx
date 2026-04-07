@@ -124,14 +124,28 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings'>('overview');
-  const [subTab, setSubTab] = useState<string>('policies');
+  const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('al_dashboard_tab');
+      if (saved && ['overview', 'actions', 'agents', 'control', 'insights', 'settings'].includes(saved)) {
+        return saved as 'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings';
+      }
+    }
+    return 'overview';
+  });
+  const [subTab, setSubTab] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('al_dashboard_subtab') || 'policies';
+    }
+    return 'policies';
+  });
   const [environment, setEnvironment] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('al_environment') || '' : '');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
   const [traceData, setTraceData] = useState<{ traceId: string; actions: unknown[]; summary: unknown } | null>(null);
   const [traceLoading, setTraceLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [policyRefreshKey, setPolicyRefreshKey] = useState(0);
   const [userEmail, setUserEmail] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
 
@@ -448,9 +462,10 @@ export default function DashboardPage() {
               key={t.key}
               onClick={() => {
                 setTab(t.key);
-                if (t.key === 'control') setSubTab('policies');
-                if (t.key === 'insights') setSubTab('alerts');
-                if (t.key === 'settings') setSubTab('general');
+                sessionStorage.setItem('al_dashboard_tab', t.key);
+                if (t.key === 'control') { setSubTab('policies'); sessionStorage.setItem('al_dashboard_subtab', 'policies'); }
+                if (t.key === 'insights') { setSubTab('alerts'); sessionStorage.setItem('al_dashboard_subtab', 'alerts'); }
+                if (t.key === 'settings') { setSubTab('general'); sessionStorage.setItem('al_dashboard_subtab', 'general'); }
               }}
               className={`px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md text-[11px] sm:text-xs md:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                 tab === t.key ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/80'
@@ -509,7 +524,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['policies', 'approvals', 'budgets'].map(st => (
-                <button key={st} onClick={() => setSubTab(st)}
+                <button key={st} onClick={() => { setSubTab(st); sessionStorage.setItem('al_dashboard_subtab', st); }}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
@@ -519,8 +534,8 @@ export default function DashboardPage() {
             </div>
             {subTab === 'policies' ? (
               <div className="space-y-8">
-                <PolicyTemplatesSection apiKey={apiKey} onToast={addToast} onRefresh={fetchData} />
-                <PoliciesTab apiKey={apiKey} onToast={addToast} />
+                <PolicyTemplatesSection apiKey={apiKey} onToast={addToast} onRefresh={() => { fetchData(); setPolicyRefreshKey(k => k + 1); }} />
+                <PoliciesTab apiKey={apiKey} onToast={addToast} refreshKey={policyRefreshKey} />
               </div>
             ) : subTab === 'approvals' ? (
               <ApprovalsTab apiKey={apiKey} onToast={addToast} />
@@ -532,7 +547,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['alerts', 'evaluations', 'analytics', 'forecast', 'replay'].map(st => (
-                <button key={st} onClick={() => setSubTab(st)}
+                <button key={st} onClick={() => { setSubTab(st); sessionStorage.setItem('al_dashboard_subtab', st); }}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
@@ -561,7 +576,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['general', 'team', 'webhooks', 'rollbacks'].map(st => (
-                <button key={st} onClick={() => setSubTab(st)}
+                <button key={st} onClick={() => { setSubTab(st); sessionStorage.setItem('al_dashboard_subtab', st); }}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>

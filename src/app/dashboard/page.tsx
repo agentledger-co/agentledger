@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { analytics } from '@/lib/analytics';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
@@ -332,6 +333,8 @@ export default function DashboardPage() {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     if (res.ok) {
+      if (endpoint === 'pause') analytics.agentPaused(name);
+      else analytics.agentResumed(name);
       addToast(`Agent "${name}" ${endpoint === 'pause' ? 'paused' : 'resumed'}`, 'success');
     } else {
       addToast(`Failed to ${endpoint} agent`, 'error');
@@ -345,6 +348,7 @@ export default function DashboardPage() {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     if (res.ok) {
+      analytics.agentKilled(name);
       addToast(`Agent "${name}" killed`, 'success');
     } else {
       addToast('Failed to kill agent', 'error');
@@ -1690,6 +1694,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       });
       const data = await res.json();
       if (res.ok) {
+        analytics.budgetCreated();
         setShowCreate(false);
         setNewBudget({ agent: '', period: 'daily', maxActions: '', maxCostDollars: '' });
         fetchBudgets();
@@ -1710,6 +1715,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       method: 'DELETE',
       headers: { Authorization: `Bearer ${apiKey}` },
     });
+    analytics.budgetDeleted();
     setDeleteConfirm(null);
     fetchBudgets();
     onRefresh();
@@ -1721,6 +1727,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     });
+    analytics.budgetReset();
     fetchBudgets();
     onRefresh();
   };
@@ -2021,6 +2028,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       body: JSON.stringify({ url: newUrl, description: newDesc, events: selectedEvents.length ? selectedEvents : undefined }),
     });
     if (res.ok) {
+      analytics.webhookCreated();
       const data = await res.json();
       onToast('Webhook created', 'success');
       setShowCreate(false);
@@ -2043,7 +2051,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       method: 'DELETE',
       headers: { Authorization: `Bearer ${apiKey}` },
     });
-    if (res.ok) { onToast('Webhook deleted', 'success'); fetchWebhooks(); }
+    if (res.ok) { analytics.webhookDeleted(); onToast('Webhook deleted', 'success'); fetchWebhooks(); }
   };
 
   const toggleWebhook = async (id: string, active: boolean) => {
@@ -2052,6 +2060,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, active: !active }),
     });
+    analytics.webhookToggled(!active);
     onToast(`Webhook ${!active ? 'enabled' : 'disabled'}`, 'info');
     fetchWebhooks();
   };
@@ -2239,6 +2248,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       body: JSON.stringify({ name: newKeyName || 'New Key' }),
     });
     if (res.ok) {
+      analytics.apiKeyCreated();
       const data = await res.json();
       onToast('New API key created', 'success');
       setShowCreate(false);
@@ -2265,6 +2275,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       body: JSON.stringify({ keyId }),
     });
     if (res.ok) {
+      analytics.apiKeyRevoked();
       onToast('Key revoked', 'success');
       fetchKeys();
     } else {
@@ -2280,6 +2291,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       body: JSON.stringify({ keyId }),
     });
     if (res.ok) {
+      analytics.apiKeyRotated();
       const data = await res.json();
       onToast('Key rotated', 'success');
       fetchKeys();

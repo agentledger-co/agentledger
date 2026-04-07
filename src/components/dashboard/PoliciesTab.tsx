@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { analytics } from '@/lib/analytics';
 
 interface Policy {
   id: string;
@@ -165,6 +166,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         }),
       });
       if (res.ok) {
+        analytics.policyCreated(newRuleType);
         onToast('Policy created', 'success');
         setShowCreate(false);
         setNewAgent('');
@@ -191,6 +193,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         body: JSON.stringify({ id, enabled: !enabled }),
       });
       if (res.ok) {
+        analytics.policyToggled(!enabled);
         onToast(`Policy ${!enabled ? 'enabled' : 'disabled'}`, 'success');
         fetchPolicies();
       } else {
@@ -209,6 +212,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (res.ok) {
+        analytics.policyDeleted();
         onToast('Policy deleted', 'success');
         setDeleteConfirm(null);
         fetchPolicies();

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
+import { analytics } from '@/lib/analytics';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -33,12 +34,14 @@ export default function SignupPage() {
     if (error) {
       setError(error.message);
     } else {
+      analytics.signup('email');
       setConfirmSent(true);
     }
     setLoading(false);
   };
 
   const handleGitHubSignup = async () => {
+    analytics.signup('github');
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: { redirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },

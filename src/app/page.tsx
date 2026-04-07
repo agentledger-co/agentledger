@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { analytics } from '@/lib/analytics';
 
 // ==================== TYPEWRITER WORD ====================
 const ROTATING_WORDS = ['do', 'send', 'charge', 'spend', 'build', 'deploy', 'create', 'call'];
@@ -140,6 +141,7 @@ function LiveDemo() {
   }, []);
 
   const handleTabClick = (t: 'feed' | 'agents' | 'budgets') => {
+    analytics.demoTabClicked(t);
     setAutoCycle(false);
     setTab(t);
   };
@@ -388,7 +390,7 @@ export default function LandingPage() {
             <a href="#demo" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Live Demo</a>
             <Link href="/docs" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Docs</Link>
             <a href="#pricing" className="text-[13px] text-white/60 hover:text-white/90 transition-colors hidden md:block">Pricing</a>
-            <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hidden md:block">
+            <Link href="/signup" onClick={() => analytics.ctaClicked('nav')} className="bg-blue-500 hover:bg-blue-400 text-white text-[13px] font-medium px-4 py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hidden md:block">
               Get Started {'\u2192'}
             </Link>
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white/60 hover:text-white/90 p-1">
@@ -427,14 +429,14 @@ export default function LandingPage() {
               Your agents send emails, create tickets, charge credit cards, and call APIs. AgentLedger logs every action, tracks every cost, and kills agents when things go wrong.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-6 py-3 rounded-xl transition-all text-[14px] shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
+              <Link href="/signup" onClick={() => analytics.ctaClicked('hero')} className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-6 py-3 rounded-xl transition-all text-[14px] shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
                 Start Free {'\u2192'}
               </Link>
               <a href="#demo" className="bg-white/[0.10] hover:bg-white/[0.08] text-white/60 hover:text-white/80 font-medium px-6 py-3 rounded-xl transition-all text-[14px] border border-white/[0.16]">
                 See live demo
               </a>
               <button
-                onClick={() => { navigator.clipboard.writeText('npm i agentledger'); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                onClick={() => { analytics.npmCommandCopied(); navigator.clipboard.writeText('npm i agentledger'); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                 className="flex items-center gap-2 bg-white/[0.10] rounded-xl border border-white/[0.16] px-4 py-2.5 hover:bg-white/[0.12] transition-colors group"
               >
                 <code className="text-[13px] text-blue-400/80 font-mono">npm i agentledger</code>
@@ -600,7 +602,7 @@ export default function LandingPage() {
                     {plan.cta} {'\u2192'}
                   </a>
                 ) : (
-                  <Link href="/signup" className={`block text-center py-2.5 rounded-xl text-[13px] font-medium transition-all ${plan.hl ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25' : 'bg-white/[0.10] hover:bg-white/[0.08] text-white/50 border border-white/[0.16]'}`}>
+                  <Link href="/signup" onClick={() => analytics.ctaClicked('pricing')} className={`block text-center py-2.5 rounded-xl text-[13px] font-medium transition-all ${plan.hl ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/25' : 'bg-white/[0.10] hover:bg-white/[0.08] text-white/50 border border-white/[0.16]'}`}>
                     {plan.cta}
                   </Link>
                 )}
@@ -625,7 +627,7 @@ export default function LandingPage() {
             {FAQ_ITEMS.map((item, i) => (
               <div key={i} className="border border-white/[0.14] rounded-xl overflow-hidden">
                 <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  onClick={() => { if (openFaq !== i) analytics.faqOpened(i); setOpenFaq(openFaq === i ? null : i); }}
                   className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.06] transition-colors"
                 >
                   <span className="text-[14px] font-medium text-white/80">{item.q}</span>
@@ -651,7 +653,7 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto text-center relative">
           <h2 className="text-[32px] font-bold mb-4 tracking-tight">Stop flying blind with your agents</h2>
           <p className="text-white/50 mb-10 text-[15px]">Know exactly what your agents are doing, what they cost, and how to stop them when things go sideways.</p>
-          <Link href="/signup" className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-8 py-3.5 rounded-xl transition-all inline-block shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 text-[14px]">
+          <Link href="/signup" onClick={() => analytics.ctaClicked('footer')} className="bg-blue-500 hover:bg-blue-400 text-white font-medium px-8 py-3.5 rounded-xl transition-all inline-block shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 text-[14px]">
             Get Started Free {'\u2192'}
           </Link>
         </div>

@@ -1986,19 +1986,35 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
           <div className="px-5 py-12 text-center text-white/50 text-sm">Loading budgets...</div>
         ) : budgets.length === 0 ? (
           <div className="px-5 py-12 text-center">
-            <div className="text-2xl mb-3 opacity-30">💰</div>
+            <div className="text-2xl mb-3 opacity-30">&#x1F4B0;</div>
             <p className="text-white/60 text-sm font-medium mb-2">No budgets configured</p>
             <p className="text-white/50 text-xs mb-4">Set spending limits to automatically pause agents when they exceed their budget.</p>
-            <a href="/docs#budgets" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">Learn about budgets →</a>
+            <a href="/docs#budgets" className="text-xs text-blue-400/60 hover:text-blue-400 transition-colors">Learn about budgets &#x2192;</a>
           </div>
-        ) : (
+        ) : filteredBudgets.length > 0 ? (
           <div className="divide-y divide-white/[0.04]">
-            {budgets.map(budget => {
+            {/* Select all row */}
+            <div className="px-5 py-2 flex items-center gap-3 border-b border-white/[0.08]">
+              <input
+                type="checkbox"
+                checked={selectedBudgets.size === filteredBudgets.length && filteredBudgets.length > 0}
+                onChange={toggleBudgetSelectAll}
+                className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+              />
+              <span className="text-[11px] text-white/40">{selectedBudgets.size > 0 ? `${selectedBudgets.size} selected` : 'Select all'}</span>
+            </div>
+            {filteredBudgets.map(budget => {
               const pctMax = Math.max(budget.pct_actions || 0, budget.pct_cost || 0);
               return (
-                <div key={budget.id} className={`px-5 py-4 hover:bg-white/[0.12] transition-colors border-l-2 ${BUDGET_STATUS_BORDER[budget.status]}`}>
+                <div key={budget.id} className={`px-5 py-4 hover:bg-white/[0.12] transition-colors border-l-2 ${BUDGET_STATUS_BORDER[budget.status]} ${selectedBudgets.has(budget.id) ? 'bg-blue-500/[0.04]' : ''}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedBudgets.has(budget.id)}
+                        onChange={() => toggleBudgetSelect(budget.id)}
+                        className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                      />
                       <span className="font-medium font-mono text-sm text-white/80">{budget.agent_name}</span>
                       <span className="text-xs text-white/60 bg-white/[0.08] px-2 py-0.5 rounded capitalize">{budget.period}</span>
                       <span className={`text-xs px-2 py-0.5 rounded capitalize font-medium ${
@@ -2016,19 +2032,19 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
                         className="text-xs text-white/60 hover:text-white/50 transition-colors px-2 py-1"
                         title="Reset counters"
                       >
-                        ↻ Reset
+                        &#x21BB; Reset
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(budget.id)}
                         className="text-xs text-red-400/50 hover:text-red-400 transition-colors px-2 py-1"
                       >
-                        ✕ Delete
+                        &#x2715; Delete
                       </button>
                     </div>
                   </div>
 
                   {/* Progress Bars */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 ml-7">
                     {budget.max_actions && (
                       <div>
                         <div className="flex items-center justify-between text-xs mb-1">
@@ -2062,7 +2078,11 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
               );
             })}
           </div>
-        )}
+        ) : budgetSearch && budgets.length > 0 ? (
+          <div className="px-5 py-8 text-center">
+            <p className="text-white/40 text-sm">No budgets match &ldquo;{budgetSearch}&rdquo;</p>
+          </div>
+        ) : null}
       </div>
 
       {/* Cost Timeline from hourly data */}
@@ -2102,6 +2122,10 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   const [newDesc, setNewDesc] = useState('');
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [shownSecret, setShownSecret] = useState<string | null>(null);
+  const [selectedWebhooks, setSelectedWebhooks] = useState<Set<string>>(new Set());
+  const [webhookSearch, setWebhookSearch] = useState('');
+  const [bulkWebhookDeleteConfirm, setBulkWebhookDeleteConfirm] = useState(false);
+  const [bulkWebhookDeleting, setBulkWebhookDeleting] = useState(false);
 
   const EVENTS = ['action.logged', 'agent.paused', 'agent.killed', 'agent.resumed', 'budget.exceeded', 'budget.warning', 'alert.created'];
 
@@ -2160,10 +2184,74 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
     fetchWebhooks();
   };
 
+  const filteredWebhooks = webhooks.filter(wh => {
+    if (!webhookSearch) return true;
+    const q = webhookSearch.toLowerCase();
+    return (
+      (wh.url as string || '').toLowerCase().includes(q) ||
+      (wh.description as string || '').toLowerCase().includes(q) ||
+      ((wh.events as string[]) || []).some(evt => evt.toLowerCase().includes(q))
+    );
+  });
+
+  const toggleWebhookSelect = (id: string) => {
+    setSelectedWebhooks(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleWebhookSelectAll = () => {
+    if (selectedWebhooks.size === filteredWebhooks.length) {
+      setSelectedWebhooks(new Set());
+    } else {
+      setSelectedWebhooks(new Set(filteredWebhooks.map(wh => wh.id as string)));
+    }
+  };
+
+  const bulkDeleteWebhooks = async () => {
+    setBulkWebhookDeleting(true);
+    try {
+      const ids = Array.from(selectedWebhooks);
+      await Promise.all(
+        ids.map(id =>
+          fetch(`/api/v1/webhooks?id=${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${apiKey}` },
+          })
+        )
+      );
+      analytics.webhookDeleted();
+      onToast(`${ids.length} ${ids.length === 1 ? 'webhook' : 'webhooks'} deleted`, 'success');
+      setSelectedWebhooks(new Set());
+      setBulkWebhookDeleteConfirm(false);
+      fetchWebhooks();
+    } catch {
+      onToast('Failed to delete some webhooks', 'error');
+    }
+    setBulkWebhookDeleting(false);
+  };
+
   if (loading) return <div className="text-white/60 text-center py-16">Loading webhooks...</div>;
 
   return (
     <div className="space-y-4">
+      {/* Bulk webhook delete confirmation */}
+      {bulkWebhookDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setBulkWebhookDeleteConfirm(false)}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">Delete {selectedWebhooks.size} {selectedWebhooks.size === 1 ? 'Webhook' : 'Webhooks'}?</h3>
+            <p className="text-sm text-white/40 mb-4">This will permanently remove the selected webhooks.</p>
+            <div className="flex gap-3">
+              <button onClick={bulkDeleteWebhooks} disabled={bulkWebhookDeleting} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors">{bulkWebhookDeleting ? 'Deleting...' : 'Delete All'}</button>
+              <button onClick={() => setBulkWebhookDeleteConfirm(false)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Webhook secret modal */}
       {shownSecret && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setShownSecret(null)}>
@@ -2189,15 +2277,32 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="text-sm font-medium text-white/70">Webhooks</h3>
           <p className="text-xs text-white/60 mt-0.5">Get notified when agents act, budgets exceed, or alerts fire.</p>
         </div>
-        <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
-          + Add Webhook
-        </button>
+        <div className="flex items-center gap-2">
+          {selectedWebhooks.size > 0 && (
+            <button onClick={() => setBulkWebhookDeleteConfirm(true)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20">
+              Delete {selectedWebhooks.size} selected
+            </button>
+          )}
+          <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+            + Add Webhook
+          </button>
+        </div>
       </div>
+
+      {webhooks.length > 3 && (
+        <input
+          type="text"
+          value={webhookSearch}
+          onChange={e => setWebhookSearch(e.target.value)}
+          placeholder="Search webhooks..."
+          className="w-full bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/30 focus:border-blue-500/50 focus:outline-none"
+        />
+      )}
 
       {showCreate && (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 space-y-3">
@@ -2255,25 +2360,45 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             Create your first webhook
           </button>
         </div>
-      ) : (
+      ) : filteredWebhooks.length > 0 ? (
         <div className="space-y-2">
-          {webhooks.map(wh => (
-            <div key={wh.id as string} className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4">
+          {/* Select all */}
+          {filteredWebhooks.length > 1 && (
+            <div className="flex items-center gap-3 px-1">
+              <input
+                type="checkbox"
+                checked={selectedWebhooks.size === filteredWebhooks.length && filteredWebhooks.length > 0}
+                onChange={toggleWebhookSelectAll}
+                className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+              />
+              <span className="text-[11px] text-white/40">{selectedWebhooks.size > 0 ? `${selectedWebhooks.size} selected` : 'Select all'}</span>
+            </div>
+          )}
+          {filteredWebhooks.map(wh => (
+            <div key={wh.id as string} className={`bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 ${selectedWebhooks.has(wh.id as string) ? 'bg-blue-500/[0.04]' : ''}`}>
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`w-2 h-2 rounded-full ${wh.active ? 'bg-emerald-400' : 'bg-white/20'}`} />
-                    <code className="text-xs text-blue-400 font-mono truncate block">{wh.url as string}</code>
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <input
+                    type="checkbox"
+                    checked={selectedWebhooks.has(wh.id as string)}
+                    onChange={() => toggleWebhookSelect(wh.id as string)}
+                    className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer mt-0.5"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`w-2 h-2 rounded-full ${wh.active ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                      <code className="text-xs text-blue-400 font-mono truncate block">{wh.url as string}</code>
+                    </div>
+                    {wh.description ? <p className="text-xs text-white/60 mb-1.5">{String(wh.description)}</p> : null}
+                    <div className="flex flex-wrap gap-1">
+                      {(wh.events as string[])?.map(evt => (
+                        <span key={evt} className="text-[10px] bg-white/[0.08] text-white/55 px-1.5 py-0.5 rounded">{evt}</span>
+                      ))}
+                    </div>
+                    {(wh.failure_count as number) > 0 && (
+                      <p className="text-[10px] text-amber-400/50 mt-1">{wh.failure_count as number} consecutive failures</p>
+                    )}
                   </div>
-                  {wh.description ? <p className="text-xs text-white/60 mb-1.5">{String(wh.description)}</p> : null}
-                  <div className="flex flex-wrap gap-1">
-                    {(wh.events as string[])?.map(evt => (
-                      <span key={evt} className="text-[10px] bg-white/[0.08] text-white/55 px-1.5 py-0.5 rounded">{evt}</span>
-                    ))}
-                  </div>
-                  {(wh.failure_count as number) > 0 && (
-                    <p className="text-[10px] text-amber-400/50 mt-1">{wh.failure_count as number} consecutive failures</p>
-                  )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button
@@ -2290,7 +2415,11 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             </div>
           ))}
         </div>
-      )}
+      ) : webhookSearch && webhooks.length > 0 ? (
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6 text-center">
+          <p className="text-white/40 text-sm">No webhooks match &ldquo;{webhookSearch}&rdquo;</p>
+        </div>
+      ) : null}
 
       {/* HMAC Verification docs */}
       <div className="bg-white/[0.12] rounded-xl border border-white/[0.12] p-4">

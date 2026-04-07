@@ -114,7 +114,7 @@ function buildConfigPayload(ruleType: RuleType, fields: Record<string, string>):
   }
 }
 
-export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: string, type: 'success' | 'error') => void }) {
+export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: string; onToast: (msg: string, type: 'success' | 'error') => void; refreshKey?: number }) {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -150,7 +150,7 @@ export default function PoliciesTab({ apiKey, onToast }: { apiKey: string; onToa
     setLoading(false);
   }, [apiKey]);
 
-  useEffect(() => { fetchPolicies(); }, [fetchPolicies]);
+  useEffect(() => { fetchPolicies(); }, [fetchPolicies, refreshKey]);
 
   const createPolicy = async () => {
     setCreating(true);

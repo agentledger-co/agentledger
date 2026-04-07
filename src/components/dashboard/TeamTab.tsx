@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { analytics } from '@/lib/analytics';
 
 interface Member {
   id: string;
@@ -114,6 +115,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole }),
       });
       if (res.ok) {
+        analytics.teamInviteSent(inviteRole);
         onToast('Invite sent', 'success');
         setInviteEmail('');
         setInviteRole('member');
@@ -148,6 +150,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
     try {
       const res = await fetch(`/api/v1/team?user_id=${userId}`, { method: 'DELETE' });
       if (res.ok) {
+        analytics.teamMemberRemoved();
         onToast('Member removed', 'success');
         setRemoveConfirm(null);
         fetchMembers();
@@ -169,6 +172,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         body: JSON.stringify({ userId, role: newRole }),
       });
       if (res.ok) {
+        analytics.teamRoleChanged(newRole);
         onToast('Role updated', 'success');
         fetchMembers();
         fetchAuditLogs();

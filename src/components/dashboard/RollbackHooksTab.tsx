@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { analytics } from '@/lib/analytics';
 
 interface RollbackHook {
   id: string;
@@ -95,6 +96,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
         body: JSON.stringify(body),
       });
       if (res.ok) {
+        analytics.rollbackHookCreated();
         onToast('Rollback hook created', 'success');
         setShowCreate(false);
         resetForm();
@@ -119,6 +121,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
         body: JSON.stringify({ id, enabled: !currentEnabled }),
       });
       if (res.ok) {
+        analytics.rollbackHookToggled(!currentEnabled);
         onToast(`Hook ${!currentEnabled ? 'enabled' : 'disabled'}`, 'success');
         fetchHooks();
       } else {
@@ -139,6 +142,7 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (res.ok) {
+        analytics.rollbackHookDeleted();
         onToast('Rollback hook deleted', 'success');
         setDeleteConfirm(null);
         fetchHooks();

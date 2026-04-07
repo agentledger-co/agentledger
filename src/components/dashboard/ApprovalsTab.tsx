@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { analytics } from '@/lib/analytics';
 
 interface Approval {
   id: string;
@@ -103,6 +104,7 @@ export default function ApprovalsTab({ apiKey, onToast }: { apiKey: string; onTo
         body: JSON.stringify({ id, decision, decided_by: 'dashboard' }),
       });
       if (res.ok) {
+        analytics.approvalDecided(decision);
         onToast(`Request ${decision}`, 'success');
         fetchApprovals();
         fetchPendingCount();

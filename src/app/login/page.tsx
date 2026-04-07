@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
+import { analytics } from '@/lib/analytics';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ export default function LoginPage() {
         options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
       });
       if (error) setError(error.message);
-      else setMagicLinkSent(true);
+      else { analytics.login('magic_link'); setMagicLinkSent(true); }
       setLoading(false);
       return;
     }
@@ -34,12 +35,14 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else {
+      analytics.login('email');
       window.location.href = '/dashboard';
     }
     setLoading(false);
   };
 
   const handleGitHubLogin = async () => {
+    analytics.login('github');
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },

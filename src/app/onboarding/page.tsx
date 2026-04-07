@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
+import { analytics } from '@/lib/analytics';
 
 const CHECK = '\u2713';
 
@@ -54,6 +55,7 @@ export default function OnboardingPage() {
       });
       const data = await res.json();
       if (data.apiKey) {
+        analytics.workspaceCreated(orgName || 'My Organization');
         setApiKey(data.apiKey);
         setStep(2);
       } else {
@@ -83,9 +85,11 @@ export default function OnboardingPage() {
         }),
       });
       if (res.ok) {
+        analytics.testEventSent(true);
         setTestResult('success');
         setTimeout(() => setStep(3), 1000);
       } else {
+        analytics.testEventSent(false);
         setTestResult('error');
       }
     } catch {
@@ -95,6 +99,7 @@ export default function OnboardingPage() {
 
   const copy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
+    if (id === 'key') analytics.apiKeyCopied();
     setCopied(id);
     setTimeout(() => setCopied(''), 2000);
   };
@@ -223,7 +228,7 @@ export default function OnboardingPage() {
             </div>
 
             <button
-              onClick={() => setStep(3)}
+              onClick={() => { analytics.onboardingSkipped(); setStep(3); }}
               className="w-full text-[13px] text-white/50 hover:text-white/40 transition-colors text-center"
             >
               Skip test, go to dashboard →
@@ -297,7 +302,7 @@ await ledger.track({
             </div>
 
             <button
-              onClick={() => { sessionStorage.setItem('al_api_key', apiKey); window.location.href = '/dashboard'; }}
+              onClick={() => { analytics.onboardingCompleted(); sessionStorage.setItem('al_api_key', apiKey); window.location.href = '/dashboard'; }}
               className="w-full bg-blue-500 hover:bg-blue-400 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-blue-500/20 text-[14px]"
             >
               Open dashboard →

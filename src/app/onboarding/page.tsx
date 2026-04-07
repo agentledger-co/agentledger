@@ -13,7 +13,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
-  const [testResult, setTestResult] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [testResult, setTestResult] = useState<'idle' | 'loading' | 'success' | 'error' | 'not_found'>('idle');
   const supabase = createBrowserClient();
 
   // Check if user already has an org
@@ -67,27 +67,22 @@ export default function OnboardingPage() {
     setLoading(false);
   };
 
-  const handleTest = async () => {
+  const handleVerify = async () => {
     setTestResult('loading');
     try {
-      const res = await fetch('/api/v1/actions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          agent: 'test-agent',
-          service: 'agentledger',
-          action: 'onboarding_test',
-          status: 'success',
-          duration_ms: 42,
-        }),
+      const res = await fetch('/api/v1/actions?limit=5', {
+        headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (res.ok) {
-        analytics.testEventSent(true);
-        setTestResult('success');
-        setTimeout(() => setStep(3), 1000);
+        const data = await res.json();
+        const actions = data.actions || [];
+        if (actions.length > 0) {
+          analytics.testEventSent(true);
+          setTestResult('success');
+          setTimeout(() => setStep(3), 1200);
+        } else {
+          setTestResult('not_found');
+        }
       } else {
         analytics.testEventSent(false);
         setTestResult('error');
@@ -192,7 +187,7 @@ export default function OnboardingPage() {
             {/* Test it */}
             <div className="mb-6">
               <h3 className="text-[15px] font-medium mb-3">Test your connection</h3>
-              <p className="text-white/60 text-[13px] mb-3">Run this in your terminal, or click the button below:</p>
+              <p className="text-white/60 text-[13px] mb-3">Run this command in your terminal to send a test event:</p>
 
               <div className="bg-[#0c0c0c] rounded-xl border border-white/[0.14] overflow-hidden mb-4">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.14]">
@@ -210,20 +205,23 @@ export default function OnboardingPage() {
               </div>
 
               <button
-                onClick={handleTest}
+                onClick={handleVerify}
                 disabled={testResult === 'loading'}
                 className={`w-full py-3 rounded-lg font-medium text-[14px] transition-all ${
                   testResult === 'success'
                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                     : testResult === 'error'
                     ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    : 'bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.14] text-white'
+                    : testResult === 'not_found'
+                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    : 'bg-blue-500 hover:bg-blue-400 text-white shadow-lg shadow-blue-500/20'
                 }`}
               >
-                {testResult === 'loading' ? 'Sending test event...' :
-                 testResult === 'success' ? `${CHECK} Test event received!` :
-                 testResult === 'error' ? 'Test failed — try again' :
-                 'Send test event'}
+                {testResult === 'loading' ? 'Checking...' :
+                 testResult === 'success' ? `${CHECK} Event received! Redirecting...` :
+                 testResult === 'error' ? 'Verification failed — try again' :
+                 testResult === 'not_found' ? 'No events found yet — run the command above first' :
+                 `I've run the command — verify`}
               </button>
             </div>
 
@@ -231,7 +229,7 @@ export default function OnboardingPage() {
               onClick={() => { analytics.onboardingSkipped(); setStep(3); }}
               className="w-full text-[13px] text-white/50 hover:text-white/40 transition-colors text-center"
             >
-              Skip test, go to dashboard →
+              Skip, go to dashboard →
             </button>
           </div>
         )}

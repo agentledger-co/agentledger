@@ -423,6 +423,9 @@ export default function DashboardPage() {
             <button onClick={fetchData} disabled={refreshing} className={`text-xs sm:text-sm transition-colors whitespace-nowrap shrink-0 ${refreshing ? 'text-blue-400' : 'text-white/60 hover:text-white/80'}`}>
               <span className={`inline-block ${refreshing ? 'animate-spin' : ''}`}>↻</span> <span className="hidden sm:inline">{refreshing ? 'Refreshing' : 'Refresh'}</span>
             </button>
+            <a href="/docs" className="text-xs sm:text-sm text-white/60 hover:text-white/80 transition-colors whitespace-nowrap shrink-0">
+              Docs
+            </a>
             <button
               onClick={async () => {
                 sessionStorage.removeItem('al_api_key');

@@ -37,6 +37,10 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Form state
   const [formAgent, setFormAgent] = useState('');
@@ -164,6 +168,57 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
     setFormEnabled(true);
   };
 
+  const filteredHooks = hooks.filter(h => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      (h.agent_name || 'any').toLowerCase().includes(q) ||
+      (h.service || 'any').toLowerCase().includes(q) ||
+      (h.action || 'any').toLowerCase().includes(q) ||
+      h.rollback_webhook_url.toLowerCase().includes(q)
+    );
+  });
+
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === filteredHooks.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filteredHooks.map(h => h.id)));
+    }
+  };
+
+  const bulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const ids = Array.from(selected);
+      await Promise.all(
+        ids.map(id =>
+          fetch(`/api/v1/rollback-hooks?id=${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${apiKey}` },
+          })
+        )
+      );
+      onToast(`${ids.length} ${ids.length === 1 ? 'hook' : 'hooks'} deleted`, 'success');
+      setSelected(new Set());
+      setBulkDeleteConfirm(false);
+      fetchHooks();
+    } catch {
+      onToast('Failed to delete some hooks', 'error');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
   function timeAgo(dateStr: string): string {
     const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
     if (seconds < 60) return `${seconds}s ago`;
@@ -178,19 +233,51 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
 
   return (
     <div className="space-y-6">
+      {/* Bulk delete confirmation modal */}
+      {bulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setBulkDeleteConfirm(false)}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">Delete {selected.size} {selected.size === 1 ? 'Hook' : 'Hooks'}?</h3>
+            <p className="text-sm text-white/40 mb-4">This will permanently remove the selected rollback hooks.</p>
+            <div className="flex gap-3">
+              <button onClick={bulkDelete} disabled={bulkDeleting} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors">{bulkDeleting ? 'Deleting...' : 'Delete All'}</button>
+              <button onClick={() => setBulkDeleteConfirm(false)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="text-sm font-medium text-white/70">Rollback Hooks</h3>
           <p className="text-xs text-white/60 mt-0.5">Automatically trigger rollback webhooks when actions fail or are blocked.</p>
         </div>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-        >
-          + Create Rollback Hook
-        </button>
+        <div className="flex items-center gap-2">
+          {selected.size > 0 && (
+            <button onClick={() => setBulkDeleteConfirm(true)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20">
+              Delete {selected.size} selected
+            </button>
+          )}
+          <button
+            onClick={() => setShowCreate(!showCreate)}
+            className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+          >
+            + Create Rollback Hook
+          </button>
+        </div>
       </div>
+
+      {/* Search */}
+      {hooks.length > 3 && (
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search hooks..."
+          className="w-full bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/30 focus:border-blue-500/50 focus:outline-none"
+        />
+      )}
 
       {/* Create form */}
       {showCreate && (
@@ -274,12 +361,20 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
             Create your first rollback hook
           </button>
         </div>
-      ) : hooks.length > 0 ? (
+      ) : filteredHooks.length > 0 ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/[0.14]">
+                  <th className="text-[11px] text-white/60 font-medium px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={selected.size === filteredHooks.length && filteredHooks.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                    />
+                  </th>
                   <th className="text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
                   <th className="text-[11px] text-white/60 font-medium px-4 py-3">Service</th>
                   <th className="text-[11px] text-white/60 font-medium px-4 py-3">Action</th>
@@ -289,8 +384,16 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
                 </tr>
               </thead>
               <tbody>
-                {hooks.map(hook => (
-                  <tr key={hook.id} className="border-b border-white/[0.12] last:border-0 hover:bg-white/[0.06] transition-colors">
+                {filteredHooks.map(hook => (
+                  <tr key={hook.id} className={`border-b border-white/[0.12] last:border-0 hover:bg-white/[0.06] transition-colors ${selected.has(hook.id) ? 'bg-blue-500/[0.04]' : ''}`}>
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(hook.id)}
+                        onChange={() => toggleSelect(hook.id)}
+                        className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                      />
+                    </td>
                     <td className="px-4 py-3 text-xs text-white/70">{hook.agent_name || <span className="text-white/50">Any</span>}</td>
                     <td className="px-4 py-3 text-xs text-white/70">{hook.service || <span className="text-white/50">Any</span>}</td>
                     <td className="px-4 py-3 text-xs text-white/70">{hook.action || <span className="text-white/50">Any</span>}</td>
@@ -337,6 +440,10 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
               </tbody>
             </table>
           </div>
+        </div>
+      ) : search && hooks.length > 0 ? (
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6 text-center">
+          <p className="text-white/40 text-sm">No hooks match &ldquo;{search}&rdquo;</p>
         </div>
       ) : null}
 

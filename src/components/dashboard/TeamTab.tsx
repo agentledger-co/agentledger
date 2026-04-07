@@ -66,6 +66,11 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
   // Confirm states
   const [removeConfirm, setRemoveConfirm] = useState<string | null>(null);
   const [revokeConfirm, setRevokeConfirm] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
+  const [bulkRemoveConfirm, setBulkRemoveConfirm] = useState(false);
+  const [bulkRemoving, setBulkRemoving] = useState(false);
+  const [roleChangeConfirm, setRoleChangeConfirm] = useState<{ userId: string; newRole: string } | null>(null);
 
   const isManager = currentRole === 'owner' || currentRole === 'admin';
 
@@ -185,6 +190,52 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
     }
   };
 
+  const filteredMembers = members.filter(m => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return m.email.toLowerCase().includes(q) || m.role.toLowerCase().includes(q);
+  });
+
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectableMembers = filteredMembers.filter(m => m.role !== 'owner');
+
+  const toggleSelectAll = () => {
+    if (selected.size === selectableMembers.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(selectableMembers.map(m => m.user_id)));
+    }
+  };
+
+  const bulkRemove = async () => {
+    setBulkRemoving(true);
+    try {
+      const ids = Array.from(selected);
+      await Promise.all(
+        ids.map(userId =>
+          fetch(`/api/v1/team?user_id=${userId}`, { method: 'DELETE' })
+        )
+      );
+      onToast(`${ids.length} ${ids.length === 1 ? 'member' : 'members'} removed`, 'success');
+      setSelected(new Set());
+      setBulkRemoveConfirm(false);
+      fetchMembers();
+      fetchAuditLogs();
+    } catch {
+      onToast('Failed to remove some members', 'error');
+    } finally {
+      setBulkRemoving(false);
+    }
+  };
+
   const inputClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] placeholder-white/50 focus:border-blue-500/50 focus:outline-none';
   const selectClass = 'bg-white/[0.10] border border-white/[0.16] text-white/80 rounded-lg px-3 py-2 text-[13px] focus:border-blue-500/50 focus:outline-none';
 
@@ -201,6 +252,34 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
             <div className="flex gap-3">
               <button onClick={() => removeMember(removeConfirm)} className="flex-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Remove</button>
               <button onClick={() => setRemoveConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk remove confirmation modal */}
+      {bulkRemoveConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setBulkRemoveConfirm(false)}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">Remove {selected.size} {selected.size === 1 ? 'Member' : 'Members'}?</h3>
+            <p className="text-sm text-white/40 mb-4">This will remove the selected users from your organization. They will lose access immediately.</p>
+            <div className="flex gap-3">
+              <button onClick={bulkRemove} disabled={bulkRemoving} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors">{bulkRemoving ? 'Removing...' : 'Remove All'}</button>
+              <button onClick={() => setBulkRemoveConfirm(false)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Role change confirmation modal */}
+      {roleChangeConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setRoleChangeConfirm(null)}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">Change Role?</h3>
+            <p className="text-sm text-white/40 mb-4">Change this member&apos;s role to <span className="text-white/60 font-medium">{roleChangeConfirm.newRole}</span>? This will update their permissions immediately.</p>
+            <div className="flex gap-3">
+              <button onClick={() => { changeRole(roleChangeConfirm.userId, roleChangeConfirm.newRole); setRoleChangeConfirm(null); }} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 rounded-lg transition-colors">Confirm</button>
+              <button onClick={() => setRoleChangeConfirm(null)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
             </div>
           </div>
         </div>
@@ -227,12 +306,38 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
             <h3 className="text-sm font-medium text-white/70">Team Members</h3>
             <p className="text-xs text-white/60 mt-0.5">Manage who has access to your organization.</p>
           </div>
+          {isManager && selected.size > 0 && (
+            <button onClick={() => setBulkRemoveConfirm(true)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20">
+              Remove {selected.size} selected
+            </button>
+          )}
         </div>
 
+        {members.length > 3 && (
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by email or role..."
+            className="w-full bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/30 focus:border-blue-500/50 focus:outline-none mb-3"
+          />
+        )}
+
+        {filteredMembers.length > 0 ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-white/[0.14]">
+                {isManager && (
+                  <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={selected.size === selectableMembers.length && selectableMembers.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                    />
+                  </th>
+                )}
                 <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Email</th>
                 <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Role</th>
                 <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden sm:table-cell">Joined</th>
@@ -240,14 +345,26 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              {members.map(member => (
-                <tr key={member.id} className="hover:bg-white/[0.06] transition-colors">
+              {filteredMembers.map(member => (
+                <tr key={member.id} className={`hover:bg-white/[0.06] transition-colors ${selected.has(member.user_id) ? 'bg-blue-500/[0.04]' : ''}`}>
+                  {isManager && (
+                    <td className="px-4 py-3">
+                      {member.role !== 'owner' ? (
+                        <input
+                          type="checkbox"
+                          checked={selected.has(member.user_id)}
+                          onChange={() => toggleSelect(member.user_id)}
+                          className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                        />
+                      ) : <span />}
+                    </td>
+                  )}
                   <td className="px-4 py-3 text-white/70">{member.email}</td>
                   <td className="px-4 py-3">
                     {isManager && member.role !== 'owner' ? (
                       <select
                         value={member.role}
-                        onChange={e => changeRole(member.user_id, e.target.value)}
+                        onChange={e => setRoleChangeConfirm({ userId: member.user_id, newRole: e.target.value })}
                         className={`text-[11px] px-2 py-0.5 rounded-md border cursor-pointer ${ROLE_COLORS[member.role] || ROLE_COLORS.viewer}`}
                         style={{ background: 'transparent' }}
                       >
@@ -279,6 +396,11 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
             </tbody>
           </table>
         </div>
+        ) : search && members.length > 0 ? (
+          <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6 text-center">
+            <p className="text-white/40 text-sm">No members match &ldquo;{search}&rdquo;</p>
+          </div>
+        ) : null}
       </div>
 
       {/* Invite Section */}

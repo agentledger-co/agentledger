@@ -119,9 +119,13 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
 
   // Create form state
   const [newAgent, setNewAgent] = useState('');
@@ -223,6 +227,56 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
       setDeletingId(null);
     }
   };
+
+  const bulkDelete = async () => {
+    setBulkDeleting(true);
+    try {
+      const ids = Array.from(selected);
+      await Promise.all(
+        ids.map(id =>
+          fetch(`/api/v1/policies?id=${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${apiKey}` },
+          })
+        )
+      );
+      onToast(`${ids.length} ${ids.length === 1 ? 'policy' : 'policies'} deleted`, 'success');
+      setSelected(new Set());
+      setBulkDeleteConfirm(false);
+      fetchPolicies();
+    } catch {
+      onToast('Failed to delete some policies', 'error');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === filteredPolicies.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filteredPolicies.map(p => p.id)));
+    }
+  };
+
+  const filteredPolicies = policies.filter(p => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      (p.agent_name || 'all agents').toLowerCase().includes(q) ||
+      (RULE_TYPE_LABELS[p.rule_type as RuleType] || p.rule_type).toLowerCase().includes(q) ||
+      formatConfig(p.rule_type, p.rule_config).toLowerCase().includes(q)
+    );
+  });
 
   const startEdit = (policy: Policy) => {
     setEditingId(policy.id);
@@ -422,6 +476,20 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
 
   return (
     <div className="space-y-4">
+      {/* Bulk delete confirmation modal */}
+      {bulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setBulkDeleteConfirm(false)}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">Delete {selected.size} {selected.size === 1 ? 'Policy' : 'Policies'}?</h3>
+            <p className="text-sm text-white/40 mb-4">This will permanently remove the selected policies. Agents will no longer be subject to these constraints.</p>
+            <div className="flex gap-3">
+              <button onClick={bulkDelete} disabled={bulkDeleting} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors">{bulkDeleting ? 'Deleting...' : 'Delete All'}</button>
+              <button onClick={() => setBulkDeleteConfirm(false)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete confirmation modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
@@ -489,15 +557,38 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="text-sm font-medium text-white/70">Policies</h3>
           <p className="text-xs text-white/60 mt-0.5">Define rules that govern how agents can act: rate limits, service restrictions, cost caps, and approval flows.</p>
         </div>
-        <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
-          + Create Policy
-        </button>
+        <div className="flex items-center gap-2">
+          {selected.size > 0 && (
+            <button onClick={() => setBulkDeleteConfirm(true)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20">
+              Delete {selected.size} selected
+            </button>
+          )}
+          {policies.length > 0 && (
+            <button onClick={() => { setSelected(new Set()); setBulkDeleteConfirm(true); setSelected(new Set(policies.map(p => p.id))); }} className="text-xs text-red-400/50 hover:text-red-400 px-2 py-1.5 transition-colors">
+              Clear All
+            </button>
+          )}
+          <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+            + Create Policy
+          </button>
+        </div>
       </div>
+
+      {/* Search */}
+      {policies.length > 3 && (
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search policies..."
+          className="w-full bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/30 focus:border-blue-500/50 focus:outline-none"
+        />
+      )}
 
       {showCreate && (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-4 space-y-3">
@@ -560,11 +651,19 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
             Create your first policy
           </button>
         </div>
-      ) : policies.length > 0 ? (
+      ) : filteredPolicies.length > 0 ? (
         <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] overflow-hidden">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-white/[0.14]">
+                <th className="text-left px-4 py-3 w-8">
+                  <input
+                    type="checkbox"
+                    checked={selected.size === filteredPolicies.length && filteredPolicies.length > 0}
+                    onChange={toggleSelectAll}
+                    className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                  />
+                </th>
                 <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Agent</th>
                 <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3">Rule Type</th>
                 <th className="text-left text-[11px] text-white/60 font-medium px-4 py-3 hidden md:table-cell">Config</th>
@@ -574,8 +673,16 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              {policies.map(policy => (
-                <tr key={policy.id} className="hover:bg-white/[0.06] transition-colors">
+              {filteredPolicies.map(policy => (
+                <tr key={policy.id} className={`hover:bg-white/[0.06] transition-colors ${selected.has(policy.id) ? 'bg-blue-500/[0.04]' : ''}`}>
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(policy.id)}
+                      onChange={() => toggleSelect(policy.id)}
+                      className="rounded border-white/20 bg-white/[0.10] text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                    />
+                  </td>
                   <td className="px-4 py-3 text-white/70">{policy.agent_name || <span className="text-white/60 italic">All agents</span>}</td>
                   <td className="px-4 py-3">
                     <span className="text-[11px] bg-white/[0.10] text-white/50 px-2 py-0.5 rounded-md">
@@ -613,6 +720,10 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
               ))}
             </tbody>
           </table>
+        </div>
+      ) : search && policies.length > 0 ? (
+        <div className="bg-white/[0.08] rounded-xl border border-white/[0.14] p-6 text-center">
+          <p className="text-white/40 text-sm">No policies match &ldquo;{search}&rdquo;</p>
         </div>
       ) : null}
     </div>

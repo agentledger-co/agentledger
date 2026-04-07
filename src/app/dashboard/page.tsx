@@ -1677,6 +1677,10 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
   const [newBudget, setNewBudget] = useState({ agent: '', period: 'daily', maxActions: '', maxCostDollars: '' });
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+  const [selectedBudgets, setSelectedBudgets] = useState<Set<string>>(new Set());
+  const [budgetSearch, setBudgetSearch] = useState('');
+  const [bulkBudgetDeleteConfirm, setBulkBudgetDeleteConfirm] = useState(false);
+  const [bulkBudgetDeleting, setBulkBudgetDeleting] = useState(false);
 
   const fetchBudgets = useCallback(async () => {
     try {
@@ -1747,6 +1751,50 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
     onRefresh();
   };
 
+  const filteredBudgets = budgets.filter(b => {
+    if (!budgetSearch) return true;
+    const q = budgetSearch.toLowerCase();
+    return b.agent_name.toLowerCase().includes(q) || b.period.toLowerCase().includes(q) || b.status.toLowerCase().includes(q);
+  });
+
+  const toggleBudgetSelect = (id: string) => {
+    setSelectedBudgets(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleBudgetSelectAll = () => {
+    if (selectedBudgets.size === filteredBudgets.length) {
+      setSelectedBudgets(new Set());
+    } else {
+      setSelectedBudgets(new Set(filteredBudgets.map(b => b.id)));
+    }
+  };
+
+  const bulkDeleteBudgets = async () => {
+    setBulkBudgetDeleting(true);
+    try {
+      const ids = Array.from(selectedBudgets);
+      await Promise.all(
+        ids.map(id =>
+          fetch(`/api/v1/budgets?id=${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${apiKey}` },
+          })
+        )
+      );
+      analytics.budgetDeleted();
+      setSelectedBudgets(new Set());
+      setBulkBudgetDeleteConfirm(false);
+      fetchBudgets();
+      onRefresh();
+    } catch { /* ignore */ }
+    setBulkBudgetDeleting(false);
+  };
+
   const BUDGET_STATUS_COLORS: Record<string, string> = {
     ok: 'bg-emerald-500',
     warning: 'bg-amber-500',
@@ -1791,6 +1839,20 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
         </div>
       )}
 
+      {/* Bulk budget delete confirmation */}
+      {bulkBudgetDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setBulkBudgetDeleteConfirm(false)}>
+          <div className="bg-[#1a1a1a] border border-white/[0.16] rounded-xl p-6 max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">Delete {selectedBudgets.size} {selectedBudgets.size === 1 ? 'Budget' : 'Budgets'}?</h3>
+            <p className="text-sm text-white/40 mb-4">This will permanently remove the selected budgets and their tracking.</p>
+            <div className="flex gap-3">
+              <button onClick={bulkDeleteBudgets} disabled={bulkBudgetDeleting} className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition-colors">{bulkBudgetDeleting ? 'Deleting...' : 'Delete All'}</button>
+              <button onClick={() => setBulkBudgetDeleteConfirm(false)} className="flex-1 bg-white/[0.08] hover:bg-white/10 text-white/60 text-sm font-medium py-2 rounded-lg transition-colors border border-white/[0.14]">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Spend Overview Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <StatCard label="Cost Today" value={formatCost(stats.todayCostCents || 0)} sub="current period" accent="orange" />
@@ -1820,15 +1882,33 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
 
       {/* Budget List */}
       <div className="bg-white/[0.08] rounded-xl border border-white/[0.14]">
-        <div className="px-5 py-4 border-b border-white/[0.14] flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-white/[0.14] flex items-center justify-between flex-wrap gap-2">
           <h3 className="text-sm font-medium text-white/60">Budget Controls</h3>
-          <button
-            onClick={() => setShowCreate(!showCreate)}
-            className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors"
-          >
-            + New Budget
-          </button>
+          <div className="flex items-center gap-2">
+            {selectedBudgets.size > 0 && (
+              <button onClick={() => setBulkBudgetDeleteConfirm(true)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border border-red-500/20">
+                Delete {selectedBudgets.size} selected
+              </button>
+            )}
+            <button
+              onClick={() => setShowCreate(!showCreate)}
+              className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-colors"
+            >
+              + New Budget
+            </button>
+          </div>
         </div>
+        {budgets.length > 3 && (
+          <div className="px-5 pt-4">
+            <input
+              type="text"
+              value={budgetSearch}
+              onChange={e => setBudgetSearch(e.target.value)}
+              placeholder="Search budgets..."
+              className="w-full bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder-white/30 focus:border-blue-500/50 focus:outline-none"
+            />
+          </div>
+        )}
 
         {/* Create Budget Form */}
         {showCreate && (

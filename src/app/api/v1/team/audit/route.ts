@@ -17,11 +17,15 @@ async function getMemberContext(req: NextRequest) {
   return { userId, orgId: member.org_id, role: member.role };
 }
 
-// GET /api/v1/team/audit — List audit logs (cookie auth for dashboard)
+// GET /api/v1/team/audit — List audit logs (admin/owner only, cookie auth for dashboard)
 export async function GET(req: NextRequest) {
   const ctx = await getMemberContext(req);
   if (!ctx) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (ctx.role !== 'owner' && ctx.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden: admin or owner role required' }, { status: 403 });
   }
 
   const url = new URL(req.url);
@@ -37,7 +41,7 @@ export async function GET(req: NextRequest) {
     .limit(limit);
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch audit logs', detail: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch audit logs' }, { status: 500 });
   }
 
   return NextResponse.json({ logs: data || [] });

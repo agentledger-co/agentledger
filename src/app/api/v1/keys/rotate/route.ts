@@ -29,13 +29,7 @@ export async function POST(req: NextRequest) {
 
   if (!oldKey) return NextResponse.json({ error: 'Key not found or already revoked' }, { status: 404 });
 
-  // Revoke old key
-  await supabase
-    .from('api_keys')
-    .update({ revoked_at: new Date().toISOString() })
-    .eq('id', keyId);
-
-  // Generate new key
+  // Generate new key FIRST (before revoking old one, for atomicity)
   const { key, hash, prefix } = generateApiKey();
 
   const { data: newKey, error } = await supabase
@@ -50,7 +44,13 @@ export async function POST(req: NextRequest) {
     .select('id, key_prefix, name, description, created_at')
     .single();
 
-  if (error) return NextResponse.json({ error: 'Failed to create new key', detail: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: 'Failed to create new key' }, { status: 500 });
+
+  // Revoke old key only after new one is confirmed created
+  await supabase
+    .from('api_keys')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('id', keyId);
 
   return NextResponse.json({ ...newKey, key, rotatedFrom: keyId });
 }

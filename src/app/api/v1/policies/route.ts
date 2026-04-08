@@ -59,10 +59,13 @@ function validateRuleConfig(ruleType: RuleType, config: unknown): string | null 
       if (!cfg.patterns.every((p: unknown) => typeof p === 'string')) {
         return 'payload_regex_block rule_config.patterns must contain only strings';
       }
-      // Validate each pattern is a valid regex
+      // Validate each pattern is a valid regex with length limit to mitigate ReDoS
       for (const pattern of cfg.patterns) {
+        if (typeof pattern !== 'string' || pattern.length > 200) {
+          return 'Each regex pattern must be a string of 200 characters or fewer';
+        }
         try {
-          new RegExp(pattern as string);
+          new RegExp(pattern);
         } catch {
           return `Invalid regex pattern: ${pattern}`;
         }

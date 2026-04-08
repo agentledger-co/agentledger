@@ -104,7 +104,7 @@ async function deliverWebhook(
       success,
       attempt,
     });
-  } catch { /* Don't fail if logging fails */ }
+  } catch (err) { console.error('[webhooks] Failed to log delivery:', err); }
 
   // Update webhook stats
   try {
@@ -115,7 +115,7 @@ async function deliverWebhook(
       active: success || ((webhook.failure_count as number) || 0) < 9,
       updated_at: new Date().toISOString(),
     }).eq('id', webhook.id);
-  } catch { /* Non-critical */ }
+  } catch (err) { console.error('[webhooks] Failed to update webhook stats:', err); }
 
   // Retry once on failure
   if (!success && attempt < 2) {

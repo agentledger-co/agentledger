@@ -136,8 +136,8 @@ export async function GET(req: NextRequest) {
               lastAlertTimestamp = alerts[alerts.length - 1].created_at;
             }
           }
-        } catch {
-          // Swallow errors, keep streaming
+        } catch (err) {
+          console.error('[stream] Poll error:', err);
         }
       };
 

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     return NextResponse.json({ error: 'Failed to pause agent', detail: error.message }, { status: 500 });
   }
 
-  fireWebhooks(auth.orgId, 'agent.paused', { agent: name }).catch(() => {});
+  fireWebhooks(auth.orgId, 'agent.paused', { agent: name }).catch(err => console.error('[agent:pause] background task failed:', err));
 
   return NextResponse.json({ status: 'paused', agent: name });
 }

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     return NextResponse.json({ error: 'Failed to resume agent', detail: error.message }, { status: 500 });
   }
 
-  fireWebhooks(auth.orgId, 'agent.resumed', { agent: name }).catch(() => {});
+  fireWebhooks(auth.orgId, 'agent.resumed', { agent: name }).catch(err => console.error('[agent:resume] background task failed:', err));
 
   return NextResponse.json({ status: 'active', agent: name });
 }

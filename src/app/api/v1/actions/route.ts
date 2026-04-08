@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
     agentId = existingAgent.id;
     agentStatus = existingAgent.status;
     // Update timestamps (non-blocking)
-    Promise.resolve(supabase.from('agents').update({ last_active_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', agentId)).catch(() => {});
+    Promise.resolve(supabase.from('agents').update({ last_active_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', agentId)).catch(err => console.error('[actions] background task failed:', err));
   } else {
     // Try to create — catch unique constraint race condition
     const { data: newAgent, error: insertErr } = await supabase
@@ -306,12 +306,12 @@ export async function POST(req: NextRequest) {
         fireWebhooks(auth.orgId, 'budget.exceeded', {
           agent, period: budget.period, current_actions: newActions, current_cost_cents: newCost,
           max_actions: budget.max_actions, max_cost_cents: budget.max_cost_cents,
-        }).catch(() => {});
+        }).catch(err => console.error('[actions] background task failed:', err));
 
         fireWebhooks(auth.orgId, 'alert.created', {
           agent, alert_type: 'budget_exceeded', severity: 'critical',
           message: `Budget for ${agent} (${budget.period}) has been exceeded`,
-        }).catch(() => {});
+        }).catch(err => console.error('[actions] background task failed:', err));
 
         // Send Slack/email notifications
         sendNotifications(auth.orgId, {
@@ -323,10 +323,10 @@ export async function POST(req: NextRequest) {
             actions: `${newActions}/${budget.max_actions || '∞'}`,
             cost: `$${(newCost / 100).toFixed(2)}/${budget.max_cost_cents ? '$' + (budget.max_cost_cents / 100).toFixed(2) : '∞'}`,
           },
-        }).catch(() => {});
+        }).catch(err => console.error('[actions] background task failed:', err));
 
         // Fire rollback hooks (non-blocking)
-        fireRollbacks(auth.orgId, 'budget_exceeded', agent, trace_id || undefined).catch(() => {});
+        fireRollbacks(auth.orgId, 'budget_exceeded', agent, trace_id || undefined).catch(err => console.error('[actions] background task failed:', err));
       }
 
       // Fire budget warning webhook
@@ -334,7 +334,7 @@ export async function POST(req: NextRequest) {
         fireWebhooks(auth.orgId, 'budget.warning', {
           agent, period: budget.period, current_actions: newActions, current_cost_cents: newCost,
           max_actions: budget.max_actions, max_cost_cents: budget.max_cost_cents,
-        }).catch(() => {});
+        }).catch(err => console.error('[actions] background task failed:', err));
 
         sendNotifications(auth.orgId, {
           event: 'budget.warning',
@@ -345,7 +345,7 @@ export async function POST(req: NextRequest) {
             actions: `${newActions}/${budget.max_actions || '∞'}`,
             cost: `$${(newCost / 100).toFixed(2)}/${budget.max_cost_cents ? '$' + (budget.max_cost_cents / 100).toFixed(2) : '∞'}`,
           },
-        }).catch(() => {});
+        }).catch(err => console.error('[actions] background task failed:', err));
       }
     }
   }
@@ -356,12 +356,12 @@ export async function POST(req: NextRequest) {
     estimated_cost_cents: cost_cents,
     duration_ms,
     status,
-  }).catch(() => {});
+  }).catch(err => console.error('[actions] background task failed:', err));
 
   // Fire action logged webhook (non-blocking)
   fireWebhooks(auth.orgId, 'action.logged', {
     id: actionLog?.id, agent, service, action, status, cost_cents, duration_ms,
-  }).catch(() => {});
+  }).catch(err => console.error('[actions] background task failed:', err));
 
   // Send notification on errors
   if (status === 'error') {
@@ -370,7 +370,7 @@ export async function POST(req: NextRequest) {
       agentName: agent,
       message: `Action \`${action}\` on \`${service}\` failed.`,
       details: { service, action, duration: `${duration_ms}ms` },
-    }).catch(() => {});
+    }).catch(err => console.error('[actions] background task failed:', err));
   }
 
   return NextResponse.json({ logged: true, id: actionLog?.id });

@@ -126,7 +126,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         setInviteRole('member');
         fetchInvites();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         onToast(err.error || 'Failed to send invite', 'error');
       }
     } catch {
@@ -161,7 +161,7 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         fetchMembers();
         fetchAuditLogs();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         onToast(err.error || 'Failed to remove member', 'error');
       }
     } catch {
@@ -182,13 +182,27 @@ export default function TeamTab({ onToast }: { onToast: (msg: string, type: 'suc
         fetchMembers();
         fetchAuditLogs();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         onToast(err.error || 'Failed to update role', 'error');
       }
     } catch {
       onToast('Failed to update role', 'error');
     }
   };
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (bulkRemoveConfirm) setBulkRemoveConfirm(false);
+        else if (removeConfirm) setRemoveConfirm(null);
+        else if (roleChangeConfirm) setRoleChangeConfirm(null);
+        else if (revokeConfirm) setRevokeConfirm(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [bulkRemoveConfirm, removeConfirm, roleChangeConfirm, revokeConfirm]);
 
   const filteredMembers = members.filter(m => {
     if (!search) return true;

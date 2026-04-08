@@ -179,7 +179,7 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
         setNewPriority('0');
         fetchPolicies();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         onToast(err.error || 'Failed to create policy', 'error');
       }
     } catch {
@@ -267,6 +267,20 @@ export default function PoliciesTab({ apiKey, onToast, refreshKey }: { apiKey: s
       setSelected(new Set(filteredPolicies.map(p => p.id)));
     }
   };
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (bulkDeleteConfirm) setBulkDeleteConfirm(false);
+        else if (deleteConfirm) setDeleteConfirm(null);
+        else if (editingId) setEditingId(null);
+        else if (showCreate) setShowCreate(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [bulkDeleteConfirm, deleteConfirm, editingId, showCreate]);
 
   const filteredPolicies = policies.filter(p => {
     if (!search) return true;

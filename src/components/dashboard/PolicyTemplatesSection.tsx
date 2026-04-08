@@ -52,7 +52,7 @@ export default function PolicyTemplatesSection({ apiKey, onToast, onRefresh }: {
         onToast(`Template applied — ${data.policiesCreated} policies created`, 'success');
         onRefresh();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         onToast(err.error || 'Failed to apply template', 'error');
       }
     } catch {

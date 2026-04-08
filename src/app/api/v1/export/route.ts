@@ -3,8 +3,8 @@ import { authenticateApiKey } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase';
 import { sanitizeString } from '@/lib/validate';
 
-const MAX_LIMIT = 50000;
-const DEFAULT_LIMIT = 10000;
+const MAX_LIMIT = 10000;
+const DEFAULT_LIMIT = 5000;
 const MAX_DATE_RANGE_DAYS = 90;
 
 const CSV_COLUMNS = [

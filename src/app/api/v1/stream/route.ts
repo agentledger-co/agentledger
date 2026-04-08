@@ -6,12 +6,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  // Auth: support both Bearer token header and ?key= query param
-  // (EventSource doesn't support custom headers)
-  const keyParam = req.nextUrl.searchParams.get('key');
-  const auth = keyParam
-    ? await authenticateApiKeyFromString(keyParam)
-    : await authenticateApiKey(req);
+  // Auth: prefer Authorization header; fall back to ?key= for EventSource
+  // (EventSource API doesn't support custom headers)
+  const auth = await authenticateApiKey(req)
+    || await (async () => {
+      const keyParam = req.nextUrl.searchParams.get('key');
+      return keyParam ? authenticateApiKeyFromString(keyParam) : null;
+    })();
 
   if (!auth) {
     return new Response('Unauthorized', { status: 401 });

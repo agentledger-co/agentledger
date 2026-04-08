@@ -20,7 +20,8 @@ export async function logAudit(params: {
       resource_id: params.resourceId,
       details: params.details || {},
     });
-  } catch {
-    // Non-blocking — don't fail the main request
+  } catch (err) {
+    // Non-blocking — don't fail the main request, but log for observability
+    console.error('[audit] Failed to write audit log:', err);
   }
 }

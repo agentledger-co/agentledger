@@ -16,12 +16,11 @@ export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   const vercelCron = req.headers.get('x-vercel-cron-signature');
 
-  const isAuthorized = (cronSecret && authHeader === `Bearer ${cronSecret}`) || vercelCron;
-  if (!isAuthorized) {
+  const hasValidSecret = cronSecret && authHeader === `Bearer ${cronSecret}`;
+  const hasVercelCron = !!vercelCron;
+
+  if (!hasValidSecret && !hasVercelCron) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  if (!cronSecret && !vercelCron) {
-    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 });
   }
 
   const supabase = createServiceClient();

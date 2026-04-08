@@ -48,15 +48,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     });
   }
 
-  fireWebhooks(auth.orgId, 'agent.killed', { agent: name }).catch(() => {});
-  fireWebhooks(auth.orgId, 'alert.created', { agent: name, alert_type: 'agent_killed', severity: 'critical' }).catch(() => {});
+  fireWebhooks(auth.orgId, 'agent.killed', { agent: name }).catch(err => console.error('[agent:kill] background task failed:', err));
+  fireWebhooks(auth.orgId, 'alert.created', { agent: name, alert_type: 'agent_killed', severity: 'critical' }).catch(err => console.error('[agent:kill] background task failed:', err));
 
   sendNotifications(auth.orgId, {
     event: 'agent.killed',
     agentName: name,
     message: `Agent *${name}* was killed.`,
     details: { killed_by: 'dashboard' },
-  }).catch(() => {});
+  }).catch(err => console.error('[agent:kill] background task failed:', err));
 
   // Fire rollback hooks — find most recent trace_id for this agent (last hour)
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ nam
     .limit(1)
     .single();
 
-  fireRollbacks(auth.orgId, 'agent_killed', name, recentAction?.trace_id || undefined).catch(() => {});
+  fireRollbacks(auth.orgId, 'agent_killed', name, recentAction?.trace_id || undefined).catch(err => console.error('[agent:kill] background task failed:', err));
 
   logAudit({
     orgId: auth.orgId,

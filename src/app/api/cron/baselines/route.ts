@@ -51,6 +51,9 @@ export async function GET(req: NextRequest) {
       .limit(1000);
 
     if (agentsError || !agents) continue;
+    if (agents.length === 1000) {
+      console.warn(`[baselines] Org ${org.id} hit 1000 agent limit — some agents may be skipped`);
+    }
 
     // Deduplicate agent names
     const agentNames = [...new Set(agents.map((a) => a.agent_name))];

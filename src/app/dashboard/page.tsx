@@ -3,6 +3,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { analytics } from '@/lib/analytics';
+
+function ssGet(key: string): string | null { try { return ssGet(key); } catch { return null; } }
+function ssSet(key: string, value: string) { try { ssSet(key, value); } catch { /* unavailable */ } }
+
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
@@ -126,7 +130,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings'>(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('al_dashboard_tab');
+      const saved = ssGet('al_dashboard_tab');
       if (saved && ['overview', 'actions', 'agents', 'control', 'insights', 'settings'].includes(saved)) {
         return saved as 'overview' | 'actions' | 'agents' | 'control' | 'insights' | 'settings';
       }
@@ -135,11 +139,11 @@ export default function DashboardPage() {
   });
   const [subTab, setSubTab] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('al_dashboard_subtab') || 'policies';
+      return ssGet('al_dashboard_subtab') || 'policies';
     }
     return 'policies';
   });
-  const [environment, setEnvironment] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('al_environment') || '' : '');
+  const [environment, setEnvironment] = useState(() => typeof window !== 'undefined' ? ssGet('al_environment') || '' : '');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [drawerAction, setDrawerAction] = useState<ActionLog | null>(null);
   const [traceData, setTraceData] = useState<{ traceId: string; actions: unknown[]; summary: unknown } | null>(null);
@@ -179,7 +183,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const init = async () => {
       // Try stored key first (for backward compat and speed)
-      const stored = typeof window !== 'undefined' ? window.sessionStorage.getItem('al_api_key') : null;
+      const stored = typeof window !== 'undefined' ? ssGet('al_api_key') : null;
       if (stored) {
         setApiKey(stored);
         setIsSetup(true);
@@ -210,7 +214,7 @@ export default function DashboardPage() {
           const data = await res.json();
           if (data.orgId && data.keys?.length > 0) {
             // User has an org — check for stored key
-            const storedKey = sessionStorage.getItem('al_api_key');
+            const storedKey = ssGet('al_api_key');
             if (storedKey) {
               setApiKey(storedKey);
               setIsSetup(true);
@@ -223,7 +227,7 @@ export default function DashboardPage() {
               if (recoverRes.ok) {
                 const recoverData = await recoverRes.json();
                 if (recoverData.key) {
-                  sessionStorage.setItem('al_api_key', recoverData.key);
+                  ssSet('al_api_key', recoverData.key);
                   setApiKey(recoverData.key);
                   setIsSetup(true);
                 }
@@ -310,7 +314,7 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         setApiKey(existingKey);
-        sessionStorage.setItem('al_api_key', existingKey);
+        ssSet('al_api_key', existingKey);
         setIsSetup(true);
       } else {
         setError('Invalid API key');
@@ -329,7 +333,7 @@ export default function DashboardPage() {
       const data = await res.json();
       if (data.apiKey) {
         setApiKey(data.apiKey);
-        sessionStorage.setItem('al_api_key', data.apiKey);
+        ssSet('al_api_key', data.apiKey);
         setIsSetup(true);
       } else {
         setError(data.error || 'Setup failed');
@@ -410,7 +414,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 overflow-x-auto scrollbar-hide">
             <WorkspaceSwitcher />
-            <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); sessionStorage.setItem('al_environment', env); }} />
+            <EnvironmentSelector apiKey={apiKey} environment={environment} onChange={(env) => { setEnvironment(env); ssSet('al_environment', env); }} />
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
@@ -465,10 +469,10 @@ export default function DashboardPage() {
               key={t.key}
               onClick={() => {
                 setTab(t.key);
-                sessionStorage.setItem('al_dashboard_tab', t.key);
-                if (t.key === 'control') { setSubTab('policies'); sessionStorage.setItem('al_dashboard_subtab', 'policies'); }
-                if (t.key === 'insights') { setSubTab('alerts'); sessionStorage.setItem('al_dashboard_subtab', 'alerts'); }
-                if (t.key === 'settings') { setSubTab('general'); sessionStorage.setItem('al_dashboard_subtab', 'general'); }
+                ssSet('al_dashboard_tab', t.key);
+                if (t.key === 'control') { setSubTab('policies'); ssSet('al_dashboard_subtab', 'policies'); }
+                if (t.key === 'insights') { setSubTab('alerts'); ssSet('al_dashboard_subtab', 'alerts'); }
+                if (t.key === 'settings') { setSubTab('general'); ssSet('al_dashboard_subtab', 'general'); }
               }}
               className={`px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md text-[11px] sm:text-xs md:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                 tab === t.key ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white/80'
@@ -527,7 +531,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['policies', 'approvals', 'budgets'].map(st => (
-                <button key={st} onClick={() => { setSubTab(st); sessionStorage.setItem('al_dashboard_subtab', st); }}
+                <button key={st} onClick={() => { setSubTab(st); ssSet('al_dashboard_subtab', st); }}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
@@ -550,7 +554,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['alerts', 'evaluations', 'analytics', 'forecast', 'replay'].map(st => (
-                <button key={st} onClick={() => { setSubTab(st); sessionStorage.setItem('al_dashboard_subtab', st); }}
+                <button key={st} onClick={() => { setSubTab(st); ssSet('al_dashboard_subtab', st); }}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
@@ -579,7 +583,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex gap-1 mb-4 border-b border-white/[0.14] pb-2 overflow-x-auto scrollbar-hide">
               {['general', 'team', 'webhooks', 'rollbacks'].map(st => (
-                <button key={st} onClick={() => { setSubTab(st); sessionStorage.setItem('al_dashboard_subtab', st); }}
+                <button key={st} onClick={() => { setSubTab(st); ssSet('al_dashboard_subtab', st); }}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors capitalize ${
                     subTab === st ? 'text-blue-400 border-b-2 border-blue-400' : 'text-white/60 hover:text-white/50'
                   }`}>
@@ -1129,6 +1133,12 @@ function AgentsTab({ stats, onToggle, onKill, onSelect, selectedAgent, actions, 
 }) {
   const [killConfirm, setKillConfirm] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape' && killConfirm) setKillConfirm(null); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [killConfirm]);
+
   // If an agent is selected, show detail view
   if (selectedAgent) {
     const agent = stats.agents.find(a => a.name === selectedAgent);
@@ -1288,6 +1298,12 @@ function AgentDetailView({ agent, actions, onBack, onToggle, onKill, apiKey, onO
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [killConfirm, setKillConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'traces'>('list');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape' && killConfirm) setKillConfirm(false); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [killConfirm]);
 
   // Filter actions for this agent
   const agentActions = actions.filter(a => a.agent_name === agent.name);
@@ -1714,7 +1730,6 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
           max_cost_cents: newBudget.maxCostDollars ? Math.round(parseFloat(newBudget.maxCostDollars) * 100) : null,
         }),
       });
-      const data = await res.json();
       if (res.ok) {
         analytics.budgetCreated();
         setShowCreate(false);
@@ -1722,6 +1737,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
         fetchBudgets();
         onRefresh();
       } else {
+        const data = await res.json().catch(() => ({}));
         setError(data.error || 'Failed to create budget');
       }
     } catch {
@@ -1753,6 +1769,18 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
     fetchBudgets();
     onRefresh();
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (bulkBudgetDeleteConfirm) setBulkBudgetDeleteConfirm(false);
+        else if (deleteConfirm) setDeleteConfirm(null);
+        else if (showCreate) setShowCreate(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [bulkBudgetDeleteConfirm, deleteConfirm, showCreate]);
 
   const filteredBudgets = budgets.filter(b => {
     if (!budgetSearch) return true;
@@ -2197,6 +2225,18 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
     );
   });
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (bulkWebhookDeleteConfirm) setBulkWebhookDeleteConfirm(false);
+        else if (shownSecret) setShownSecret(null);
+        else if (showCreate) setShowCreate(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [bulkWebhookDeleteConfirm, shownSecret, showCreate]);
+
   const toggleWebhookSelect = (id: string) => {
     setSelectedWebhooks(prev => {
       const next = new Set(prev);
@@ -2527,7 +2567,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
           if (confirm(`Rotated API Key (save it now!):\n\n${data.key}\n\nClick OK to copy to clipboard.`)) {
             navigator.clipboard.writeText(data.key);
             // If this was the key we were using, update sessionStorage
-            sessionStorage.setItem('al_api_key', data.key);
+            ssSet('al_api_key', data.key);
             window.location.reload();
           }
         }, 100);
@@ -2681,6 +2721,12 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 
 // ==================== ACTION DRAWER ====================
 function ActionDrawer({ action, onClose, onOpenTrace }: { action: ActionLog; onClose: () => void; onOpenTrace?: (traceId: string) => void }) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const meta = (action.metadata || action.request_meta || {}) as Record<string, unknown>;
   const hasInput = action.input != null && typeof action.input === 'object' && Object.keys(action.input as Record<string, unknown>).length > 0;
   const hasOutput = action.output != null && typeof action.output === 'object' && Object.keys(action.output as Record<string, unknown>).length > 0;

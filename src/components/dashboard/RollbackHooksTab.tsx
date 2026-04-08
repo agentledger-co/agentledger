@@ -160,6 +160,19 @@ export default function RollbackHooksTab({ apiKey, onToast }: RollbackHooksTabPr
     }
   };
 
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (bulkDeleteConfirm) setBulkDeleteConfirm(false);
+        else if (deleteConfirm) setDeleteConfirm(null);
+        else if (showCreate) setShowCreate(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [bulkDeleteConfirm, deleteConfirm, showCreate]);
+
   const resetForm = () => {
     setFormAgent('');
     setFormService('');

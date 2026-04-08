@@ -2639,7 +2639,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-medium text-white/70">API Keys</h3>
-            <p className="text-xs text-white/60 mt-0.5">Manage authentication keys for your organization. Max 5 active keys.</p>
+            <p className="text-xs text-white/60 mt-0.5">Manage authentication keys for your workspace. Max 5 active keys.</p>
           </div>
           <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-500 hover:bg-blue-400 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
             + New Key

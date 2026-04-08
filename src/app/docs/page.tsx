@@ -748,7 +748,7 @@ app.post('/webhook', (req, res) => {
           {/* API Key Management */}
           <section id="api-keys" className="mb-20">
             <h2 className="text-[22px] font-semibold mb-4 tracking-tight">API Key Management</h2>
-            <p className="text-white/60 text-[14px] mb-4">Create up to 5 active API keys per organization. Rotate and revoke keys without downtime.</p>
+            <p className="text-white/60 text-[14px] mb-4">Create up to 5 active API keys per workspace. Rotate and revoke keys without downtime.</p>
 
             <h3 className="text-[16px] font-medium mt-4 mb-3">Create a new key</h3>
             <Code code={`curl -X POST https://your-instance.vercel.app/api/v1/keys/create \\

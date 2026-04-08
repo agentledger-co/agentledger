@@ -79,6 +79,7 @@ export default function PrivacyPage() {
               <li><strong className="text-white/60">Communications:</strong> Service-related announcements, security alerts</li>
             </ul>
             <p className="mt-2">We do <strong className="text-white/60">not</strong> sell your data to third parties. We do <strong className="text-white/60">not</strong> use your agent activity data for advertising, profiling, or AI training.</p>
+            <p className="mt-2">Agent activity data (action names, agent names, cost, and status) may be included in notification payloads sent to third-party services you configure, such as Slack, Discord, PagerDuty, or custom webhooks.</p>
           </section>
 
           <section>

@@ -127,7 +127,7 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        {/* Step 1: Create Organization */}
+        {/* Step 1: Create Workspace */}
         {step === 1 && (
           <div>
             <div className="text-center mb-8">

@@ -353,6 +353,31 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [autoRefresh, isSetup, fetchData]);
 
+  // GA4 engagement heartbeat — fire an event every 30s while the dashboard
+  // tab is in focus. Offsets GA4's focus-only engagement timer, which
+  // undercounts monitoring dashboards users leave open in the background.
+  useEffect(() => {
+    if (!isSetup) return;
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(() => analytics.dashboardHeartbeat(), 30000);
+    };
+    const stop = () => {
+      if (interval) { clearInterval(interval); interval = null; }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') start();
+      else stop();
+    };
+    if (document.visibilityState === 'visible') start();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      stop();
+    };
+  }, [isSetup]);
+
   const handleSetup = async (existingKey?: string) => {
     setLoading(true);
     setError('');

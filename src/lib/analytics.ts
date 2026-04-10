@@ -75,4 +75,11 @@ export const analytics = {
   demoTabClicked: (tab: string) => track('demo_tab_clicked', { tab }),
   npmCommandCopied: () => track('npm_command_copied'),
   faqOpened: (index: number) => track('faq_opened', { faq_index: index }),
+  scrollDepth: (percent: 25 | 50 | 75 | 100) => track('scroll_depth', { percent }),
+
+  // ---- Engagement ----
+  // Fired every 30s while a dashboard tab is in focus. Offsets GA4's
+  // focus-only engagement timer, which undercounts dashboard tools that
+  // users leave open in the background.
+  dashboardHeartbeat: () => track('dashboard_heartbeat'),
 };

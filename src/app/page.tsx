@@ -374,6 +374,27 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
+  // Track scroll depth so GA4 gets engagement signal from non-bouncing
+  // readers. Each threshold fires at most once per page load.
+  useEffect(() => {
+    const fired = new Set<25 | 50 | 75 | 100>();
+    const thresholds: (25 | 50 | 75 | 100)[] = [25, 50, 75, 100];
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) return;
+      const pct = (window.scrollY / scrollable) * 100;
+      for (const t of thresholds) {
+        if (pct >= t && !fired.has(t)) {
+          fired.add(t);
+          analytics.scrollDepth(t);
+        }
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#08080a] text-white">
       {/* Nav */}

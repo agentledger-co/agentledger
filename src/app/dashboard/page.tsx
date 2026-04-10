@@ -2189,7 +2189,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         setShownSecret(data.secret);
       }
     } else {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       onToast(err.error || 'Failed to create webhook', 'error');
     }
   };
@@ -2528,7 +2528,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         }, 100);
       }
     } else {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       onToast(err.error || 'Failed to create key', 'error');
     }
   };
@@ -2544,7 +2544,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       onToast('Key revoked', 'success');
       fetchKeys();
     } else {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       onToast(err.error || 'Failed to revoke key', 'error');
     }
   };
@@ -2571,7 +2571,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
         }, 100);
       }
     } else {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       onToast(err.error || 'Failed to rotate key', 'error');
     }
   };
@@ -2961,7 +2961,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
       if (channel === 'slack') setSlackActive(true);
       else setEmailActive(true);
     } else {
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       onToast(data.error || 'Failed to save', 'error');
     }
     setSaving(false);

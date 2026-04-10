@@ -15,11 +15,15 @@ export default function LoginPage() {
 
   const supabase = createBrowserClient();
 
-  // Surface auth callback failures (e.g. expired confirmation link)
+  // Surface auth callback failures (e.g. expired confirmation link) and
+  // session-expiry redirects from the dashboard's apiFetch wrapper.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('error') === 'auth_failed') {
+    const err = params.get('error');
+    if (err === 'auth_failed') {
       setError('Sign-in link expired or invalid. Please try again.');
+    } else if (err === 'session_expired') {
+      setError('Your session has expired. Please sign in again.');
     }
   }, []);
 

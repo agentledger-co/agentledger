@@ -21,6 +21,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No organization found' }, { status: 404 });
   }
 
+  // Revoke any prior recover-keys for this org so we don't accumulate
+  // a fresh row on every dashboard mount from a new browser/device.
+  // Only auto-issued recover-keys are revoked; user-created keys are untouched.
+  await supabase
+    .from('api_keys')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('org_id', member.org_id)
+    .eq('description', 'Generated on re-login')
+    .is('revoked_at', null);
+
   const { key, hash, prefix } = generateApiKey();
 
   const { count } = await supabase

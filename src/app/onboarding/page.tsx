@@ -302,7 +302,11 @@ await ledger.track({
             </div>
 
             <button
-              onClick={() => { analytics.onboardingCompleted(); sessionStorage.setItem('al_api_key', apiKey); window.location.href = '/dashboard'; }}
+              onClick={() => {
+                analytics.onboardingCompleted();
+                try { sessionStorage.setItem('al_api_key', apiKey); } catch { /* unavailable in incognito */ }
+                window.location.href = '/dashboard';
+              }}
               className="w-full bg-blue-500 hover:bg-blue-400 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-blue-500/20 text-[14px]"
             >
               Open dashboard →

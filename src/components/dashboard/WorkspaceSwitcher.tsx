@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 
+function ssGet(key: string): string | null { try { return sessionStorage.getItem(key); } catch { return null; } }
+function ssSet(key: string, value: string) { try { sessionStorage.setItem(key, value); } catch { /* unavailable */ } }
+
 interface Workspace {
   id: string;
   name: string;
@@ -35,17 +38,26 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
           return;
         }
 
-        const ws: Workspace[] = memberships.map((m: any) => ({
-          id: m.organizations.id,
-          name: m.organizations.name,
-          role: m.role,
-          plan: m.organizations.plan,
-        }));
+        // Supabase joined relations may be returned as either an object or
+        // an array depending on the query — and may be null if the parent
+        // row was deleted. Defensive: filter out null orgs first.
+        const ws: Workspace[] = memberships
+          .map((m: any) => {
+            const org = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations;
+            if (!org) return null;
+            return {
+              id: org.id,
+              name: org.name,
+              role: m.role,
+              plan: org.plan,
+            } as Workspace;
+          })
+          .filter((w): w is Workspace => w !== null);
 
         setWorkspaces(ws);
 
         // Set current from sessionStorage or first
-        const storedOrgId = sessionStorage.getItem('al_org_id');
+        const storedOrgId = ssGet('al_org_id');
         const found = ws.find(w => w.id === storedOrgId);
         setCurrent(found || ws[0]);
       } catch { /* ignore */ }
@@ -67,7 +79,7 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
   const switchWorkspace = async (ws: Workspace) => {
     setCurrent(ws);
     setOpen(false);
-    sessionStorage.setItem('al_org_id', ws.id);
+    ssSet('al_org_id', ws.id);
 
     // Get a new API key for this org
     try {
@@ -88,7 +100,7 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
         if (res.ok) {
           const data = await res.json();
           if (data.key) {
-            sessionStorage.setItem('al_api_key', data.key);
+            ssSet('al_api_key', data.key);
           }
         }
       }

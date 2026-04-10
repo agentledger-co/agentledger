@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { analytics } from '@/lib/analytics';
 
-function ssGet(key: string): string | null { try { return ssGet(key); } catch { return null; } }
-function ssSet(key: string, value: string) { try { ssSet(key, value); } catch { /* unavailable */ } }
+function ssGet(key: string): string | null { try { return sessionStorage.getItem(key); } catch { return null; } }
+function ssSet(key: string, value: string) { try { sessionStorage.setItem(key, value); } catch { /* unavailable */ } }
 
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -206,39 +206,37 @@ export default function DashboardPage() {
         setUserEmail(user.email || '');
 
         // Look up user's org and API key
-        const res = await fetch('/api/v1/keys', {
-          
-        });
+        const res = await fetch('/api/v1/keys');
 
         if (res.ok) {
           const data = await res.json();
-          if (data.orgId && data.keys?.length > 0) {
-            // User has an org — check for stored key
-            const storedKey = ssGet('al_api_key');
-            if (storedKey) {
-              setApiKey(storedKey);
-              setIsSetup(true);
-            } else {
-              // Returning user without stored key — generate a new one
-              const recoverRes = await fetch('/api/v1/keys/recover', {
-                method: 'POST',
-                
-              });
-              if (recoverRes.ok) {
-                const recoverData = await recoverRes.json();
-                if (recoverData.key) {
-                  ssSet('al_api_key', recoverData.key);
-                  setApiKey(recoverData.key);
-                  setIsSetup(true);
-                }
-              } else {
-                setError('Failed to recover API access. Please contact support.');
-              }
-            }
-          } else {
+          if (!data.orgId) {
             // No org yet — redirect to onboarding
             window.location.href = '/onboarding';
             return;
+          }
+
+          // User has an org. Use stored key if present, otherwise recover.
+          const storedKey = ssGet('al_api_key');
+          if (storedKey) {
+            setApiKey(storedKey);
+            setIsSetup(true);
+          } else {
+            // No stored key (returning user OR org has no active keys) — recover.
+            // /api/v1/keys/recover always issues a fresh key for the org.
+            const recoverRes = await fetch('/api/v1/keys/recover', { method: 'POST' });
+            if (recoverRes.ok) {
+              const recoverData = await recoverRes.json();
+              if (recoverData.key) {
+                ssSet('al_api_key', recoverData.key);
+                setApiKey(recoverData.key);
+                setIsSetup(true);
+              } else {
+                setError('Failed to recover API access. Please contact support.');
+              }
+            } else {
+              setError('Failed to recover API access. Please contact support.');
+            }
           }
         }
       } catch {
@@ -432,7 +430,7 @@ export default function DashboardPage() {
             </a>
             <button
               onClick={async () => {
-                sessionStorage.removeItem('al_api_key');
+                try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }
                 try {
                   const { createBrowserClient } = await import('@/lib/supabase');
                   const supabase = createBrowserClient();
@@ -2707,7 +2705,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
               });
             }
             onToast('All keys revoked', 'success');
-            sessionStorage.removeItem('agentledger_api_key');
+            try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }
             window.location.href = '/login';
           }}
           className="text-xs text-red-400/40 hover:text-red-400 border border-red-500/10 hover:border-red-500/20 px-3 py-1.5 rounded-lg transition-colors"

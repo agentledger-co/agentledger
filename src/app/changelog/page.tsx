@@ -6,6 +6,7 @@ const ENTRIES = [
     version: 'v0.6.1',
     title: 'Launch Hardening',
     changes: [
+      'Landing page feature grid — colorful themed icons with ambient animations (broadcast pulse, heartbeat, trend bob, and more), respecting prefers-reduced-motion',
       'GA4 pageview tracking — fires on every client-side navigation, not just initial load',
       'Landing page scroll-depth tracking and dashboard engagement heartbeat for accurate session time',
       'Auth-expiry resilience — session listener, clean 401 surfacing, apiFetch wrapper, inline re-key modal',

@@ -228,3 +228,71 @@ select option {
 .animate-blink {
   animation: blink 0.8s step-end infinite;
 }
+
+/* ============================================
+   Feature-card icon animations
+   Ambient motion for the landing "Features" grid.
+   Each card gets a thematic animation; hover speeds
+   it up for an "excited" interaction, matching the
+   logo heartbeat pattern above.
+   ============================================ */
+
+@keyframes feat-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+@keyframes feat-sway {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes feat-beat {
+  0%, 100% { transform: scale(1); }
+  12% { transform: scale(1.18); }
+  24% { transform: scale(1); }
+  36% { transform: scale(1.10); }
+  48% { transform: scale(1); }
+}
+
+@keyframes feat-bob {
+  0%, 100% { transform: translateY(2px); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes feat-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes feat-cursor {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+.feat-icon-pulse { animation: feat-pulse 3.2s ease-in-out infinite; transform-origin: center; }
+.feat-icon-sway { animation: feat-sway 4s ease-in-out infinite; transform-origin: center; }
+.feat-icon-beat { animation: feat-beat 3.5s ease-in-out infinite; transform-origin: center; }
+.feat-icon-bob  { animation: feat-bob 3.2s ease-in-out infinite; transform-origin: center; }
+.feat-icon-spin { animation: feat-spin 8s linear infinite; transform-origin: center; }
+.feat-icon-cursor { animation: feat-cursor 1.6s ease-in-out infinite; transform-origin: center; }
+
+/* Speed up on card hover — "excited" state, same trick as the logo */
+.group:hover .feat-icon-pulse  { animation-duration: 1.4s; }
+.group:hover .feat-icon-sway   { animation-duration: 1.6s; }
+.group:hover .feat-icon-beat   { animation-duration: 1.4s; }
+.group:hover .feat-icon-bob    { animation-duration: 1.4s; }
+.group:hover .feat-icon-spin   { animation-duration: 3s; }
+.group:hover .feat-icon-cursor { animation-duration: 0.8s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feat-icon-pulse,
+  .feat-icon-sway,
+  .feat-icon-beat,
+  .feat-icon-bob,
+  .feat-icon-spin,
+  .feat-icon-cursor {
+    animation: none;
+  }
+}

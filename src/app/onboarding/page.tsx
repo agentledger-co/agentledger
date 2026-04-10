@@ -22,12 +22,10 @@ export default function OnboardingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const res = await fetch('/api/v1/keys', {
-        headers: { 'x-user-id': user.id },
-      });
+      const res = await fetch('/api/v1/keys');
       if (res.ok) {
         const data = await res.json();
-        if (data.apiKey) {
+        if (data.orgId) {
           // Already onboarded
           window.location.href = '/dashboard';
         }
@@ -53,11 +51,15 @@ export default function OnboardingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: orgName || 'My Organization', userId: user.id }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (data.apiKey) {
         analytics.workspaceCreated(orgName || 'My Organization');
         setApiKey(data.apiKey);
         setStep(2);
+      } else if (res.status === 409) {
+        // User already has an org — send them to the dashboard
+        window.location.href = '/dashboard';
+        return;
       } else {
         setError(data.error || 'Setup failed');
       }

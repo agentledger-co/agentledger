@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
 import { analytics } from '@/lib/analytics';
@@ -14,6 +14,14 @@ export default function LoginPage() {
   const [mode, setMode] = useState<'password' | 'magic'>('password');
 
   const supabase = createBrowserClient();
+
+  // Surface auth callback failures (e.g. expired confirmation link)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'auth_failed') {
+      setError('Sign-in link expired or invalid. Please try again.');
+    }
+  }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();

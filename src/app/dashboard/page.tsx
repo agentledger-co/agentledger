@@ -7,6 +7,31 @@ import { analytics } from '@/lib/analytics';
 function ssGet(key: string): string | null { try { return sessionStorage.getItem(key); } catch { return null; } }
 function ssSet(key: string, value: string) { try { sessionStorage.setItem(key, value); } catch { /* unavailable */ } }
 
+// Centralized fetch wrapper for the dashboard. Adds:
+//   1. A 30s timeout so a hung network never leaves a button stuck disabled.
+//   2. Auto-redirect to /login on 401/403 so an expired session can never
+//      silently degrade into "stale data forever" or "click does nothing."
+// Used for every internal /api call from the dashboard. Skip it for the
+// legacy SetupScreen handleSetup paths where a 401 is an expected
+// "invalid key" signal, not an auth-expired signal.
+let authRedirectInFlight = false;
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  // AbortSignal.timeout is supported in all modern browsers and Node 17.3+.
+  const signal = init?.signal ?? AbortSignal.timeout(30000);
+  const res = await fetch(input, { ...init, signal });
+  if (res.status === 401 || res.status === 403) {
+    if (!authRedirectInFlight) {
+      authRedirectInFlight = true;
+      try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }
+      try { sessionStorage.removeItem('al_org_id'); } catch { /* unavailable */ }
+      // Defer the redirect a tick so any in-flight render can finish.
+      setTimeout(() => { window.location.href = '/login?error=session_expired'; }, 0);
+    }
+    throw new Error('Session expired');
+  }
+  return res;
+}
+
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
@@ -163,7 +188,7 @@ export default function DashboardPage() {
     if (!apiKey || traceLoading) return;
     setTraceLoading(true);
     try {
-      const res = await fetch(`/api/v1/traces/${encodeURIComponent(traceId)}`, {
+      const res = await apiFetch(`/api/v1/traces/${encodeURIComponent(traceId)}`, {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (!res.ok) {
@@ -206,7 +231,7 @@ export default function DashboardPage() {
         setUserEmail(user.email || '');
 
         // Look up user's org and API key
-        const res = await fetch('/api/v1/keys');
+        const res = await apiFetch('/api/v1/keys');
 
         if (res.ok) {
           const data = await res.json();
@@ -224,7 +249,7 @@ export default function DashboardPage() {
           } else {
             // No stored key (returning user OR org has no active keys) — recover.
             // /api/v1/keys/recover always issues a fresh key for the org.
-            const recoverRes = await fetch('/api/v1/keys/recover', { method: 'POST' });
+            const recoverRes = await apiFetch('/api/v1/keys/recover', { method: 'POST' });
             if (recoverRes.ok) {
               const recoverData = await recoverRes.json();
               if (recoverData.key) {
@@ -247,24 +272,41 @@ export default function DashboardPage() {
 
     init();
   }, []);
+
+  // Proactive session-expiry guard. Supabase auto-refreshes tokens on the
+  // client when the page is open, but if the refresh fails (e.g. user signed
+  // out from another tab, password changed, account deleted) we want to
+  // catch it and redirect immediately rather than wait for the next API call
+  // to 401. Listens for SIGNED_OUT and TOKEN_REFRESHED-with-null-session.
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    (async () => {
+      try {
+        const { createBrowserClient } = await import('@/lib/supabase');
+        const supabase = createBrowserClient();
+        const { data } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+            try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }
+            try { sessionStorage.removeItem('al_org_id'); } catch { /* unavailable */ }
+            window.location.href = '/login?error=session_expired';
+          }
+        });
+        unsub = () => data.subscription.unsubscribe();
+      } catch { /* supabase unavailable */ }
+    })();
+    return () => { if (unsub) unsub(); };
+  }, []);
+
   const fetchData = useCallback(async () => {
     if (!apiKey) return;
     setRefreshing(true);
     try {
+      // apiFetch auto-redirects on 401/403, so a stale session never silently
+      // shows old data — the wrapper navigates away before we get here.
       const [statsRes, actionsRes] = await Promise.all([
-        fetch('/api/v1/stats', { headers: { Authorization: `Bearer ${apiKey}` } }),
-        fetch('/api/v1/actions?limit=50', { headers: { Authorization: `Bearer ${apiKey}` } }),
+        apiFetch('/api/v1/stats', { headers: { Authorization: `Bearer ${apiKey}` } }),
+        apiFetch('/api/v1/actions?limit=50', { headers: { Authorization: `Bearer ${apiKey}` } }),
       ]);
-
-      // Auth expired or key revoked: stop the refresh loop and surface
-      // an actionable error instead of silently showing stale data forever.
-      if (statsRes.status === 401 || statsRes.status === 403) {
-        setAutoRefresh(false);
-        try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }
-        setError('Your session has expired. Redirecting to sign in…');
-        setTimeout(() => { window.location.href = '/login'; }, 1500);
-        return;
-      }
 
       if (!statsRes.ok) throw new Error('Failed to fetch stats');
 
@@ -354,7 +396,7 @@ export default function DashboardPage() {
 
   const toggleAgent = async (name: string, currentStatus: string) => {
     const endpoint = currentStatus === 'active' ? 'pause' : 'resume';
-    const res = await fetch(`/api/v1/agents/${name}/${endpoint}`, {
+    const res = await apiFetch(`/api/v1/agents/${name}/${endpoint}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}` },
     });
@@ -369,7 +411,7 @@ export default function DashboardPage() {
   };
 
   const killAgent = async (name: string) => {
-    const res = await fetch(`/api/v1/agents/${name}/kill`, {
+    const res = await apiFetch(`/api/v1/agents/${name}/kill`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}` },
     });
@@ -383,7 +425,7 @@ export default function DashboardPage() {
   };
 
   const acknowledgeAlert = async (id?: string) => {
-    await fetch('/api/v1/alerts/acknowledge', {
+    await apiFetch('/api/v1/alerts/acknowledge', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(id ? { id } : { all: true }),
@@ -1711,7 +1753,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
 
   const fetchBudgets = useCallback(async () => {
     try {
-      const res = await fetch('/api/v1/budgets', {
+      const res = await apiFetch('/api/v1/budgets', {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (res.ok) {
@@ -1728,7 +1770,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
     setCreating(true);
     setError('');
     try {
-      const res = await fetch('/api/v1/budgets', {
+      const res = await apiFetch('/api/v1/budgets', {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1757,7 +1799,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const deleteBudget = async (id: string) => {
-    await fetch(`/api/v1/budgets?id=${id}`, {
+    await apiFetch(`/api/v1/budgets?id=${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${apiKey}` },
     });
@@ -1768,7 +1810,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
   };
 
   const resetBudget = async (id: string) => {
-    await fetch('/api/v1/budgets', {
+    await apiFetch('/api/v1/budgets', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -1819,7 +1861,7 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
       const ids = Array.from(selectedBudgets);
       await Promise.all(
         ids.map(id =>
-          fetch(`/api/v1/budgets?id=${id}`, {
+          apiFetch(`/api/v1/budgets?id=${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${apiKey}` },
           })
@@ -2176,7 +2218,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   const EVENTS = ['action.logged', 'agent.paused', 'agent.killed', 'agent.resumed', 'budget.exceeded', 'budget.warning', 'alert.created'];
 
   const fetchWebhooks = useCallback(async () => {
-    const res = await fetch('/api/v1/webhooks', { headers: { Authorization: `Bearer ${apiKey}` } });
+    const res = await apiFetch('/api/v1/webhooks', { headers: { Authorization: `Bearer ${apiKey}` } });
     if (res.ok) {
       const data = await res.json();
       setWebhooks(data.webhooks || []);
@@ -2187,7 +2229,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   useEffect(() => { fetchWebhooks(); }, [fetchWebhooks]);
 
   const createWebhook = async () => {
-    const res = await fetch('/api/v1/webhooks', {
+    const res = await apiFetch('/api/v1/webhooks', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: newUrl, description: newDesc, events: selectedEvents.length ? selectedEvents : undefined }),
@@ -2212,7 +2254,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   };
 
   const deleteWebhook = async (id: string) => {
-    const res = await fetch(`/api/v1/webhooks?id=${id}`, {
+    const res = await apiFetch(`/api/v1/webhooks?id=${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${apiKey}` },
     });
@@ -2220,7 +2262,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   };
 
   const toggleWebhook = async (id: string, active: boolean) => {
-    await fetch('/api/v1/webhooks', {
+    await apiFetch('/api/v1/webhooks', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, active: !active }),
@@ -2275,7 +2317,7 @@ function WebhooksTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       const ids = Array.from(selectedWebhooks);
       await Promise.all(
         ids.map(id =>
-          fetch(`/api/v1/webhooks?id=${id}`, {
+          apiFetch(`/api/v1/webhooks?id=${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${apiKey}` },
           })
@@ -2508,7 +2550,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 
   const fetchKeys = useCallback(async () => {
     // Fetch usage stats
-    const usageRes = await fetch('/api/v1/usage', {
+    const usageRes = await apiFetch('/api/v1/usage', {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     if (usageRes.ok) {
@@ -2516,7 +2558,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
     }
 
     // Fetch via stats for key info
-    const keysRes = await fetch('/api/v1/stats', {
+    const keysRes = await apiFetch('/api/v1/stats', {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
     if (keysRes.ok) {
@@ -2528,7 +2570,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   useEffect(() => { fetchKeys(); }, [fetchKeys]);
 
   const createKey = async () => {
-    const res = await fetch('/api/v1/keys/create', {
+    const res = await apiFetch('/api/v1/keys/create', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newKeyName || 'New Key' }),
@@ -2550,7 +2592,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   };
 
   const revokeKey = async (keyId: string) => {
-    const res = await fetch('/api/v1/keys/revoke', {
+    const res = await apiFetch('/api/v1/keys/revoke', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ keyId }),
@@ -2566,7 +2608,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   };
 
   const rotateKey = async (keyId: string) => {
-    const res = await fetch('/api/v1/keys/rotate', {
+    const res = await apiFetch('/api/v1/keys/rotate', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ keyId }),
@@ -2746,7 +2788,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
             if (!confirm('Are you sure you want to revoke ALL API keys? This will lock you out of the API. You will need to create a new key through the dashboard.')) return;
             for (const k of keys) {
               if (k.id === 'current') continue;
-              await fetch('/api/v1/keys/revoke', {
+              await apiFetch('/api/v1/keys/revoke', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ keyId: k.id }),
@@ -2971,7 +3013,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch('/api/v1/notifications', {
+      const res = await apiFetch('/api/v1/notifications', {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (!res.ok) return;
@@ -2998,7 +3040,7 @@ function NotificationsSection({ apiKey, onToast }: { apiKey: string; onToast: (m
     const events = channel === 'slack' ? slackEvents : emailEvents;
     const active = channel === 'slack' ? slackActive : emailActive;
 
-    const res = await fetch('/api/v1/notifications', {
+    const res = await apiFetch('/api/v1/notifications', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ channel, config, events, active }),

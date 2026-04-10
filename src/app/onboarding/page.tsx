@@ -50,6 +50,7 @@ export default function OnboardingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: orgName || 'My Organization', userId: user.id }),
+        signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
       if (data.apiKey) {
@@ -63,8 +64,9 @@ export default function OnboardingPage() {
       } else {
         setError(data.error || 'Setup failed');
       }
-    } catch {
-      setError('Setup failed');
+    } catch (err) {
+      const isTimeout = err instanceof Error && err.name === 'TimeoutError';
+      setError(isTimeout ? 'Setup timed out — please check your connection and try again.' : 'Setup failed');
     }
     setLoading(false);
   };
@@ -74,6 +76,7 @@ export default function OnboardingPage() {
     try {
       const res = await fetch('/api/v1/actions?limit=5', {
         headers: { Authorization: `Bearer ${apiKey}` },
+        signal: AbortSignal.timeout(30000),
       });
       if (res.ok) {
         const data = await res.json();
@@ -144,7 +147,7 @@ export default function OnboardingPage() {
                 onChange={e => setOrgName(e.target.value)}
                 placeholder="Acme Corp"
                 autoFocus
-                className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-4 py-3 text-[14px] text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none mb-4"
+                className="w-full bg-white/[0.12] border border-white/[0.20] rounded-lg px-4 py-3 text-base text-white placeholder-white/50 focus:border-blue-500/60 focus:outline-none mb-4"
               />
               <button
                 onClick={handleCreateOrg}

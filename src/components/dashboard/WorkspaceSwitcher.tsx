@@ -95,8 +95,12 @@ export default function WorkspaceSwitcher({ onSwitch }: { onSwitch?: (orgId: str
         .limit(1);
 
       if (keys && keys.length > 0) {
-        // Need to recover the full key
-        const res = await fetch('/api/v1/keys/recover', { method: 'POST' });
+        // Need to recover the full key. 30s timeout so a hung network
+        // doesn't trap the user mid-switch — we still reload below regardless.
+        const res = await fetch('/api/v1/keys/recover', {
+          method: 'POST',
+          signal: AbortSignal.timeout(30000),
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.key) {

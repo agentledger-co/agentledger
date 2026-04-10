@@ -72,13 +72,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create organization', detail: orgError.message }, { status: 500 });
   }
 
-  // Link user to org if userId provided
+  // Link user to org if userId provided. If this fails, roll back the org
+  // so the user doesn't end up with an orphan organization they can't access
+  // (which would trap them in an onboarding loop).
   if (userId) {
-    await supabase.from('org_members').insert({
+    const { error: memberError } = await supabase.from('org_members').insert({
       org_id: org.id,
       user_id: userId,
       role: 'owner',
     });
+
+    if (memberError) {
+      await supabase.from('organizations').delete().eq('id', org.id);
+      return NextResponse.json(
+        { error: 'Failed to link user to organization', detail: memberError.message },
+        { status: 500 }
+      );
+    }
   }
 
   // Generate API key (properly hashed)
@@ -94,6 +104,9 @@ export async function POST(req: NextRequest) {
     });
 
   if (keyError) {
+    // Roll back org + membership on key failure to avoid orphan rows.
+    await supabase.from('org_members').delete().eq('org_id', org.id);
+    await supabase.from('organizations').delete().eq('id', org.id);
     return NextResponse.json({ error: 'Failed to create API key', detail: keyError.message }, { status: 500 });
   }
 

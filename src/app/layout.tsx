@@ -1,7 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
+import GAPageTracker from '@/components/GAPageTracker';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+};
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://agentledger.co';
 
@@ -103,7 +111,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && <GAPageTracker />}
+        {children}
+      </body>
     </html>
   );
 }

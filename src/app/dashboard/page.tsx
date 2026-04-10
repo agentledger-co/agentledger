@@ -256,6 +256,16 @@ export default function DashboardPage() {
         fetch('/api/v1/actions?limit=50', { headers: { Authorization: `Bearer ${apiKey}` } }),
       ]);
 
+      // Auth expired or key revoked: stop the refresh loop and surface
+      // an actionable error instead of silently showing stale data forever.
+      if (statsRes.status === 401 || statsRes.status === 403) {
+        setAutoRefresh(false);
+        try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }
+        setError('Your session has expired. Redirecting to sign in…');
+        setTimeout(() => { window.location.href = '/login'; }, 1500);
+        return;
+      }
+
       if (!statsRes.ok) throw new Error('Failed to fetch stats');
 
       const statsData = await statsRes.json();
@@ -1940,7 +1950,14 @@ function BudgetsTab({ stats, apiKey, onRefresh }: { stats: Stats; apiKey: string
         )}
 
         {/* Create Budget Form */}
-        {showCreate && (
+        {showCreate && stats.agents.length === 0 && (
+          <div className="px-5 py-6 border-b border-white/[0.14] bg-white/[0.04]">
+            <p className="text-sm text-white/70 mb-2 font-medium">Send your first action to enable budgets</p>
+            <p className="text-xs text-white/50 mb-3">Budgets attach to agents, and agents are auto-registered the first time you log an action via the SDK or API. Once you have at least one agent, come back here.</p>
+            <a href="/docs#core-sdk" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">View SDK quick-start &#x2192;</a>
+          </div>
+        )}
+        {showCreate && stats.agents.length > 0 && (
           <div className="px-5 py-4 border-b border-white/[0.14] bg-white/[0.12]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
               <div>
@@ -2484,6 +2501,10 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
+  // Modal state for newly issued / rotated keys. Replaces window.confirm()
+  // which was a footgun: pressing Cancel permanently lost the new key, and
+  // the native dialog didn't render reliably on mobile.
+  const [shownNewKey, setShownNewKey] = useState<{ key: string; isRotation: boolean } | null>(null);
 
   const fetchKeys = useCallback(async () => {
     // Fetch usage stats
@@ -2519,13 +2540,8 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       setShowCreate(false);
       setNewKeyName('');
       fetchKeys();
-      // Show key once
       if (data.key) {
-        setTimeout(() => {
-          if (confirm(`New API Key (save it now!):\n\n${data.key}\n\nClick OK to copy to clipboard.`)) {
-            navigator.clipboard.writeText(data.key);
-          }
-        }, 100);
+        setShownNewKey({ key: data.key, isRotation: false });
       }
     } else {
       const err = await res.json().catch(() => ({}));
@@ -2561,14 +2577,7 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
       onToast('Key rotated', 'success');
       fetchKeys();
       if (data.key) {
-        setTimeout(() => {
-          if (confirm(`Rotated API Key (save it now!):\n\n${data.key}\n\nClick OK to copy to clipboard.`)) {
-            navigator.clipboard.writeText(data.key);
-            // If this was the key we were using, update sessionStorage
-            ssSet('al_api_key', data.key);
-            window.location.reload();
-          }
-        }, 100);
+        setShownNewKey({ key: data.key, isRotation: true });
       }
     } else {
       const err = await res.json().catch(() => ({}));
@@ -2580,6 +2589,45 @@ function SettingsTab({ apiKey, onToast }: { apiKey: string; onToast: (msg: strin
 
   return (
     <div className="space-y-6">
+      {/* Newly issued key modal — replaces window.confirm() which lost the key on Cancel */}
+      {shownNewKey && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => {
+          if (shownNewKey.isRotation) {
+            ssSet('al_api_key', shownNewKey.key);
+            window.location.reload();
+          } else {
+            setShownNewKey(null);
+          }
+        }}>
+          <div className="bg-[#1a1a1a] border border-blue-500/20 rounded-xl p-6 max-w-md mx-4 w-full" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold mb-2">{shownNewKey.isRotation ? 'Rotated API Key' : 'New API Key'}</h3>
+            <p className="text-sm text-white/40 mb-4">Save this key now &mdash; you won&apos;t see it again. Store it in your environment variables.</p>
+            <div className="bg-white/[0.08] rounded-lg p-3 mb-4 flex items-center justify-between gap-2">
+              <code className="text-[13px] text-blue-400 font-mono break-all">{shownNewKey.key}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(shownNewKey.key); onToast('Key copied', 'info'); }}
+                className="text-xs text-white/60 hover:text-white flex-shrink-0"
+              >
+                Copy
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                if (shownNewKey.isRotation) {
+                  ssSet('al_api_key', shownNewKey.key);
+                  window.location.reload();
+                } else {
+                  setShownNewKey(null);
+                }
+              }}
+              className="w-full bg-blue-500 hover:bg-blue-400 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+            >
+              I&apos;ve saved it
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Usage Stats */}
       {usage && (
         <div>

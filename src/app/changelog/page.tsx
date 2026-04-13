@@ -6,6 +6,8 @@ const ENTRIES = [
     version: 'v0.6.1',
     title: 'Launch Hardening',
     changes: [
+      'Google OAuth — sign up and log in with one click via Continue with Google, no email verification needed',
+      'Email typo detection — catches common domain mistakes (gmai.com, gmailcom, etc.) and placeholder addresses before submission',
       'Landing page feature grid — colorful themed icons with ambient animations (broadcast pulse, heartbeat, trend bob, and more), respecting prefers-reduced-motion',
       'GA4 pageview tracking — fires on every client-side navigation, not just initial load',
       'Landing page scroll-depth tracking and dashboard engagement heartbeat for accurate session time',

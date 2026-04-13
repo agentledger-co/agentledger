@@ -16,8 +16,8 @@ function track(eventName: string, params?: Record<string, string | number | bool
 // ---- Authentication & Onboarding ----
 export const analytics = {
   // Signup & Login
-  signup: (method: 'email' | 'github') => track('sign_up', { method }),
-  login: (method: 'email' | 'github' | 'magic_link') => track('login', { method }),
+  signup: (method: 'email' | 'github' | 'google') => track('sign_up', { method }),
+  login: (method: 'email' | 'github' | 'google' | 'magic_link') => track('login', { method }),
 
   // Onboarding
   workspaceCreated: (name: string) => track('workspace_created', { workspace_name: name }),

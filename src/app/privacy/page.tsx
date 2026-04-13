@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-[32px] font-bold mb-2 tracking-tight">Privacy Policy</h1>
-        <p className="text-white/60 text-[14px] mb-10">Last updated: February 16, 2026</p>
+        <p className="text-white/60 text-[14px] mb-10">Last updated: April 13, 2026</p>
 
         <div className="prose prose-invert prose-sm max-w-none space-y-8 text-white/50 text-[14px] leading-relaxed">
 
@@ -40,9 +40,9 @@ export default function PrivacyPage() {
             <p>When you create an account, we collect:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Email address</li>
-              <li>Password (hashed, never stored in plain text)</li>
+              <li>Password (hashed, never stored in plain text) — if you sign up with email</li>
               <li>Organization name</li>
-              <li>Authentication provider information (if using GitHub OAuth)</li>
+              <li>Authentication provider information (if using Google or GitHub OAuth), including your name and profile picture as provided by the OAuth provider</li>
             </ul>
 
             <h3 className="text-[15px] font-medium text-white/60 mt-4 mb-2">2.2 Agent Activity Data</h3>
@@ -59,13 +59,15 @@ export default function PrivacyPage() {
             <p className="mt-2"><strong className="text-white/60">Important:</strong> You control what data your agents send to AgentLedger. We recommend not sending personal data (PII) in the metadata field unless necessary. We do not inspect, analyze, or use your agent activity data for any purpose other than providing the Service to you.</p>
 
             <h3 className="text-[15px] font-medium text-white/60 mt-4 mb-2">2.3 Usage Data</h3>
-            <p>We automatically collect limited technical data when you use the dashboard:</p>
+            <p>We automatically collect limited technical data when you use the Service:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>IP address</li>
               <li>Browser type and version</li>
-              <li>Pages visited and features used</li>
+              <li>Pages visited, features used, and scroll depth</li>
               <li>Referral source</li>
+              <li>Session duration and engagement time</li>
             </ul>
+            <p className="mt-2">We use Google Analytics 4 (GA4) to collect this usage data. GA4 may set cookies to distinguish unique users and sessions. See Section 9 for more details on cookies.</p>
           </section>
 
           <section>
@@ -112,7 +114,10 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li><strong className="text-white/60">Supabase:</strong> Database hosting, authentication (data stored in their infrastructure)</li>
               <li><strong className="text-white/60">Vercel:</strong> Application hosting and CDN</li>
+              <li><strong className="text-white/60">Google:</strong> OAuth authentication provider (if you choose Google login) and analytics via Google Analytics 4</li>
               <li><strong className="text-white/60">GitHub:</strong> OAuth authentication provider (if you choose GitHub login)</li>
+              <li><strong className="text-white/60">Sentry:</strong> Error monitoring and performance tracking</li>
+              <li><strong className="text-white/60">Resend:</strong> Transactional email delivery (confirmation emails, invitations)</li>
             </ul>
             <p className="mt-2">Each of these services has their own privacy policies. We encourage you to review them.</p>
           </section>
@@ -145,8 +150,12 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-[18px] font-semibold text-white/80 mb-3">9. Cookies</h2>
-            <p>We use essential cookies for authentication and session management. These cookies are necessary for the Service to function and cannot be disabled. We do not use advertising or tracking cookies.</p>
-            <p className="mt-2">If we introduce optional analytics cookies in the future, we will update this policy and provide you with a choice to opt in or out.</p>
+            <p>We use the following types of cookies:</p>
+            <ul className="list-disc pl-5 space-y-1 mt-2">
+              <li><strong className="text-white/60">Essential cookies:</strong> Authentication and session management. These are necessary for the Service to function and cannot be disabled.</li>
+              <li><strong className="text-white/60">Analytics cookies:</strong> Google Analytics 4 (GA4) sets cookies (e.g., <code className="text-white/40 text-[12px]">_ga</code>, <code className="text-white/40 text-[12px]">_ga_*</code>) to distinguish unique users and measure engagement. This data is used solely to understand how the Service is used and improve it. We do not use this data for advertising or profiling.</li>
+            </ul>
+            <p className="mt-2">We do not use advertising, retargeting, or third-party tracking cookies.</p>
           </section>
 
           <section>

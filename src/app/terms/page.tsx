@@ -23,7 +23,7 @@ export default function TermsPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-[32px] font-bold mb-2 tracking-tight">Terms of Service</h1>
-        <p className="text-white/60 text-[14px] mb-10">Last updated: February 16, 2026</p>
+        <p className="text-white/60 text-[14px] mb-10">Last updated: April 13, 2026</p>
 
         <div className="prose prose-invert prose-sm max-w-none space-y-8 text-white/50 text-[14px] leading-relaxed">
 
@@ -39,7 +39,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-[18px] font-semibold text-white/80 mb-3">3. Accounts</h2>
-            <p>To use the Service, you must create an account. You are responsible for maintaining the confidentiality of your account credentials, including API keys. You are responsible for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.</p>
+            <p>To use the Service, you must create an account using email and password, or via a third-party authentication provider (Google or GitHub). When you authenticate via a third-party provider, you authorize us to access your basic profile information (name, email, profile picture) as provided by that provider. You are responsible for maintaining the confidentiality of your account credentials, including API keys. You are responsible for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.</p>
             <p className="mt-2">You must be at least 18 years old to use the Service. By creating an account, you represent that you are at least 18 years of age.</p>
           </section>
 

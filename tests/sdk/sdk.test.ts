@@ -284,7 +284,7 @@ describe('AgentLedger SDK', () => {
       await ledger.pauseAgent('support-bot');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/v1/agents/support-bot/pause',
+        'http://localhost:3000/api/v1/agents/support-bot/pause?environment=production',
         expect.objectContaining({ method: 'POST' })
       );
     });
@@ -295,7 +295,7 @@ describe('AgentLedger SDK', () => {
       await ledger.resumeAgent('support-bot');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/v1/agents/support-bot/resume',
+        'http://localhost:3000/api/v1/agents/support-bot/resume?environment=production',
         expect.objectContaining({ method: 'POST' })
       );
     });
@@ -306,7 +306,7 @@ describe('AgentLedger SDK', () => {
       await ledger.killAgent('rogue-bot');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/v1/agents/rogue-bot/kill',
+        'http://localhost:3000/api/v1/agents/rogue-bot/kill?environment=production',
         expect.objectContaining({ method: 'POST' })
       );
     });

@@ -582,7 +582,7 @@ describe('Regression: Existing Features Still Work', () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: 'ok' }) });
     await ledger.pauseAgent('test-bot');
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3000/api/v1/agents/test-bot/pause',
+      'http://localhost:3000/api/v1/agents/test-bot/pause?environment=production',
       expect.objectContaining({ method: 'POST' })
     );
 

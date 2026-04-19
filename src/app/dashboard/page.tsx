@@ -505,6 +505,9 @@ export default function DashboardPage() {
             <a href="/docs" className="text-xs sm:text-sm text-white/60 hover:text-white/80 transition-colors whitespace-nowrap shrink-0">
               Docs
             </a>
+            <a href="mailto:hello@agentledger.co?subject=AgentLedger%20Upgrade%20Enquiry" className="text-xs sm:text-sm text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap shrink-0">
+              Upgrade
+            </a>
             <button
               onClick={async () => {
                 try { sessionStorage.removeItem('al_api_key'); } catch { /* unavailable */ }

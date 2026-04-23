@@ -20,7 +20,24 @@ const nextConfig: NextConfig = {
           // HSTS — force HTTPS for 1 year
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
           // Content Security Policy
-          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com https://www.google-analytics.com https://analytics.google.com https://*.ingest.sentry.io; frame-ancestors 'none';" },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "font-src 'self' data:",
+              // connect-src:
+              //   - Supabase (auth + realtime)
+              //   - GA4 beacons (region1.google-analytics.com matches *.google-analytics.com)
+              //   - Sentry ingest (broad *.sentry.io so US/EU/DE region hosts all match;
+              //     *.ingest.sentry.io does NOT match oXXX.ingest.us.sentry.io)
+              //   - GitHub API for the landing-page stars widget
+              "connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.sentry.io https://api.github.com",
+              "frame-ancestors 'none'",
+            ].join('; ') + ';',
+          },
         ],
       },
       // Read-only GET endpoints that can tolerate short caching.

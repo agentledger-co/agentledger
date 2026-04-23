@@ -212,11 +212,27 @@ ALTER TABLE notification_settings ENABLE ROW LEVEL SECURITY;
 -- These RLS policies are a defense-in-depth layer — if the anon key
 -- is accidentally used, data is still protected.
 
--- Allow service role full access (API routes use this)
--- Block anon key from all tables (defense in depth)
-CREATE POLICY "Service role only" ON organizations FOR ALL USING (false);
-CREATE POLICY "Service role only" ON org_members FOR ALL USING (false);
-CREATE POLICY "Service role only" ON api_keys FOR ALL USING (false);
+-- Service role bypasses RLS automatically — all /api/v1/* routes use it.
+-- Anon role is blocked everywhere (no matching policy == denied).
+-- Authenticated role gets narrow read access to the three tables the
+-- browser client queries directly from the dashboard UI.
+
+-- org_members / organizations / api_keys: read-only from the browser,
+-- scoped to the user's own memberships.
+CREATE POLICY "Users can read their own memberships" ON org_members
+  FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Members can read their organizations" ON organizations
+  FOR SELECT TO authenticated
+  USING (id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid()));
+
+CREATE POLICY "Members can read api_keys in their orgs" ON api_keys
+  FOR SELECT TO authenticated
+  USING (org_id IN (SELECT org_id FROM org_members WHERE user_id = auth.uid()));
+
+-- Remaining tables are only touched by server-side API routes (service_role),
+-- so blocking all non-service access is correct.
 CREATE POLICY "Service role only" ON agents FOR ALL USING (false);
 CREATE POLICY "Service role only" ON action_logs FOR ALL USING (false);
 CREATE POLICY "Service role only" ON budgets FOR ALL USING (false);
